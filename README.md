@@ -17,7 +17,7 @@ This repository contains updated versions of Equinox's mods that have been modif
 |-----|----------|-------------|
 | [WormholeChests](./WormholeChests/) | [Original](https://github.com/CubeSuite/TTMod-WormholeChests) | Chests on the same channel share inventory |
 | [Restock](./Restock/) | [Original](https://github.com/CubeSuite/TTMod-Restock) | Auto-restock inventory from nearby chests |
-| [AtlantumReactor](./AtlantumReactor/) | [Original](https://github.com/CubeSuite/TTMod-AtlantumReactor) | End-game Atlantum power generator |
+| [AtlantumReactor](./AtlantumReactor/) | [Original](https://github.com/CubeSuite/AtlantumReactor) | End-game Atlantum power generator |
 | [MorePlanters](./MorePlanters/) | [Original](https://github.com/CubeSuite/TTMod-MorePlanters) | Planter MKII and MKIII machines |
 | [PlanterCoreClusters](./PlanterCoreClusters/) | [Original](https://github.com/CubeSuite/TTMod-PlanterCoreClusters) | Core Cluster speed boost for Planters |
 | [EMUBuilder_Patched](./EMUBuilder_Patched/) | [Original](https://github.com/CubeSuite/TTMod-EMUBuilder) | Extended Blueprint copy/paste support |
