@@ -7,7 +7,7 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "DevTools"
-versionNumber = "2.1.1"
+versionNumber = "2.1.2"
 description = "In-game developer tools with GUI for Techtonica. Toggle game modes, player stats, machine speeds, protection zones, safe sprint, and more. Now includes CasperProtections features! Press F8 to open."
 websiteUrl = "https://github.com/xXDeath420Xx/CertiFried-EMU613-Mods"
 containsNsfwContent = false

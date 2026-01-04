@@ -2,6 +2,17 @@
 
 All notable changes to DevTools will be documented in this file.
 
+## [2.1.2] - 2026-01-04
+
+### Fixed
+- F8 hotkey now has fallback detection (also try Shift+F7 as alternative)
+- Added error handling to prevent Harmony patch failures from breaking the mod
+- Improved logging for debugging infinite crafting and hotkey issues
+
+### Changed
+- Better error handling throughout Update loop
+- Added detailed logging when cheats are applied
+
 ## [2.1.1] - 2026-01-04
 
 ### Added

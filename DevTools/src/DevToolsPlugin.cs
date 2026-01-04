@@ -14,7 +14,7 @@ namespace DevTools
     {
         private const string MyGUID = "com.certifired.DevTools";
         private const string PluginName = "DevTools";
-        private const string VersionString = "2.1.0";
+        private const string VersionString = "2.1.2";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -212,43 +212,88 @@ namespace DevTools
 
             guiVisible = ShowGui.Value;
 
-            // Apply patches
-            Harmony.PatchAll();
+            // Apply patches with error handling
+            try
+            {
+                Harmony.PatchAll();
+                Log.LogInfo("Harmony patches applied successfully");
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"Error applying Harmony patches: {ex.Message}");
+                Log.LogError($"Stack trace: {ex.StackTrace}");
+                // Continue without patches - core functionality should still work
+            }
 
             Log.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loaded.");
-            Log.LogInfo($"Press {GuiToggleKey.Value} to toggle the DevTools GUI");
+            Log.LogInfo($"Press {GuiToggleKey.Value} to toggle the DevTools GUI (also try Shift+F7 as backup)");
         }
 
         private void Update()
         {
-            // Toggle GUI with hotkey
-            if (Input.GetKeyDown(GuiToggleKey.Value))
+            try
             {
-                guiVisible = !guiVisible;
-                ShowGui.Value = guiVisible;
-                Log.LogInfo($"DevTools GUI {(guiVisible ? "opened" : "closed")}");
+                // Toggle GUI with hotkey - check both configured key and backup key (F8)
+                bool keyPressed = Input.GetKeyDown(GuiToggleKey.Value);
+
+                // Also check F8 directly as fallback in case config isn't loading correctly
+                if (!keyPressed && GuiToggleKey.Value != KeyCode.F8)
+                {
+                    keyPressed = Input.GetKeyDown(KeyCode.F8);
+                }
+
+                // Also support Shift+F7 as alternative hotkey
+                if (!keyPressed && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F7))
+                {
+                    keyPressed = true;
+                }
+
+                if (keyPressed)
+                {
+                    guiVisible = !guiVisible;
+                    ShowGui.Value = guiVisible;
+                    Log.LogInfo($"DevTools GUI {(guiVisible ? "opened" : "closed")} (key: {GuiToggleKey.Value})");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"Error checking hotkey: {ex.Message}");
             }
 
             // Apply cheats once Player is available
-            if (Player.instance != null && Player.instance.cheats != null)
+            try
             {
-                ApplyPlayerCheats();
-                if (!isInitialized)
+                if (Player.instance != null && Player.instance.cheats != null)
                 {
-                    isInitialized = true;
-                    Log.LogInfo("DevTools initialized - PlayerCheats active");
+                    ApplyPlayerCheats();
+                    if (!isInitialized)
+                    {
+                        isInitialized = true;
+                        Log.LogInfo($"DevTools initialized - PlayerCheats active (InfiniteCrafting={InfiniteCrafting.Value})");
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"Error applying player cheats: {ex.Message}");
             }
 
             // Apply game mode settings continuously for live updates
-            if (GameState.instance != null)
+            try
             {
-                ApplyGameModeSettings();
-                if (!settingsApplied)
+                if (GameState.instance != null)
                 {
-                    settingsApplied = true;
-                    Log.LogInfo("DevTools applied game mode settings");
+                    ApplyGameModeSettings();
+                    if (!settingsApplied)
+                    {
+                        settingsApplied = true;
+                        Log.LogInfo("DevTools applied game mode settings");
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"Error applying game mode settings: {ex.Message}");
             }
 
             // Apply Cat Sounds FMOD parameter
@@ -722,11 +767,19 @@ namespace DevTools
             GUILayout.EndVertical();
         }
 
+        private static bool loggedCheatStatus = false;
+        private static bool lastInfiniteCraftingValue = false;
+
         private void ApplyPlayerCheats()
         {
             var cheats = Player.instance?.cheats;
             if (cheats == null) return;
 
+            // Track if the value changed for logging
+            bool valueChanged = InfiniteCrafting.Value != lastInfiniteCraftingValue;
+            lastInfiniteCraftingValue = InfiniteCrafting.Value;
+
+            // Apply all cheat settings
             cheats.infiniteCrafting = InfiniteCrafting.Value;
             cheats.maxPower = MaxPower.Value;
             cheats.ultraPickaxe = UltraPickaxe.Value;
@@ -737,6 +790,13 @@ namespace DevTools
             cheats.hideMachineParticles = HideMachineParticles.Value;
             cheats.simSpeed = SimSpeed.Value;
             cheats.freeCameraMode = (PlayerCheats.FreeCameraMode)FreeCameraMode.Value;
+
+            // Log once to verify application, and also log when InfiniteCrafting changes
+            if (!loggedCheatStatus || valueChanged)
+            {
+                Log.LogInfo($"Applied cheats - InfiniteCrafting: {InfiniteCrafting.Value} (successfully set on Player.cheats)");
+                loggedCheatStatus = true;
+            }
         }
 
         private void ApplyGameModeSettings()
