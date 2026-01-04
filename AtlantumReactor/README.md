@@ -1,6 +1,9 @@
-# Atlantum Reactor
+# Atlantum Reactor (Updated)
 
 A powerful endgame nuclear reactor for Techtonica that generates 20MW of power.
+
+> **Original mod by [Equinox](https://thunderstore.io/c/techtonica/p/Equinox/)**
+> Maintained and updated by CertiFried
 
 ## Features
 
