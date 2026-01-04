@@ -1,0 +1,29 @@
+[config]
+schemaVersion = "0.0.1"
+
+[general]
+repository = "https://thunderstore.io"
+
+[package]
+namespace = "CertiFried"
+name = "DevTools"
+versionNumber = "1.0.0"
+description = "Developer tools and cheats for Techtonica. Includes infinite crafting, max power, speed multipliers, and hidden game settings."
+websiteUrl = "https://github.com/xXDeath420Xx/CertiFried-EMU613-Mods"
+containsNsfwContent = false
+
+[package.dependencies]
+BepInEx-BepInExPack = "5.4.2100"
+
+[build]
+icon = "./build/icon.png"
+readme = "./README.md"
+outdir = "./build"
+
+[[build.copy]]
+source = "./build/DevTools.dll"
+target = "/"
+
+[publish]
+repository = "https://thunderstore.io"
+communities = ["techtonica"]
