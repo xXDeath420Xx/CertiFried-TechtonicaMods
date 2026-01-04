@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using EquinoxsModUtils;
 using EquinoxsModUtils.Additions;
@@ -21,18 +22,21 @@ namespace PlanterCoreClusters
     {
         private const string MyGUID = "com.equinox.PlanterCoreClusters";
         private const string PluginName = "PlanterCoreClusters";
-        private const string VersionString = "3.0.0";
+        private const string VersionString = "3.0.3";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
 
         public static string coreBoostGrowingName = "Core Boost (Growing)";
-        public static float perClusterBoost = 5f;
+        public static ConfigEntry<float> perClusterBoost;
 
         private void Awake()
         {
             Log = Logger;
             Log.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loading...");
+
+            perClusterBoost = Config.Bind("General", "Boost Per Cluster", 5.0f,
+                new ConfigDescription("Speed boost percentage per Core Cluster (default 5%).", new AcceptableValueRange<float>(1.0f, 50.0f)));
 
             Harmony.PatchAll();
             Harmony.CreateAndPatchAll(typeof(PlanterInstancePatch));
@@ -43,7 +47,7 @@ namespace PlanterCoreClusters
                 category = TechCategory.Science,
                 coreTypeNeeded = CoreType.Blue,
                 coreCountNeeded = 100,
-                description = $"Increases speed of all Planters by {perClusterBoost}% per Core Cluster.",
+                description = "Increases speed of all Planters by configurable % per Core Cluster (default 5%).",
                 displayName = coreBoostGrowingName,
                 requiredTier = ResearchTier.Tier1,
                 treePosition = 0
@@ -89,7 +93,7 @@ namespace PlanterCoreClusters
 
             if (TechTreeState.instance.freeCores == 0) return;
 
-            float boost = TechTreeState.instance.freeCores * PlanterCoreClustersPlugin.perClusterBoost * 0.0001f;
+            float boost = TechTreeState.instance.freeCores * PlanterCoreClustersPlugin.perClusterBoost.Value * 0.0001f;
             boost += 1f;
 
             for (int i = 0; i < __instance.plantSlots.Count(); i++)

@@ -1,11 +1,11 @@
-﻿using BepInEx;
+using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using EquinoxsModUtils;
 using HarmonyLib;
+using Mirror;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Principal;
 using UnityEngine;
 
 namespace Restock
@@ -15,13 +15,15 @@ namespace Restock
     {
         private const string MyGUID = "com.equinox.Restock";
         private const string PluginName = "Restock";
-        private const string VersionString = "3.0.0";
+        private const string VersionString = "3.0.3";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log = new ManualLogSource(PluginName);
 
         public static string restockRadiusKey = "Restock Radius";
         public static ConfigEntry<int> restockRadius;
+        public static ConfigEntry<float> restockCooldown;
+        private float lastRestockTime = 0f;
 
         internal static Dictionary<string, ConfigEntry<int>> stacksDictionary = new Dictionary<string, ConfigEntry<int>>();
 
@@ -34,6 +36,8 @@ namespace Restock
             Logger.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loading...");
             Harmony.PatchAll();
 
+            restockCooldown = Config.Bind<float>("General", "Restock Cooldown", 0.5f,
+                new ConfigDescription("Seconds between restock checks (reduces CPU usage)", new AcceptableValueRange<float>(0.1f, 5.0f)));
             restockRadius = Config.Bind<int>("General", restockRadiusKey, 5, new ConfigDescription("The radius around the player to scan for chests", new AcceptableValueRange<int>(0, 10)));
 
             foreach (string name in EMU.Names.Resources.SafeResources) {
@@ -46,13 +50,20 @@ namespace Restock
                 stacksDictionary.Add(name, Config.Bind(category, name, defaultValue, new ConfigDescription($"The number of stacks of {name} to restock up to", new AcceptableValueRange<int>(0, int.MaxValue))));
             }
 
-            // ToDo: Apply Patches
-
             Logger.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loaded.");
             Log = Logger;
         }
 
         private void FixedUpdate() {
+            // MULTIPLAYER FIX: Only run on host/server to prevent inventory desync
+            // In multiplayer, only the server should modify inventories - clients would cause
+            // items to appear/disappear erratically as server resyncs its authoritative state
+            if (!NetworkServer.active) return;
+
+            // Throttle restock checks for performance
+            if (Time.time - lastRestockTime < restockCooldown.Value) return;
+            lastRestockTime = Time.time;
+
             if (Player.instance == null) return;
             int radius = restockRadius.Value;
             scanZone = new Bounds {

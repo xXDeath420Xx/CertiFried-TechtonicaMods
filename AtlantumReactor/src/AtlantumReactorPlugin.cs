@@ -1,4 +1,5 @@
 using System;
+using Mirror;
 using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Logging;
@@ -20,7 +21,7 @@ namespace AtlantumReactor
     {
         private const string MyGUID = "com.equinox.AtlantumReactor";
         private const string PluginName = "AtlantumReactor";
-        private const string VersionString = "3.0.0";
+        private const string VersionString = "3.0.1";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -170,6 +171,9 @@ namespace AtlantumReactor
         [HarmonyPrefix]
         private static void ReactorSimUpdate(ref MemoryTreeInstance __instance)
         {
+            // MULTIPLAYER FIX: Only run on host/server to prevent desync
+            if (!NetworkServer.active) return;
+
             if (!AtlantumReactorPlugin.IsAtlantumReactor(__instance))
                 return;
 

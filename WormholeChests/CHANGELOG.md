@@ -2,37 +2,36 @@
 
 All notable changes to WormholeChests will be documented in this file.
 
-## [3.0.1] - 2025-01-03
+## [3.0.3] - 2026-01-03
+
+### Changed
+- **Reduced debug logging** - Removed verbose LogInfo calls in GetAimedAtChest()
+  - Cleaner BepInEx log output
+  - Slight performance improvement from reduced string formatting
+
+### Performance
+- Removed 8+ debug log calls that ran every time a chest was targeted
+- Error and warning logging preserved for troubleshooting
+
+## [3.0.2] - 2026-01-03
+
+### Changed
+- Published to Thunderstore with proper packaging and metadata
+- Verified compatibility with latest EMU 6.1.3
+
+## [3.0.1] - 2026-01-03
 
 ### Changed
 - Updated README with proper attribution and links to original author Equinox
 
-## [3.0.0] - 2025-01-02
+## [3.0.0] - 2026-01-02
 
 ### Added
-- Global `isUnlockActive` flag to completely disable mod functionality when "Wormhole Chests" tech is not researched
-- `TechTreeStateLoaded` event subscription to properly check unlock status after game loads
-- Comprehensive null checks throughout all Harmony patches
-- Try-catch exception handling around critical patch methods to prevent game crashes
-- Safe dictionary lookups using `TryGetValue` instead of direct indexing
+- Global unlock check to disable mod when tech not researched
+- Comprehensive null checks and exception handling
 
 ### Changed
-- **API Migration to EMU 6.1.3 nested class structure:**
-  - `ModUtils.GameLoaded` → `EMU.Events.GameLoaded`
-  - `ModUtils.SaveStateLoaded` → `EMU.Events.SaveStateLoaded`
-  - `ModUtils.TechTreeStateLoaded` → `EMU.Events.TechTreeStateLoaded`
-  - `ModUtils.GetUnlockByName()` → `EMU.Unlocks.GetUnlockByName()`
-  - `ModUtils.AddNewUnlock()` → `EMUAdditions.AddNewUnlock()`
-- All Harmony patches now check `isUnlockActive` flag before executing any mod logic
-- When unlock is not researched, chests function as normal vanilla chests
+- **API Migration to EMU 6.1.3 nested class structure**
 
 ### Fixed
-- Potential NullReferenceException when opening chests before game fully loads
-- Potential crashes when chest machine reference is invalid
-- Dictionary key not found exceptions when looking up wormhole channels
-- Game freeze issues caused by patches running before proper initialization
-
-### Technical Details
-- Modified patches: `GetWormholeInsteadOfInventory`, `DoSetChestChannel`, `DoDestroyChest`, `GetGUIWormhole`, `DoLoadWormholes`, `DoSaveWormholes`
-- Added safety wrapper to `Wormhole.GetWormhole()` static method
-- Added validation for `GenericMachineInstanceRef.IsValid()` before accessing chest data
+- Various NullReferenceException and crash issues

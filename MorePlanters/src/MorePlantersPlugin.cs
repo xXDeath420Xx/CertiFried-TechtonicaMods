@@ -23,7 +23,7 @@ namespace MorePlanters
     {
         private const string MyGUID = "com.equinox.MorePlanters";
         private const string PluginName = "MorePlanters";
-        private const string VersionString = "3.0.0";
+        private const string VersionString = "3.0.3";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -32,6 +32,7 @@ namespace MorePlanters
         public const string PlanterMk3Name = "Planter MKIII";
 
         public static ConfigEntry<bool> doublePlants;
+        public static ConfigEntry<float> speedMultiplier;
 
         private static string dataFolder => Application.persistentDataPath + "/MorePlanters";
 
@@ -150,6 +151,8 @@ namespace MorePlanters
 
         private void CreateConfigEntries()
         {
+            speedMultiplier = Config.Bind("General", "Speed Multiplier", 2.0f,
+                new ConfigDescription("Speed multiplier for upgraded planters (default 2x).", new AcceptableValueRange<float>(1.0f, 10.0f)));
             doublePlants = Config.Bind("General", "Double Plants", true,
                 new ConfigDescription("Whether the Planter MKII should produce two plants per seed."));
         }
@@ -292,7 +295,7 @@ namespace MorePlanters
                 // Default growth is 120 seconds, we want 60 for 2x speed
                 if (slot.totalGrowthDuration == 120f)
                 {
-                    slot.totalGrowthDuration = 60f;
+                    slot.totalGrowthDuration = 120f / MorePlantersPlugin.speedMultiplier.Value;
                 }
             }
         }

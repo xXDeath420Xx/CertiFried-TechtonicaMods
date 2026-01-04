@@ -32,7 +32,7 @@ namespace WormholeChests
     {
         private const string MyGUID = "com.equinox.WormholeChests";
         private const string PluginName = "WormholeChests";
-        private const string VersionString = "3.0.0";
+        private const string VersionString = "3.0.3";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -332,38 +332,30 @@ namespace WormholeChests
         {
             try
             {
-                WormholeChestsPlugin.Log.LogInfo("GetAimedAtChest: Starting...");
 
                 // Check if player/interaction exists
                 if (Player.instance == null)
                 {
-                    WormholeChestsPlugin.Log.LogInfo("GetAimedAtChest: Player.instance is null");
                     return default;
                 }
                 if (Player.instance.interaction == null)
                 {
-                    WormholeChestsPlugin.Log.LogInfo("GetAimedAtChest: Player.instance.interaction is null");
                     return default;
                 }
 
-                WormholeChestsPlugin.Log.LogInfo("GetAimedAtChest: Getting targetMachineRef via reflection...");
                 object fieldValue = EMU.GetPrivateField<PlayerInteraction>("targetMachineRef", Player.instance.interaction);
 
                 if (fieldValue == null)
                 {
-                    WormholeChestsPlugin.Log.LogInfo("GetAimedAtChest: targetMachineRef is null");
                     return default;  // Not aiming at anything, normal case
                 }
 
-                WormholeChestsPlugin.Log.LogInfo($"GetAimedAtChest: Got field value type: {fieldValue.GetType().Name}");
                 GenericMachineInstanceRef machineRef = (GenericMachineInstanceRef)fieldValue;
 
-                WormholeChestsPlugin.Log.LogInfo($"GetAimedAtChest: machineRef.typeIndex={machineRef.typeIndex}, MachineTypeEnum.Chest={MachineTypeEnum.Chest}");
 
                 // Check if this is actually a chest (typeIndex == MachineTypeEnum.Chest)
                 if (machineRef.typeIndex != MachineTypeEnum.Chest)
                 {
-                    WormholeChestsPlugin.Log.LogInfo("GetAimedAtChest: Not a chest type, returning default");
                     return default;  // Not a chest, normal case when opening other inventories
                 }
 
@@ -373,9 +365,7 @@ namespace WormholeChests
                     return default;
                 }
 
-                WormholeChestsPlugin.Log.LogInfo($"GetAimedAtChest: Getting chest from MachineManager, index={machineRef.index}");
                 ChestInstance result = MachineManager.instance.Get<ChestInstance, ChestDefinition>(machineRef.index, MachineTypeEnum.Chest);
-                WormholeChestsPlugin.Log.LogInfo($"GetAimedAtChest: Got chest, instanceId={result.commonInfo.instanceId}");
                 return result;
             }
             catch (Exception ex)

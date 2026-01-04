@@ -2,12 +2,18 @@
 
 All notable changes to EMUBuilder (Community Patched) will be documented in this file.
 
-## [1.1.1] - 2025-01-03
+## [1.1.2] - 2026-01-03
+
+### Changed
+- Published to Thunderstore with proper packaging and metadata
+- Verified compatibility with latest EMU 6.1.3
+
+## [1.1.1] - 2026-01-03
 
 ### Changed
 - Updated README with proper attribution and links to original author Equinox
 
-## [1.1.0] - 2025-01-02
+## [1.1.0] - 2026-01-02
 
 ### Added
 - **Extended machine type support for Blueprints copy/paste:**
@@ -36,7 +42,6 @@ All notable changes to EMUBuilder (Community Patched) will be documented in this
 - Static field `SupportedMachineTypes` patched in `.cctor` (static constructor)
 - Switch statement patched by injecting additional case labels pointing to `DoSimpleBuild` call
 - Original EMUBuilder.dll backed up before patching
-- Patch tool location: `C:\Users\crawf\TechtonicaMods\Patcher\EMUBuilderPatcher\`
 
 ### Compatibility
 - Requires EquinoxsModUtils 6.1.3+
