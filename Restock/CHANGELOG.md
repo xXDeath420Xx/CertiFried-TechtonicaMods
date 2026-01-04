@@ -2,6 +2,11 @@
 
 All notable changes to Restock will be documented in this file.
 
+## [3.0.4] - 2026-01-03
+
+### Fixed
+- Included CHANGELOG.md in Thunderstore package for proper changelog display
+
 ## [3.0.3] - 2026-01-03
 
 ### Added

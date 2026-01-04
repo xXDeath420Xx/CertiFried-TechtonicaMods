@@ -23,7 +23,7 @@ namespace MorePlanters
     {
         private const string MyGUID = "com.equinox.MorePlanters";
         private const string PluginName = "MorePlanters";
-        private const string VersionString = "3.0.3";
+        private const string VersionString = "3.0.4";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;

@@ -32,7 +32,7 @@ namespace WormholeChests
     {
         private const string MyGUID = "com.equinox.WormholeChests";
         private const string PluginName = "WormholeChests";
-        private const string VersionString = "3.0.3";
+        private const string VersionString = "3.0.4";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;

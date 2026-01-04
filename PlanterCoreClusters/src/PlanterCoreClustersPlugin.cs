@@ -22,7 +22,7 @@ namespace PlanterCoreClusters
     {
         private const string MyGUID = "com.equinox.PlanterCoreClusters";
         private const string PluginName = "PlanterCoreClusters";
-        private const string VersionString = "3.0.3";
+        private const string VersionString = "3.0.4";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
