@@ -2,6 +2,17 @@
 
 All notable changes to EnhancedLogistics will be documented in this file.
 
+## [2.0.3] - 2026-01-04
+
+### Fixed
+- **CRITICAL**: Fixed broken Harmony patches targeting non-existent `InserterInstance.CheckPlacement` method
+- This was causing the mod to fail to load with "Undefined target method" error
+
+### Changed
+- Inserter speed boost now properly patches `InserterDefinition.InitOverrideSettings` to multiply `cyclesPerMinute`
+- Inserter range extension now properly patches `InserterDefinition.InitInstance` to extend `armLength`
+- Both patches include proper error handling and logging
+
 ## [2.0.2] - 2026-01-04
 
 ### Fixed

@@ -14,7 +14,7 @@ namespace EnhancedLogistics
     {
         private const string MyGUID = "com.certifired.EnhancedLogistics";
         private const string PluginName = "EnhancedLogistics";
-        private const string VersionString = "2.0.0";
+        private const string VersionString = "2.0.3";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -1564,29 +1564,61 @@ namespace EnhancedLogistics
     internal static class LogisticsPatches
     {
         /// <summary>
-        /// Extend inserter range
+        /// Increase inserter speed by modifying cyclesPerMinute after InitOverrideSettings
         /// </summary>
-        [HarmonyPatch(typeof(InserterInstance), "CheckPlacement")]
+        [HarmonyPatch(typeof(InserterDefinition), "InitOverrideSettings")]
         [HarmonyPostfix]
-        private static void ExtendInserterRange(InserterInstance __instance, ref bool __result)
+        private static void BoostInserterSpeed(InserterDefinition __instance)
         {
             if (!EnhancedLogisticsPlugin.EnableBetterLogistics.Value) return;
 
-            // This patch allows inserters to reach further by modifying placement validation
-            // The actual range extension would need more specific patches
+            try
+            {
+                // Access the runtimeSettings and multiply cyclesPerMinute
+                float multiplier = EnhancedLogisticsPlugin.InserterSpeedMultiplier.Value;
+                if (multiplier > 1f)
+                {
+                    __instance.runtimeSettings.cyclesPerMinute *= multiplier;
+                    EnhancedLogisticsPlugin.Log.LogDebug($"Boosted inserter {__instance.displayName} speed to {__instance.runtimeSettings.cyclesPerMinute} cycles/min");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                EnhancedLogisticsPlugin.Log.LogWarning($"Failed to boost inserter speed: {ex.Message}");
+            }
         }
 
         /// <summary>
-        /// Speed up inserter operations
+        /// Increase inserter arm length after instance is created
         /// </summary>
-        [HarmonyPatch(typeof(InserterInstance), "SimUpdate")]
-        [HarmonyPrefix]
-        private static void SpeedUpInserter(InserterInstance __instance)
+        [HarmonyPatch(typeof(InserterDefinition), "InitInstance")]
+        [HarmonyPostfix]
+        private static void ExtendInserterArm(InserterDefinition __instance, ref InserterInstance newInstance)
         {
             if (!EnhancedLogisticsPlugin.EnableBetterLogistics.Value) return;
 
-            // Apply speed multiplier by adjusting the inserter's internal timer
-            // This would need access to private fields via reflection
+            try
+            {
+                // Extend arm length based on range multiplier
+                float rangeMultiplier = EnhancedLogisticsPlugin.InserterRangeMultiplier.Value;
+                if (rangeMultiplier > 1f)
+                {
+                    int originalArmLength = newInstance.armLength;
+                    newInstance.armLength = (int)(originalArmLength * rangeMultiplier);
+
+                    // Cap at reasonable maximum
+                    if (newInstance.armLength > 5) newInstance.armLength = 5;
+
+                    if (newInstance.armLength != originalArmLength)
+                    {
+                        EnhancedLogisticsPlugin.Log.LogDebug($"Extended inserter arm from {originalArmLength} to {newInstance.armLength}");
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                EnhancedLogisticsPlugin.Log.LogWarning($"Failed to extend inserter arm: {ex.Message}");
+            }
         }
     }
 }
