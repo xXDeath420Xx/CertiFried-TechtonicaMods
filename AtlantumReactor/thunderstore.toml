@@ -7,7 +7,7 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "AtlantumReactor_Updated"
-versionNumber = "4.0.1"
+versionNumber = "4.0.2"
 description = "Updated Atlantum Reactor - a 20MW endgame power generator. Originally created by Equinox, maintained by CertiFried. Consumes Atlantum Mixture Bricks and Shiverthorn Coolant."
 websiteUrl = "https://github.com/xXDeath420Xx/CertiFried-EMU613-Mods"
 containsNsfwContent = false
@@ -20,6 +20,7 @@ Equinox-EMUAdditions = "2.0.0"
 [build]
 icon = "./build/icon.png"
 readme = "./README.md"
+changelog = "./CHANGELOG.md"
 outdir = "./build"
 
 [[build.copy]]

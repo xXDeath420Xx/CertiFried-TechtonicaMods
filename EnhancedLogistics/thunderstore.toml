@@ -7,7 +7,7 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "EnhancedLogistics"
-versionNumber = "2.0.0"
+versionNumber = "2.0.1"
 description = "Enhanced logistics with Drone Delivery, Relay Networks, and Research Tiers. Extend drone coverage with color-coded relays, unlock upgrades through 5 research tiers. Includes Search UI and Storage Network."
 websiteUrl = "https://github.com/xXDeath420Xx/CertiFried-EMU613-Mods"
 containsNsfwContent = false
@@ -18,6 +18,7 @@ BepInEx-BepInExPack = "5.4.2100"
 [build]
 icon = "./build/icon.png"
 readme = "./README.md"
+changelog = "./CHANGELOG.md"
 outdir = "./build"
 
 [[build.copy]]

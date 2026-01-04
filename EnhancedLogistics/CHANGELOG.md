@@ -2,6 +2,11 @@
 
 All notable changes to EnhancedLogistics will be documented in this file.
 
+## [2.0.1] - 2026-01-04
+
+### Added
+- Changelog now included in Thunderstore package
+
 ## [2.0.0] - 2026-01-04
 
 ### Added

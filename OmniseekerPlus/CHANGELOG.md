@@ -2,6 +2,11 @@
 
 All notable changes to OmniseekerPlus will be documented in this file.
 
+## [1.0.2] - 2026-01-04
+
+### Added
+- Changelog now included in Thunderstore package
+
 ## [1.0.1] - 2026-01-04
 
 ### Changed
