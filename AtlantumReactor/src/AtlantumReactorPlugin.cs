@@ -1,7 +1,7 @@
 using System;
-using Mirror;
 using System.Collections.Generic;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using EquinoxsModUtils;
 using EquinoxsModUtils.Additions;
@@ -19,30 +19,38 @@ namespace AtlantumReactor
     [BepInDependency("com.equinox.EMUAdditions")]
     public class AtlantumReactorPlugin : BaseUnityPlugin
     {
-        private const string MyGUID = "com.equinox.AtlantumReactor";
+        private const string MyGUID = "com.certifired.AtlantumReactor";
         private const string PluginName = "AtlantumReactor";
-        private const string VersionString = "3.0.1";
+        private const string VersionString = "4.0.0";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
 
         public const string ReactorName = "Atlantum Reactor";
 
-        // Power settings
-        public const float BasePowerMW = 20f; // 20 MW base
-        public const float PerCoolantBoost = 0.5f; // +0.5 MW per coolant
-        public const float FuelConsumptionRate = 0.1f; // Consume 1 fuel per 10 seconds
+        // Fuel resource names
+        public const string AtlantumBrickName = "Atlantum Mixture Brick";
+        public const string CoolantName = "Shiverthorn Coolant";
 
-        // Track reactor states
-        public static Dictionary<uint, ReactorState> reactorStates = new Dictionary<uint, ReactorState>();
+        // Power settings (in kW - game uses kW internally)
+        // 20 MW = 20,000 kW output
+        public static ConfigEntry<int> PowerOutputKW;
+        public static ConfigEntry<bool> DebugMode;
+
+        // Track our reactor definition
+        public static int reactorDefinitionId = -1;
 
         private void Awake()
         {
             Log = Logger;
             Log.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loading...");
 
+            // Config
+            PowerOutputKW = Config.Bind("Power", "Power Output (kW)", 20000,
+                new ConfigDescription("Power output in kW (20000 = 20MW)", new AcceptableValueRange<int>(1000, 100000)));
+            DebugMode = Config.Bind("General", "Debug Mode", false, "Enable verbose debug logging");
+
             Harmony.PatchAll();
-            ApplyPatches();
 
             // Add Atlantum Reactor unlock
             EMUAdditions.AddNewUnlock(new NewUnlockDetails
@@ -50,18 +58,25 @@ namespace AtlantumReactor
                 category = TechCategory.Energy,
                 coreTypeNeeded = CoreType.Blue,
                 coreCountNeeded = 1000,
-                description = $"Consumes Atlantum Mixture Brick and Shiverthorn Coolant to produce {BasePowerMW}MW of power. Coolant boosts output.",
+                description = $"Consumes {AtlantumBrickName} and {CoolantName} to produce {PowerOutputKW.Value / 1000}MW of power.",
                 displayName = ReactorName,
                 requiredTier = ResearchTier.Tier1,
                 treePosition = 0
             });
 
-            // Add Atlantum Reactor machine (based on existing Core Composer / MemoryTree)
-            MemoryTreeDefinition reactorDef = ScriptableObject.CreateInstance<MemoryTreeDefinition>();
-            EMUAdditions.AddNewMachine<MemoryTreeInstance, MemoryTreeDefinition>(reactorDef, new NewResourceDetails
+            // Create the PowerGeneratorDefinition
+            var reactorDefinition = ScriptableObject.CreateInstance<PowerGeneratorDefinition>();
+
+            // Configure as fuel-based generator
+            reactorDefinition.usesFuel = true;
+            reactorDefinition.isCrankDriven = false;
+            reactorDefinition.powerDuration = 0f;
+            reactorDefinition.torqueDemand = 0;
+
+            EMUAdditions.AddNewMachine<PowerGeneratorInstance, PowerGeneratorDefinition>(reactorDefinition, new NewResourceDetails
             {
                 name = ReactorName,
-                description = $"Consumes Atlantum Mixture Brick and Shiverthorn Coolant to produce {BasePowerMW}MW of power.",
+                description = $"Advanced nuclear reactor that consumes {AtlantumBrickName} and {CoolantName} to produce {PowerOutputKW.Value / 1000}MW of power. High-output endgame power solution.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
                 headerTitle = "Production",
@@ -69,22 +84,24 @@ namespace AtlantumReactor
                 maxStackCount = 1,
                 sortPriority = 999,
                 unlockName = ReactorName,
-                parentName = "Core Composer"
+                parentName = "Crank Generator MKII" // Use Crank Generator MKII as visual base
             });
 
-            // Add recipe
+            // Add crafting recipe
             EMUAdditions.AddNewRecipe(new NewRecipeDetails
             {
                 GUID = MyGUID,
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                duration = 10f,
+                duration = 30f,
                 unlockName = ReactorName,
                 ingredients = new List<RecipeResourceInfo>
                 {
-                    new RecipeResourceInfo("Core Composer", 1),
                     new RecipeResourceInfo("Crank Generator MKII", 5),
-                    new RecipeResourceInfo("Steel Slab", 10)
+                    new RecipeResourceInfo("Steel Frame", 20),
+                    new RecipeResourceInfo("Processor", 10),
+                    new RecipeResourceInfo("Cooling System", 10),
+                    new RecipeResourceInfo("Atlantum Mixture Brick", 5)
                 },
                 outputs = new List<RecipeResourceInfo>
                 {
@@ -94,15 +111,10 @@ namespace AtlantumReactor
             });
 
             // Hook events
-            EMU.Events.TechTreeStateLoaded += OnTechTreeStateLoaded;
             EMU.Events.GameDefinesLoaded += OnGameDefinesLoaded;
+            EMU.Events.TechTreeStateLoaded += OnTechTreeStateLoaded;
 
             Log.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loaded.");
-        }
-
-        private void ApplyPatches()
-        {
-            Harmony.CreateAndPatchAll(typeof(MemoryTreeInstancePatch));
         }
 
         private void OnGameDefinesLoaded()
@@ -112,146 +124,193 @@ namespace AtlantumReactor
             if (reactorInfo != null)
             {
                 reactorInfo.unlock = EMU.Unlocks.GetUnlockByName(ReactorName);
+                reactorDefinitionId = reactorInfo.uniqueId;
+                LogDebug($"Reactor registered with ID: {reactorDefinitionId}");
+            }
+
+            // Register fuel resources
+            RegisterFuelResources();
+        }
+
+        private void RegisterFuelResources()
+        {
+            // Set fuelAmount on Atlantum Mixture Brick to make it recognized as fuel
+            ResourceInfo atlantumBrick = EMU.Resources.GetResourceInfoByName(AtlantumBrickName);
+            if (atlantumBrick != null)
+            {
+                if (atlantumBrick.fuelAmount <= 0)
+                {
+                    atlantumBrick.fuelAmount = 200f; // High fuel value - lasts a long time
+                }
+                LogDebug($"Registered {AtlantumBrickName} as fuel with amount {atlantumBrick.fuelAmount}");
+            }
+            else
+            {
+                Log.LogWarning($"Could not find {AtlantumBrickName} to register as fuel");
+            }
+
+            // Set fuelAmount on Shiverthorn Coolant to make it recognized as fuel
+            ResourceInfo coolant = EMU.Resources.GetResourceInfoByName(CoolantName);
+            if (coolant != null)
+            {
+                if (coolant.fuelAmount <= 0)
+                {
+                    coolant.fuelAmount = 100f; // Moderate fuel value
+                }
+                LogDebug($"Registered {CoolantName} as fuel with amount {coolant.fuelAmount}");
+            }
+            else
+            {
+                Log.LogWarning($"Could not find {CoolantName} to register as fuel");
             }
         }
 
         private void OnTechTreeStateLoaded()
         {
-            // Position in tech tree
-            Unlock crankMk2 = EMU.Unlocks.GetUnlockByName("Crank Generator MKII");
+            // Position in tech tree after HVC Reach IV (endgame power)
             Unlock hvcReach = EMU.Unlocks.GetUnlockByName("HVC Reach IV");
-
             Unlock reactorUnlock = EMU.Unlocks.GetUnlockByName(ReactorName);
-            if (reactorUnlock != null)
+
+            if (reactorUnlock != null && hvcReach != null)
             {
-                if (crankMk2 != null)
-                    reactorUnlock.treePosition = crankMk2.treePosition;
-                if (hvcReach != null)
-                    reactorUnlock.requiredTier = hvcReach.requiredTier;
+                reactorUnlock.requiredTier = hvcReach.requiredTier;
+                reactorUnlock.treePosition = hvcReach.treePosition;
+                LogDebug($"Positioned reactor unlock after HVC Reach IV");
             }
         }
 
-        public static bool IsAtlantumReactor(MemoryTreeInstance instance)
+        public static void LogDebug(string message)
         {
-            return instance.myDef != null && instance.myDef.displayName == ReactorName;
-        }
-
-        public static ReactorState GetOrCreateState(uint instanceId)
-        {
-            if (!reactorStates.TryGetValue(instanceId, out ReactorState state))
+            if (DebugMode != null && DebugMode.Value)
             {
-                state = new ReactorState(instanceId);
-                reactorStates[instanceId] = state;
+                Log.LogInfo($"[DEBUG] {message}");
             }
-            return state;
         }
     }
 
-    public class ReactorState
+    /// <summary>
+    /// Patches to make the reactor actually generate power
+    /// </summary>
+    [HarmonyPatch]
+    internal static class ReactorPowerPatches
     {
-        public uint instanceId;
-        public float fuelAmount;
-        public float coolantAmount;
-        public float powerOutput;
-        public bool isRunning;
-
-        public ReactorState(uint id)
+        /// <summary>
+        /// Ensure reactor generates power during simulation updates
+        /// </summary>
+        [HarmonyPatch(typeof(PowerGeneratorInstance), nameof(PowerGeneratorInstance.SimUpdate))]
+        [HarmonyPostfix]
+        private static void EnsureReactorPowerGeneration(ref PowerGeneratorInstance __instance)
         {
-            instanceId = id;
+            try
+            {
+                if (__instance.myDef == null) return;
+                if (__instance.myDef.displayName != AtlantumReactorPlugin.ReactorName) return;
+
+                // Set power generation (negative consumption = generation)
+                ref var powerInfo = ref __instance.powerInfo;
+                powerInfo.curPowerConsumption = -AtlantumReactorPlugin.PowerOutputKW.Value;
+                powerInfo.isGenerator = true;
+
+                AtlantumReactorPlugin.LogDebug($"Reactor generating {AtlantumReactorPlugin.PowerOutputKW.Value}kW");
+            }
+            catch
+            {
+                // Silently ignore errors
+            }
         }
     }
 
-    internal class MemoryTreeInstancePatch
+    /// <summary>
+    /// Patches to apply green tint to Atlantum Reactor visuals
+    /// </summary>
+    [HarmonyPatch]
+    internal static class ReactorVisualPatches
     {
-        private static float lastUpdateTime = 0f;
-        private static ResourceInfo atlantumBrickInfo;
-        private static ResourceInfo coolantInfo;
+        // Bright radioactive green color
+        private static readonly Color ReactorGreen = new Color(0.2f, 1f, 0.3f);
+        private static readonly Color EmissionGreen = new Color(0.1f, 0.8f, 0.2f);
 
-        [HarmonyPatch(typeof(MemoryTreeInstance), "SimUpdate")]
-        [HarmonyPrefix]
-        private static void ReactorSimUpdate(ref MemoryTreeInstance __instance)
+        // Track which reactors we've already tinted
+        private static readonly HashSet<uint> tintedReactors = new HashSet<uint>();
+
+        /// <summary>
+        /// Apply green tint during SimUpdate
+        /// </summary>
+        [HarmonyPatch(typeof(PowerGeneratorInstance), nameof(PowerGeneratorInstance.SimUpdate))]
+        [HarmonyPostfix]
+        private static void ApplyGreenTintOnUpdate(ref PowerGeneratorInstance __instance)
         {
-            // MULTIPLAYER FIX: Only run on host/server to prevent desync
-            if (!NetworkServer.active) return;
-
-            if (!AtlantumReactorPlugin.IsAtlantumReactor(__instance))
-                return;
-
-            // Only update every second
-            if (Time.time - lastUpdateTime < 1f)
-                return;
-            lastUpdateTime = Time.time;
-
-            // Cache resource info
-            if (atlantumBrickInfo == null)
-                atlantumBrickInfo = EMU.Resources.GetResourceInfoByName("Atlantum Mixture Brick");
-            if (coolantInfo == null)
-                coolantInfo = EMU.Resources.GetResourceInfoByName("Shiverthorn Coolant");
-
-            if (atlantumBrickInfo == null || coolantInfo == null)
-                return;
-
-            uint instanceId = __instance.commonInfo.instanceId;
-            ReactorState state = AtlantumReactorPlugin.GetOrCreateState(instanceId);
-
-            // Check inventory for fuel
-            var inventories = __instance.commonInfo.inventories;
-            if (inventories == null || inventories.Length == 0)
-                return;
-
-            ref var inputInv = ref inventories[0];
-
-            int fuelCount = 0;
-            int coolantCount = 0;
-
-            // Count fuel and coolant in inventory
-            for (int i = 0; i < inputInv.myStacks.Length; i++)
+            try
             {
-                ref var stack = ref inputInv.myStacks[i];
-                if (stack.isEmpty) continue;
+                if (__instance.myDef == null) return;
+                if (__instance.myDef.displayName != AtlantumReactorPlugin.ReactorName) return;
 
-                if (stack.info.uniqueId == atlantumBrickInfo.uniqueId)
-                    fuelCount += stack.count;
-                else if (stack.info.uniqueId == coolantInfo.uniqueId)
-                    coolantCount += stack.count;
+                uint instanceId = __instance.commonInfo.instanceId;
+                if (tintedReactors.Contains(instanceId)) return;
+
+                var visual = __instance.commonInfo.refGameObj;
+                if (visual == null) return;
+
+                ApplyGreenMaterial(visual);
+                tintedReactors.Add(instanceId);
+                AtlantumReactorPlugin.LogDebug($"Applied green tint to reactor {instanceId}");
+            }
+            catch
+            {
+                // Silently ignore
+            }
+        }
+
+        /// <summary>
+        /// Clear tinted reactors when machine is deconstructed
+        /// </summary>
+        [HarmonyPatch(typeof(MachineManager), "RemoveMachine")]
+        [HarmonyPostfix]
+        private static void ClearTintedReactor(uint instanceId)
+        {
+            tintedReactors.Remove(instanceId);
+        }
+
+        private static void ApplyGreenMaterial(GameObject visual)
+        {
+            var renderers = visual.GetComponentsInChildren<MeshRenderer>(true);
+            foreach (var renderer in renderers)
+            {
+                // Use MaterialPropertyBlock to avoid modifying shared materials
+                MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
+                renderer.GetPropertyBlock(propBlock);
+
+                propBlock.SetColor("_Color", ReactorGreen);
+                propBlock.SetColor("_BaseColor", ReactorGreen);
+                propBlock.SetColor("_EmissionColor", EmissionGreen * 3f);
+
+                renderer.SetPropertyBlock(propBlock);
             }
 
-            // Calculate power output in kW (game uses kW internally)
-            // 20 MW = 20,000 kW
-            float powerOutputKW = 0f;
-
-            if (fuelCount > 0)
+            // Also try direct material modification as fallback
+            foreach (var renderer in renderers)
             {
-                state.isRunning = true;
-                float powerMW = AtlantumReactorPlugin.BasePowerMW + (coolantCount * AtlantumReactorPlugin.PerCoolantBoost);
-                state.powerOutput = powerMW;
-                powerOutputKW = powerMW * 1000f; // Convert MW to kW
-
-                // Consume fuel slowly (1 per 10 seconds)
-                state.fuelAmount += AtlantumReactorPlugin.FuelConsumptionRate;
-                if (state.fuelAmount >= 1f)
+                var materials = renderer.materials;
+                for (int i = 0; i < materials.Length; i++)
                 {
-                    state.fuelAmount -= 1f;
-                    inputInv.TryRemoveResources(atlantumBrickInfo.uniqueId, 1);
+                    var mat = materials[i];
 
-                    // Also consume coolant occasionally
-                    if (coolantCount > 0 && UnityEngine.Random.value < 0.1f)
+                    if (mat.HasProperty("_Color"))
+                        mat.color = ReactorGreen;
+                    if (mat.HasProperty("_BaseColor"))
+                        mat.SetColor("_BaseColor", ReactorGreen);
+                    if (mat.HasProperty("_EmissionColor"))
                     {
-                        inputInv.TryRemoveResources(coolantInfo.uniqueId, 1);
+                        mat.EnableKeyword("_EMISSION");
+                        mat.SetColor("_EmissionColor", EmissionGreen * 3f);
                     }
                 }
+                renderer.materials = materials;
             }
-            else
-            {
-                state.isRunning = false;
-                state.powerOutput = 0f;
-            }
-
-            // Set power generation on the PowerInfo
-            // isGenerator = true means this machine produces power
-            // curPowerConsumption is NEGATIVE for generators (power output)
-            __instance.powerInfo.isGenerator = state.isRunning;
-            __instance.powerInfo.curPowerConsumption = state.isRunning ? -(int)powerOutputKW : 0;
         }
     }
+
+    // Note: OmniseekerPatches removed - OmniseekableType, OmniseekerUI, OmniseekerIndicator
+    // types may not be available. AtlantumOreVein should already be scannable in the game
+    // if it exists as part of the base game content.
 }

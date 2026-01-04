@@ -21,7 +21,7 @@ namespace AdvancedMachines
     {
         private const string MyGUID = "com.certifired.AdvancedMachines";
         private const string PluginName = "AdvancedMachines";
-        private const string VersionString = "1.0.0";
+        private const string VersionString = "2.0.0";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;

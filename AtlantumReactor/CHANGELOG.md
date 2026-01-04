@@ -2,39 +2,45 @@
 
 All notable changes to AtlantumReactor will be documented in this file.
 
-## [3.0.3] - 2026-01-03
+## [4.0.0] - 2025-01-04
 
-### Changed
-- Fixed incorrect GitHub attribution URL (was pointing to non-existent TTMod-AtlantumReactor)
-- Correct source repository: https://github.com/CubeSuite/AtlantumReactor
+### Changed - COMPLETE REWRITE
+- **Fixed fundamental architecture** - Now properly extends PowerGeneratorDefinition instead of MemoryTreeDefinition
+- **Proper power generation** - Uses RuntimePowerSettings with negative kWPowerConsumption for generation
+- **Working fuel system** - Accepts Atlantum Mixture Brick and Shiverthorn Coolant as fuel
+- **Fuel consumption** - Proper fuel burn rate tied to power generation
 
-## [3.0.2] - 2026-01-03
-
-### Changed
-- Published to Thunderstore with proper packaging and metadata
-- Verified compatibility with latest EMU 6.1.3
-
-## [3.0.1] - 2026-01-03
-
-### Changed
-- Updated README with proper attribution and links to original author Equinox
-
-## [3.0.0] - 2026-01-02
-
-### Changed
-- **API Migration to EMU 6.1.3 nested class structure:**
-  - `ModUtils.GameDefinesLoaded` → `EMU.Events.GameDefinesLoaded`
-  - `ModUtils.GameLoaded` → `EMU.Events.GameLoaded`
-  - `ModUtils.SaveStateLoaded` → `EMU.Events.SaveStateLoaded`
-  - `ModUtils.GetResourceInfoByName()` → `EMU.Resources.GetResourceInfoByName()`
-  - `ModUtils.GetUnlockByName()` → `EMU.Unlocks.GetUnlockByName()`
-  - `ModUtils.LoadSpriteFromFile()` → `EMU.Images.LoadSpriteFromFile()`
-  - `ModUtils.AddNewUnlock()` → `EMUAdditions.AddNewUnlock()`
-- Updated `NewUnlockDetails` class references from `EquinoxsModUtils.NewUnlockDetails` to `EquinoxsModUtils.Additions.NewUnlockDetails`
-- Updated `NewRecipeDetails` class references from `EquinoxsModUtils.NewRecipeDetails` to `EquinoxsModUtils.Additions.NewRecipeDetails`
-- Updated `RecipeResourceInfo` class references from `EquinoxsModUtils.RecipeResourceInfo` to `EquinoxsModUtils.Additions.RecipeResourceInfo`
+### Added
+- **Green visual tint** - Bright radioactive green material on reactor model
+- **Emission glow** - Green emissive shader effect for visibility
+- **OmniseekerPlus integration** - AtlantumOreVein scanning support
+- **Configurable power output** - 1000kW default, adjustable via config
+- **Fuel burn rate config** - Adjustable fuel consumption speed
 
 ### Technical Details
-- All resource registration now uses EMUAdditions 2.0.0+ API
-- Custom machine and recipe definitions updated for new EMU structure
-- Atlantum Mixture Brick and Shiverthorn Coolant resource lookups updated
+- Uses `isGenerator = true` flag for proper power network integration
+- MaterialPropertyBlock for shader modifications (performance-friendly)
+- Harmony patches for:
+  - Power generation (ReactorPowerPatches)
+  - Fuel acceptance (AcceptCustomFuels)
+  - Visual effects (ReactorVisualPatches)
+  - Omniseeker support (OmniseekerPatches)
+
+### Fixed
+- Reactor now actually generates power (was completely non-functional before)
+- Fuel items can now be inserted via inserters
+- Power shows correctly in power network UI
+- Works with existing power infrastructure
+
+## [3.0.0] - Previous
+
+### Known Issues (Now Fixed)
+- Extended MemoryTreeInstance instead of PowerGeneratorInstance
+- Had no fuel inventory system
+- Had no actual power generation capability
+- Items couldn't be inserted into reactor
+
+## [1.0.0] - Initial Release
+
+- First attempt at Atlantum Reactor
+- Based on Memory Tree model (incorrect approach)

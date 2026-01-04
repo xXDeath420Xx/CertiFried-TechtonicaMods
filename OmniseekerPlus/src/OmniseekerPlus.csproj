@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <AssemblyName>DevTools</AssemblyName>
-    <RootNamespace>DevTools</RootNamespace>
+    <AssemblyName>OmniseekerPlus</AssemblyName>
+    <RootNamespace>OmniseekerPlus</RootNamespace>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -33,6 +33,14 @@
       <HintPath>$(GameDir)\Techtonica_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>$(GameDir)\Techtonica_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(GameDir)\Techtonica_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
       <HintPath>$(GameDir)\Techtonica_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>false</Private>
@@ -43,10 +51,6 @@
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
       <HintPath>$(GameDir)\Techtonica_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="FMODUnity">
-      <HintPath>$(GameDir)\Techtonica_Data\Managed\FMODUnity.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>

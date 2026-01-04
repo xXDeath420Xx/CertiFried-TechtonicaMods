@@ -1,32 +1,41 @@
-# AdvancedMachines
+# Advanced Machines
 
-Adds Tier 4 and Tier 5 versions of core production machines to Techtonica.
+Adds Tier 4 and Tier 5 versions of production machines with significantly increased speeds.
 
 ## Features
 
-### New Machines
-- **Smelter MKIV/MKV** - 2x/3x speed, higher power consumption
-- **Assembler MKIII/MKIV** - 2x/3x speed, higher power consumption
-- **Mining Drill MKIII/MKIV** - Faster extraction rates
-- **Thresher MKII/MKIII** - 2x/3x processing speed
-- **Planter MKIV/MKV** - Extended range and faster growth (requires MorePlanters)
+### Tier 4 Machines (200% speed)
+- Smelter MKIV
+- Assembler MKIV
+- Mining Drill MKIV
+- Thresher MKIV
+- Planter MKIV
 
-### Configuration Options
-- Enable/disable hidden variants
-- Enable/disable Tier 4 machines
-- Enable/disable Tier 5 machines
+### Tier 5 Machines (300% speed)
+- Smelter MKV
+- Assembler MKV
+- Mining Drill MKV
+- Thresher MKV
+- Planter MKV
+
+### Hidden Variants Enabler
+Unlocks hidden machine variants that exist in the game files but aren't normally accessible.
 
 ## Requirements
-- BepInEx 5.4.2100+
-- EquinoxsModUtils 6.1.3+
-- EMUAdditions 2.0.0+
+
+Each tier requires research and appropriate resources to craft. Higher tier machines consume more power but produce much faster.
 
 ## Installation
-1. Install BepInEx and dependencies
-2. Place AdvancedMachines.dll in `BepInEx/plugins/`
 
-## License
-GPL-3.0 - See LICENSE file
+1. Install BepInEx for Techtonica
+2. Install EquinoxsModUtils (EMU) 6.1.3+
+3. Install EMUAdditions 2.0.0+
+4. Place the `AdvancedMachines.dll` in your `BepInEx/plugins` folder
 
-## Credits
-Created by CertiFried
+## Configuration
+
+Machine speeds can be configured in the BepInEx configuration file.
+
+## Changelog
+
+See CHANGELOG.md for version history.

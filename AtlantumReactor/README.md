@@ -1,39 +1,41 @@
-# AtlantumReactor - Updated for EMU 6.1.3
+# Atlantum Reactor
 
-Adds an end-game power generation building that consumes Atlantum resources.
+A powerful endgame nuclear reactor for Techtonica that generates 20MW of power.
 
 ## Features
 
-### Atlantum Reactor
-- High-power output for late-game bases
-- Consumes Atlantum Mixture Brick as fuel
-- Requires Shiverthorn Coolant for operation
-- Unlocked via Tech Tree
+- **High Power Output**: Generates 20,000 kW (20MW) of power
+- **Fuel-Based**: Consumes Atlantum Mixture Bricks and Shiverthorn Coolant
+- **Distinctive Visual**: Green radioactive tint for easy identification
+- **Endgame Content**: Positioned in tech tree after HVC Reach IV
+
+## Recipe
+
+Crafted in Assembler:
+- 5x Crank Generator MKII
+- 20x Steel Frame
+- 10x Processor
+- 10x Cooling System
+- 5x Atlantum Mixture Brick
+
+## Research Requirements
+
+- Tech Category: Energy
+- Core Type: Blue
+- Core Count: 1000
 
 ## Installation
 
-1. Requires EquinoxsModUtils 6.1.3+
-2. Requires EMUAdditions 2.0.0+
-3. Install via r2modman or extract to BepInEx/plugins
+1. Install BepInEx for Techtonica
+2. Install EquinoxsModUtils (EMU) 6.1.3+
+3. Install EMUAdditions 2.0.0+
+4. Place the `AtlantumReactor.dll` in your `BepInEx/plugins` folder
+
+## Configuration
+
+Power output can be configured in the BepInEx configuration file:
+- **Power Output (kW)**: Default 20000 (20MW), range 1000-100000
 
 ## Changelog
 
-### v3.0.0
-- Updated for EquinoxsModUtils 6.1.3 compatibility
-- Fixed NewResourceInfo API changes
-
-## Credits & Attribution
-
-**Original Author:** [Equinox](https://new.thunderstore.io/c/techtonica/p/Equinox/)
-
-This mod was originally created by Equinox as part of the [CubeSuite](https://github.com/CubeSuite) collection of Techtonica mods. This version has been updated for EMU 6.1.3 compatibility.
-
-- **Original Thunderstore Page:** [Equinox's AtlantumReactor](https://new.thunderstore.io/c/techtonica/p/Equinox/AtlantumReactor/)
-- **Original Source Repository:** [AtlantumReactor](https://github.com/CubeSuite/AtlantumReactor)
-- **Equinox's Thunderstore Profile:** [https://new.thunderstore.io/c/techtonica/p/Equinox/](https://new.thunderstore.io/c/techtonica/p/Equinox/)
-
-All credit for the original mod concept, design, and implementation goes to Equinox.
-
-## License
-
-GPL-3.0 (GNU General Public License v3.0) - See [original repository](https://github.com/CubeSuite/AtlantumReactor) for full license.
+See CHANGELOG.md for version history.
