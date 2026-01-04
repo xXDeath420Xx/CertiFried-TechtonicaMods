@@ -6,22 +6,28 @@ repository = "https://thunderstore.io"
 
 [package]
 namespace = "CertiFried"
-name = "DevTools"
-versionNumber = "1.0.1"
-description = "Developer tools and cheats for Techtonica. Includes infinite crafting, max power, speed multipliers, and hidden game settings."
+name = "Restock_Updated"
+versionNumber = "3.0.5"
+description = "Automatically restocks items from your inventory when placing machines or items. Updated for EMU 6.1.3. Original mod by Equinox."
 websiteUrl = "https://github.com/xXDeath420Xx/CertiFried-EMU613-Mods"
 containsNsfwContent = false
 
 [package.dependencies]
 BepInEx-BepInExPack = "5.4.2100"
+Equinox-EquinoxsModUtils = "6.1.3"
+Equinox-EMUAdditions = "2.0.0"
 
 [build]
-icon = "./build/icon.png"
+icon = "./thunderstore/icon.png"
 readme = "./README.md"
 outdir = "./build"
 
 [[build.copy]]
-source = "./build/DevTools.dll"
+source = "./thunderstore/Restock.dll"
+target = "/"
+
+[[build.copy]]
+source = "./CHANGELOG.md"
 target = "/"
 
 [publish]

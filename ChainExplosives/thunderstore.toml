@@ -4,7 +4,7 @@ schemaVersion = "0.0.1"
 [package]
 namespace = "CertiFried"
 name = "ChainExplosives_Updated"
-versionNumber = "1.0.0"
+versionNumber = "1.0.1"
 description = "Interact with one explosive to detonate ALL placed explosives at once! Chain reaction mining!"
 websiteUrl = "https://github.com/CubeSuite/TTMod-ChainExplosives"
 containsNsfwContent = false
