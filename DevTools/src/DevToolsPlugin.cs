@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -13,7 +14,7 @@ namespace DevTools
     {
         private const string MyGUID = "com.certifired.DevTools";
         private const string PluginName = "DevTools";
-        private const string VersionString = "2.0.0";
+        private const string VersionString = "2.1.0";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -68,16 +69,27 @@ namespace DevTools
         public static ConfigEntry<bool> RainbowCores;
         public static ConfigEntry<bool> PlaceholderVoice;
 
+        // ============================================
+        // PROTECTION SETTINGS (from CasperProtections)
+        // ============================================
+        public static ConfigEntry<bool> DisableProtectionZones;
+        public static ConfigEntry<bool> DisableSafeSprint;
+        public static ConfigEntry<bool> DisablePrebuildProtections;
+        public static ConfigEntry<bool> SprintHoldMode;
+
         private static bool isInitialized = false;
         private static bool settingsApplied = false;
         private static float rainbowHue = 0f;
+
+        // Reflection field for sprint hold mode
+        private static FieldInfo runToggledOnField = null;
 
         // GUI State
         private static bool guiVisible = false;
         private static Rect windowRect = new Rect(20, 20, 420, 600);
         private static Vector2 scrollPosition = Vector2.zero;
         private static int currentTab = 0;
-        private static string[] tabNames = { "Player", "Game Mode", "Machines", "Power", "Special" };
+        private static string[] tabNames = { "Player", "Game Mode", "Machines", "Power", "Protection", "Special" };
         private static GUIStyle headerStyle;
         private static GUIStyle boxStyle;
         private static bool stylesInitialized = false;
@@ -170,6 +182,20 @@ namespace DevTools
                 "Memory Tree cores cycle through rainbow colors");
             PlaceholderVoice = Config.Bind("SpecialCheats", "Placeholder Voice", false,
                 "Enable placeholder voice lines (developer audio)");
+
+            // Protection Settings (from CasperProtections)
+            DisableProtectionZones = Config.Bind("ProtectionSettings", "Disable Protection Zones", false,
+                "Allow digging/building anywhere, ignoring protection zones");
+            DisableSafeSprint = Config.Bind("ProtectionSettings", "Disable Safe Sprint", false,
+                "Allow sprinting inside buildings (disables safe speed zones)");
+            DisablePrebuildProtections = Config.Bind("ProtectionSettings", "Disable Prebuild Protections", false,
+                "Allow erasing/modifying prebuilt objects");
+            SprintHoldMode = Config.Bind("ProtectionSettings", "Sprint Hold Mode", false,
+                "Only sprint while holding the sprint key (tap to stop)");
+
+            // Initialize reflection field for sprint hold mode
+            runToggledOnField = typeof(PlayerFirstPersonController).GetField("runToggledOn",
+                BindingFlags.NonPublic | BindingFlags.Instance);
 
             // Initialize input fields
             simSpeedInput = SimSpeed.Value.ToString("F1");
@@ -297,7 +323,8 @@ namespace DevTools
                 case 1: DrawGameModeTab(); break;
                 case 2: DrawMachinesTab(); break;
                 case 3: DrawPowerTab(); break;
-                case 4: DrawSpecialTab(); break;
+                case 4: DrawProtectionTab(); break;
+                case 5: DrawSpecialTab(); break;
             }
 
             GUILayout.EndScrollView();
@@ -596,6 +623,52 @@ namespace DevTools
             GUILayout.EndVertical();
         }
 
+        private void DrawProtectionTab()
+        {
+            GUILayout.Label("Protection Settings", headerStyle);
+            GUILayout.Space(5);
+
+            GUILayout.BeginVertical(boxStyle);
+
+            GUILayout.Label("From CasperProtections mod - integrated for convenience", GUI.skin.label);
+            GUILayout.Space(10);
+
+            GUI.color = DisableProtectionZones.Value ? Color.red : Color.white;
+            DisableProtectionZones.Value = GUILayout.Toggle(DisableProtectionZones.Value, " Disable Protection Zones");
+            GUI.color = Color.white;
+            GUILayout.Label("  Dig/build anywhere, ignore protected areas", GUI.skin.label);
+            GUILayout.Space(10);
+
+            GUI.color = DisableSafeSprint.Value ? Color.red : Color.white;
+            DisableSafeSprint.Value = GUILayout.Toggle(DisableSafeSprint.Value, " Disable Safe Sprint");
+            GUI.color = Color.white;
+            GUILayout.Label("  Allow sprinting inside buildings", GUI.skin.label);
+            GUILayout.Space(10);
+
+            GUI.color = DisablePrebuildProtections.Value ? Color.red : Color.white;
+            DisablePrebuildProtections.Value = GUILayout.Toggle(DisablePrebuildProtections.Value, " Disable Prebuild Protections");
+            GUI.color = Color.white;
+            GUILayout.Label("  Allow erasing prebuilt/developer objects", GUI.skin.label);
+            GUILayout.Space(10);
+
+            GUI.color = SprintHoldMode.Value ? Color.green : Color.white;
+            SprintHoldMode.Value = GUILayout.Toggle(SprintHoldMode.Value, " Sprint Hold Mode");
+            GUI.color = Color.white;
+            GUILayout.Label("  Only run while holding sprint key", GUI.skin.label);
+            GUILayout.Label("  (Release to stop sprinting)", GUI.skin.label);
+            GUILayout.Space(20);
+
+            // Warning
+            GUILayout.Label("Warning", headerStyle);
+            GUILayout.Space(5);
+            GUI.color = Color.yellow;
+            GUILayout.Label("Protection features may affect gameplay!");
+            GUILayout.Label("Use with caution - can break things.");
+            GUI.color = Color.white;
+
+            GUILayout.EndVertical();
+        }
+
         private void DrawSpecialTab()
         {
             GUILayout.Label("Special Cheats", headerStyle);
@@ -837,6 +910,105 @@ namespace DevTools
                 }
             }
             catch { }
+        }
+
+        // ============================================
+        // CASPERPROTECTIONS PATCHES
+        // ============================================
+
+        /// <summary>
+        /// Disable Protection Zones - Skip registering protection zones to allow building/digging anywhere
+        /// </summary>
+        [HarmonyPatch(typeof(GridManager), "RegisterProtectedZone")]
+        [HarmonyPrefix]
+        private static bool DisableProtectionZones_Prefix(ref ProtectionZoneData protectionZone, ref byte strata)
+        {
+            // Skip registration when protection zones are disabled
+            if (DevToolsPlugin.DisableProtectionZones.Value)
+            {
+                return false; // Skip original method
+            }
+            return true; // Run original method
+        }
+
+        /// <summary>
+        /// Disable Protection Zones - Always allow voxel modification
+        /// </summary>
+        [HarmonyPatch(typeof(VoxelManager), "CanModifyVoxelAt")]
+        [HarmonyPrefix]
+        private static bool DisableProtectionZones_VoxelPrefix(ref bool __result)
+        {
+            if (DevToolsPlugin.DisableProtectionZones.Value)
+            {
+                __result = true;
+                return false; // Skip original, we set result to true
+            }
+            return true; // Run original method
+        }
+
+        /// <summary>
+        /// Disable Safe Sprint - Allow sprinting inside buildings
+        /// </summary>
+        [HarmonyPatch(typeof(SafeSpeedTriggerZoneData), "SetSprintState")]
+        [HarmonyPrefix]
+        private static bool DisableSafeSprint_Prefix(ref bool isOn)
+        {
+            if (DevToolsPlugin.DisableSafeSprint.Value)
+            {
+                isOn = false; // Force sprint to not be restricted
+                return true; // Continue with modified value
+            }
+            return true; // Run original method
+        }
+
+        /// <summary>
+        /// Disable Prebuild Protections - Allow erasing prebuilt objects
+        /// </summary>
+        [HarmonyPatch(typeof(GridManager), "ShouldSkipErasing")]
+        [HarmonyPrefix]
+        private static bool DisablePrebuildProtections_Prefix(ref bool __result)
+        {
+            if (DevToolsPlugin.DisablePrebuildProtections.Value)
+            {
+                __result = false; // Never skip erasing
+                return false; // Skip original, we set result
+            }
+            return true; // Run original method
+        }
+
+        /// <summary>
+        /// Sprint Hold Mode - Only sprint while holding the sprint key
+        /// </summary>
+        [HarmonyPatch(typeof(PlayerFirstPersonController), "LateUpdate")]
+        [HarmonyPrefix]
+        private static bool SprintHoldMode_Prefix(PlayerFirstPersonController __instance)
+        {
+            if (DevToolsPlugin.SprintHoldMode.Value)
+            {
+                try
+                {
+                    var runToggledOnField = typeof(PlayerFirstPersonController).GetField("runToggledOn",
+                        BindingFlags.NonPublic | BindingFlags.Instance);
+
+                    if (runToggledOnField != null)
+                    {
+                        bool sprintHeld = InputHandler.instance.SprintHeld;
+                        runToggledOnField.SetValue(__instance, sprintHeld);
+
+                        // Also stop sprinting if not moving
+                        Vector2 moveAxes = InputHandler.instance.MoveAxes;
+                        if (moveAxes.magnitude < 0.5f)
+                        {
+                            runToggledOnField.SetValue(__instance, false);
+                        }
+                    }
+                }
+                catch
+                {
+                    // Silently ignore reflection errors
+                }
+            }
+            return true; // Always run original method
         }
     }
 }

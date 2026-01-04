@@ -14,7 +14,7 @@ namespace EnhancedLogistics
     {
         private const string MyGUID = "com.certifired.EnhancedLogistics";
         private const string PluginName = "EnhancedLogistics";
-        private const string VersionString = "1.0.0";
+        private const string VersionString = "2.0.0";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -55,6 +55,20 @@ namespace EnhancedLogistics
         public static ConfigEntry<float> DroneSpeed;
         public static ConfigEntry<float> DroneRange;
         public static ConfigEntry<KeyCode> DroneMenuKey;
+
+        // ============================================
+        // DRONE RELAY SETTINGS
+        // ============================================
+        public static ConfigEntry<bool> EnableDroneRelays;
+        public static ConfigEntry<float> RelayBaseRange;
+        public static ConfigEntry<bool> ShowRelayNetwork;
+        public static ConfigEntry<int> MaxDronesPerNetwork;
+
+        // ============================================
+        // DRONE RESEARCH SETTINGS
+        // ============================================
+        public static ConfigEntry<int> CurrentDroneTier;
+        public static ConfigEntry<bool> AutoUnlockTiers;
 
         // State
         public static bool searchWindowOpen = false;
@@ -133,6 +147,22 @@ namespace EnhancedLogistics
             DroneMenuKey = Config.Bind("Drone System", "Drone Menu Key", KeyCode.J,
                 "Key to open drone management menu");
 
+            // Drone Relay Settings
+            EnableDroneRelays = Config.Bind("Drone Relays", "Enable Drone Relays", true,
+                "Enable the drone relay system for extended network coverage");
+            RelayBaseRange = Config.Bind("Drone Relays", "Relay Base Range", 150f,
+                new ConfigDescription("Base range for drone relays (extends network)", new AcceptableValueRange<float>(50f, 500f)));
+            ShowRelayNetwork = Config.Bind("Drone Relays", "Show Relay Network", true,
+                "Display visual connections between relays");
+            MaxDronesPerNetwork = Config.Bind("Drone Relays", "Max Drones Per Network", 5,
+                new ConfigDescription("Maximum drones that can operate in a single network", new AcceptableValueRange<int>(1, 20)));
+
+            // Drone Research Settings
+            CurrentDroneTier = Config.Bind("Drone Research", "Current Drone Tier", 1,
+                new ConfigDescription("Current unlocked drone technology tier", new AcceptableValueRange<int>(1, 5)));
+            AutoUnlockTiers = Config.Bind("Drone Research", "Auto Unlock Tiers", false,
+                "Automatically unlock drone tiers (for testing)");
+
             Harmony.PatchAll();
 
             Log.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loaded.");
@@ -169,6 +199,18 @@ namespace EnhancedLogistics
             {
                 DroneManager.Update();
             }
+
+            // Update drone relay network
+            if (EnableDroneRelays.Value)
+            {
+                DroneRelayNetwork.Update();
+            }
+        }
+
+        private void Start()
+        {
+            // Initialize relay network
+            DroneRelayNetwork.Initialize();
         }
 
         private void OnGUI()
@@ -449,60 +491,37 @@ namespace EnhancedLogistics
             return str.Substring(0, maxLength - 3) + "...";
         }
 
+        private int droneWindowTab = 0;
+        private string[] droneTabNames = { "Status", "Research", "Relays" };
+
         private void DrawDroneWindow(int id)
         {
             GUILayout.BeginVertical();
 
             GUILayout.Label("Drone Delivery System", new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold, fontSize = 14 });
-            GUILayout.Space(10);
+            GUILayout.Space(5);
 
-            // Drone status
-            GUILayout.BeginVertical(GUI.skin.box);
-            GUILayout.Label($"Active Drones: {DroneManager.activeDrones.Count}");
-            GUILayout.Label($"Pending Deliveries: {DroneManager.pendingDeliveries.Count}");
-            GUILayout.Label($"Drone Capacity: {DroneCapacity.Value} items");
-            GUILayout.Label($"Drone Speed: {DroneSpeed.Value} u/s");
-            GUILayout.Label($"Max Range: {DroneRange.Value}m");
-            GUILayout.EndVertical();
-
-            GUILayout.Space(10);
-
-            // Drone list
-            GUILayout.Label("Active Drones:");
-            droneScrollPos = GUILayout.BeginScrollView(droneScrollPos, GUILayout.Height(150));
-
-            foreach (var drone in DroneManager.activeDrones)
-            {
-                GUILayout.BeginHorizontal(GUI.skin.box);
-                GUILayout.Label($"Drone #{drone.id}", GUILayout.Width(80));
-                GUILayout.Label(drone.state.ToString(), GUILayout.Width(80));
-                GUILayout.Label($"{drone.cargoCount}/{DroneCapacity.Value}", GUILayout.Width(50));
-                GUILayout.EndHorizontal();
-            }
-
-            if (DroneManager.activeDrones.Count == 0)
-            {
-                GUILayout.Label("No active drones. Build a Drone Hub to deploy drones!");
-            }
-
-            GUILayout.EndScrollView();
-
-            GUILayout.Space(10);
-
-            // Controls
+            // Tab buttons
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Create Test Drone"))
+            for (int i = 0; i < droneTabNames.Length; i++)
             {
-                if (Player.instance != null)
+                GUI.color = (droneWindowTab == i) ? Color.cyan : Color.white;
+                if (GUILayout.Button(droneTabNames[i], GUILayout.Height(25)))
                 {
-                    DroneManager.SpawnDrone(Player.instance.transform.position + Vector3.up * 2f);
+                    droneWindowTab = i;
                 }
             }
-            if (GUILayout.Button("Clear All Drones"))
-            {
-                DroneManager.ClearAllDrones();
-            }
+            GUI.color = Color.white;
             GUILayout.EndHorizontal();
+
+            GUILayout.Space(5);
+
+            switch (droneWindowTab)
+            {
+                case 0: DrawDroneStatusTab(); break;
+                case 1: DrawDroneResearchTab(); break;
+                case 2: DrawDroneRelayTab(); break;
+            }
 
             GUILayout.FlexibleSpace();
 
@@ -514,6 +533,174 @@ namespace EnhancedLogistics
             GUILayout.EndVertical();
 
             GUI.DragWindow(new Rect(0, 0, 10000, 30));
+        }
+
+        private void DrawDroneStatusTab()
+        {
+            // Drone status with tiered stats
+            GUILayout.BeginVertical(GUI.skin.box);
+            var tierData = DroneResearch.GetCurrentTierData();
+            GUILayout.Label($"Tech Level: {DroneResearch.GetTierProgressString()}", new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold });
+            GUILayout.Space(5);
+            GUILayout.Label($"Active Drones: {DroneManager.activeDrones.Count}/{DroneManager.GetMaxDrones()}");
+            GUILayout.Label($"Pending Deliveries: {DroneManager.pendingDeliveries.Count}");
+            GUILayout.Label($"Capacity: {DroneManager.GetTieredCapacity()} items");
+            GUILayout.Label($"Speed: {DroneManager.GetTieredSpeed():F1} u/s");
+            GUILayout.Label($"Range: {DroneManager.GetTieredRange():F0}m");
+            GUILayout.EndVertical();
+
+            GUILayout.Space(5);
+
+            // Drone list
+            GUILayout.Label("Active Drones:");
+            droneScrollPos = GUILayout.BeginScrollView(droneScrollPos, GUILayout.Height(120));
+
+            foreach (var drone in DroneManager.activeDrones)
+            {
+                GUILayout.BeginHorizontal(GUI.skin.box);
+                GUILayout.Label($"#{drone.id}", GUILayout.Width(30));
+                GUI.color = drone.state == DroneManager.DroneState.Idle ? Color.green : Color.yellow;
+                GUILayout.Label(drone.state.ToString(), GUILayout.Width(90));
+                GUI.color = Color.white;
+                GUILayout.Label($"{drone.cargoCount}/{DroneManager.GetTieredCapacity()}", GUILayout.Width(50));
+                GUILayout.EndHorizontal();
+            }
+
+            if (DroneManager.activeDrones.Count == 0)
+            {
+                GUILayout.Label("No active drones.");
+            }
+
+            GUILayout.EndScrollView();
+
+            GUILayout.Space(5);
+
+            // Controls
+            GUILayout.BeginHorizontal();
+            if (DroneManager.activeDrones.Count < DroneManager.GetMaxDrones())
+            {
+                if (GUILayout.Button("Spawn Drone"))
+                {
+                    if (Player.instance != null)
+                    {
+                        DroneManager.SpawnDrone(Player.instance.transform.position + Vector3.up * 2f);
+                    }
+                }
+            }
+            else
+            {
+                GUI.enabled = false;
+                GUILayout.Button("Max Drones");
+                GUI.enabled = true;
+            }
+
+            if (GUILayout.Button("Clear All"))
+            {
+                DroneManager.ClearAllDrones();
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        private void DrawDroneResearchTab()
+        {
+            GUILayout.Label("Drone Technology Research", new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold });
+            GUILayout.Space(5);
+
+            foreach (DroneResearch.DroneTier tier in Enum.GetValues(typeof(DroneResearch.DroneTier)))
+            {
+                var data = DroneResearch.tierData[tier];
+                bool isUnlocked = (int)tier <= CurrentDroneTier.Value;
+                bool canUnlock = DroneResearch.CanUnlockTier(tier);
+
+                GUILayout.BeginVertical(GUI.skin.box);
+
+                // Tier header
+                GUILayout.BeginHorizontal();
+                GUI.color = isUnlocked ? Color.green : (canUnlock ? Color.yellow : Color.gray);
+                GUILayout.Label($"Tier {(int)tier}: {data.name}", new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold });
+                GUI.color = Color.white;
+
+                if (isUnlocked)
+                {
+                    GUILayout.Label("[UNLOCKED]", GUILayout.Width(80));
+                }
+                else if (canUnlock)
+                {
+                    if (GUILayout.Button("Unlock", GUILayout.Width(60)))
+                    {
+                        DroneResearch.TryUnlockTier(tier);
+                    }
+                }
+                else
+                {
+                    GUILayout.Label("[LOCKED]", GUILayout.Width(80));
+                }
+                GUILayout.EndHorizontal();
+
+                // Stats
+                GUILayout.Label(data.description, new GUIStyle(GUI.skin.label) { fontSize = 10 });
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"Speed: x{data.speedMultiplier:F2}", GUILayout.Width(80));
+                GUILayout.Label($"Capacity: x{data.capacityMultiplier:F2}", GUILayout.Width(90));
+                GUILayout.Label($"Range: x{data.rangeMultiplier:F2}", GUILayout.Width(80));
+                GUILayout.Label($"+{data.bonusDrones} drones", GUILayout.Width(70));
+                GUILayout.EndHorizontal();
+
+                GUILayout.EndVertical();
+            }
+        }
+
+        private void DrawDroneRelayTab()
+        {
+            GUILayout.Label("Drone Relay Network", new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold });
+            GUILayout.Space(5);
+
+            // Relay settings
+            GUILayout.BeginVertical(GUI.skin.box);
+            EnableDroneRelays.Value = GUILayout.Toggle(EnableDroneRelays.Value, " Enable Relay System");
+            ShowRelayNetwork.Value = GUILayout.Toggle(ShowRelayNetwork.Value, " Show Network Visualization");
+            GUILayout.Label($"Relay Base Range: {RelayBaseRange.Value:F0}m");
+            GUILayout.Label($"Tiered Range: {RelayBaseRange.Value * DroneResearch.GetRangeMultiplier():F0}m");
+            GUILayout.EndVertical();
+
+            GUILayout.Space(5);
+
+            // Network status by color
+            GUILayout.Label("Networks:");
+            droneScrollPos = GUILayout.BeginScrollView(droneScrollPos, GUILayout.Height(120));
+
+            foreach (DroneRelayNetwork.RelayColor color in Enum.GetValues(typeof(DroneRelayNetwork.RelayColor)))
+            {
+                if (color == DroneRelayNetwork.RelayColor.None) continue;
+
+                int relayCount = DroneRelayNetwork.GetNetworkRelayCount(color);
+                if (relayCount == 0) continue;
+
+                GUILayout.BeginHorizontal(GUI.skin.box);
+                GUI.color = DroneRelayNetwork.GetRelayColorValue(color);
+                GUILayout.Box("", GUILayout.Width(20), GUILayout.Height(20));
+                GUI.color = Color.white;
+                GUILayout.Label($"{color}: {relayCount} relays", GUILayout.Width(120));
+                GUILayout.Label($"Coverage: {DroneRelayNetwork.GetNetworkCoverage(color):F0}m", GUILayout.Width(100));
+                GUILayout.EndHorizontal();
+            }
+
+            if (DroneRelayNetwork.relays.Count == 0)
+            {
+                GUILayout.Label("No relay networks detected.");
+                GUILayout.Label("Paint storage chests with relay colors to create networks.");
+            }
+
+            GUILayout.EndScrollView();
+
+            GUILayout.Space(5);
+
+            // Instructions
+            GUILayout.BeginVertical(GUI.skin.box);
+            GUILayout.Label("Relay Colors (paint indices 10-14):", new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold });
+            GUILayout.Label("10: Cyan  | 11: Magenta | 12: Orange");
+            GUILayout.Label("13: Lime  | 14: Purple");
+            GUILayout.EndVertical();
         }
     }
 
@@ -817,6 +1004,556 @@ namespace EnhancedLogistics
             }
             activeDrones.Clear();
             pendingDeliveries.Clear();
+        }
+
+        /// <summary>
+        /// Get stats modified by current research tier
+        /// </summary>
+        public static float GetTieredSpeed()
+        {
+            return EnhancedLogisticsPlugin.DroneSpeed.Value * DroneResearch.GetSpeedMultiplier();
+        }
+
+        public static int GetTieredCapacity()
+        {
+            return (int)(EnhancedLogisticsPlugin.DroneCapacity.Value * DroneResearch.GetCapacityMultiplier());
+        }
+
+        public static float GetTieredRange()
+        {
+            return EnhancedLogisticsPlugin.DroneRange.Value * DroneResearch.GetRangeMultiplier();
+        }
+
+        public static int GetMaxDrones()
+        {
+            return EnhancedLogisticsPlugin.MaxDronesPerNetwork.Value + DroneResearch.GetBonusDrones();
+        }
+    }
+
+    /// <summary>
+    /// Drone Relay System - Extends network coverage using special relay chests
+    /// </summary>
+    public static class DroneRelayNetwork
+    {
+        // Relay colors (different from standard game chest colors)
+        public enum RelayColor
+        {
+            None = -1,
+            Cyan = 0,      // Network A
+            Magenta = 1,   // Network B
+            Orange = 2,    // Network C
+            Lime = 3,      // Network D
+            Purple = 4     // Network E
+        }
+
+        public class DroneRelay
+        {
+            public uint chestId;
+            public Vector3 position;
+            public RelayColor networkColor;
+            public float range;
+            public bool isHub; // Primary hub spawns drones
+            public List<uint> connectedRelays = new List<uint>();
+            public GameObject visualIndicator;
+        }
+
+        public static Dictionary<uint, DroneRelay> relays = new Dictionary<uint, DroneRelay>();
+        public static Dictionary<RelayColor, List<uint>> networksByColor = new Dictionary<RelayColor, List<uint>>();
+        public static Dictionary<RelayColor, List<DroneManager.DroneInstance>> networkDrones = new Dictionary<RelayColor, List<DroneManager.DroneInstance>>();
+
+        private static List<LineRenderer> connectionLines = new List<LineRenderer>();
+        private static float updateTimer = 0f;
+
+        public static void Initialize()
+        {
+            // Initialize network dictionaries
+            foreach (RelayColor color in Enum.GetValues(typeof(RelayColor)))
+            {
+                if (color != RelayColor.None)
+                {
+                    networksByColor[color] = new List<uint>();
+                    networkDrones[color] = new List<DroneManager.DroneInstance>();
+                }
+            }
+        }
+
+        public static void Update()
+        {
+            if (!EnhancedLogisticsPlugin.EnableDroneRelays.Value) return;
+
+            updateTimer -= Time.deltaTime;
+            if (updateTimer <= 0f)
+            {
+                updateTimer = 1f; // Update every second
+                ScanForRelays();
+                UpdateConnections();
+                if (EnhancedLogisticsPlugin.ShowRelayNetwork.Value)
+                {
+                    UpdateVisuals();
+                }
+            }
+        }
+
+        // Manual relay registration (since automatic paint detection isn't available)
+        // Users can register relays via console or GUI
+        private static Dictionary<uint, RelayColor> manualRelayAssignments = new Dictionary<uint, RelayColor>();
+
+        /// <summary>
+        /// Scan for manually registered relays
+        /// </summary>
+        private static void ScanForRelays()
+        {
+            if (MachineManager.instance == null) return;
+
+            try
+            {
+                // Process manually assigned relays
+                foreach (var assignment in manualRelayAssignments.ToList())
+                {
+                    uint chestId = assignment.Key;
+                    RelayColor color = assignment.Value;
+
+                    try
+                    {
+                        var chest = MachineManager.instance.Get<ChestInstance, ChestDefinition>((int)chestId, MachineTypeEnum.Chest);
+                        if (chest.commonInfo.instanceId == 0)
+                        {
+                            // Chest no longer exists
+                            manualRelayAssignments.Remove(chestId);
+                            if (relays.ContainsKey(chestId))
+                            {
+                                UnregisterRelay(chestId);
+                            }
+                            continue;
+                        }
+
+                        if (!relays.ContainsKey(chestId))
+                        {
+                            RegisterRelay(chestId, chest.gridInfo.Center, color);
+                        }
+                    }
+                    catch
+                    {
+                        manualRelayAssignments.Remove(chestId);
+                        if (relays.ContainsKey(chestId))
+                        {
+                            UnregisterRelay(chestId);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                EnhancedLogisticsPlugin.Log.LogWarning($"Relay scan error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Manually assign a chest as a relay
+        /// </summary>
+        public static bool AssignChestAsRelay(uint chestId, RelayColor color)
+        {
+            try
+            {
+                var chest = MachineManager.instance.Get<ChestInstance, ChestDefinition>((int)chestId, MachineTypeEnum.Chest);
+                if (chest.commonInfo.instanceId == 0) return false;
+
+                manualRelayAssignments[chestId] = color;
+                RegisterRelay(chestId, chest.gridInfo.Center, color);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Remove relay assignment from a chest
+        /// </summary>
+        public static void RemoveRelayAssignment(uint chestId)
+        {
+            manualRelayAssignments.Remove(chestId);
+            UnregisterRelay(chestId);
+        }
+
+        public static void RegisterRelay(uint chestId, Vector3 position, RelayColor color, bool isHub = false)
+        {
+            var relay = new DroneRelay
+            {
+                chestId = chestId,
+                position = position,
+                networkColor = color,
+                range = EnhancedLogisticsPlugin.RelayBaseRange.Value * DroneResearch.GetRangeMultiplier(),
+                isHub = isHub
+            };
+
+            relays[chestId] = relay;
+
+            if (!networksByColor.ContainsKey(color))
+            {
+                networksByColor[color] = new List<uint>();
+            }
+            networksByColor[color].Add(chestId);
+
+            // Create visual indicator
+            if (EnhancedLogisticsPlugin.ShowRelayNetwork.Value)
+            {
+                CreateRelayVisual(relay);
+            }
+
+            EnhancedLogisticsPlugin.Log.LogInfo($"Registered relay #{chestId} on network {color}");
+        }
+
+        public static void UnregisterRelay(uint chestId)
+        {
+            if (relays.TryGetValue(chestId, out var relay))
+            {
+                if (relay.visualIndicator != null)
+                {
+                    UnityEngine.Object.Destroy(relay.visualIndicator);
+                }
+
+                if (networksByColor.ContainsKey(relay.networkColor))
+                {
+                    networksByColor[relay.networkColor].Remove(chestId);
+                }
+
+                relays.Remove(chestId);
+            }
+        }
+
+        private static void CreateRelayVisual(DroneRelay relay)
+        {
+            // Create a glowing sphere indicator above the relay
+            relay.visualIndicator = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            relay.visualIndicator.name = $"RelayIndicator_{relay.chestId}";
+            relay.visualIndicator.transform.position = relay.position + Vector3.up * 3f;
+            relay.visualIndicator.transform.localScale = Vector3.one * 0.3f;
+
+            var collider = relay.visualIndicator.GetComponent<Collider>();
+            if (collider != null) UnityEngine.Object.Destroy(collider);
+
+            var renderer = relay.visualIndicator.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                Color relayColor = GetRelayColorValue(relay.networkColor);
+                renderer.material.color = relayColor;
+                renderer.material.EnableKeyword("_EMISSION");
+                renderer.material.SetColor("_EmissionColor", relayColor * 3f);
+            }
+        }
+
+        public static Color GetRelayColorValue(RelayColor color)
+        {
+            switch (color)
+            {
+                case RelayColor.Cyan: return Color.cyan;
+                case RelayColor.Magenta: return Color.magenta;
+                case RelayColor.Orange: return new Color(1f, 0.5f, 0f);
+                case RelayColor.Lime: return new Color(0.5f, 1f, 0.2f);
+                case RelayColor.Purple: return new Color(0.6f, 0.2f, 1f);
+                default: return Color.white;
+            }
+        }
+
+        private static void UpdateConnections()
+        {
+            // Build connection graph between relays in same network
+            foreach (var relay in relays.Values)
+            {
+                relay.connectedRelays.Clear();
+
+                foreach (var otherRelay in relays.Values)
+                {
+                    if (otherRelay.chestId == relay.chestId) continue;
+                    if (otherRelay.networkColor != relay.networkColor) continue;
+
+                    float distance = Vector3.Distance(relay.position, otherRelay.position);
+                    if (distance <= relay.range + otherRelay.range)
+                    {
+                        relay.connectedRelays.Add(otherRelay.chestId);
+                    }
+                }
+            }
+        }
+
+        private static void UpdateVisuals()
+        {
+            // Clear old lines
+            foreach (var line in connectionLines)
+            {
+                if (line != null) UnityEngine.Object.Destroy(line.gameObject);
+            }
+            connectionLines.Clear();
+
+            // Draw connections between relays
+            HashSet<string> drawnConnections = new HashSet<string>();
+
+            foreach (var relay in relays.Values)
+            {
+                foreach (var connectedId in relay.connectedRelays)
+                {
+                    string connectionKey = relay.chestId < connectedId
+                        ? $"{relay.chestId}_{connectedId}"
+                        : $"{connectedId}_{relay.chestId}";
+
+                    if (drawnConnections.Contains(connectionKey)) continue;
+                    drawnConnections.Add(connectionKey);
+
+                    if (relays.TryGetValue(connectedId, out var connected))
+                    {
+                        DrawConnection(relay.position + Vector3.up * 3f,
+                                      connected.position + Vector3.up * 3f,
+                                      GetRelayColorValue(relay.networkColor));
+                    }
+                }
+            }
+        }
+
+        private static void DrawConnection(Vector3 start, Vector3 end, Color color)
+        {
+            var lineObj = new GameObject("RelayConnection");
+            var lineRenderer = lineObj.AddComponent<LineRenderer>();
+
+            lineRenderer.positionCount = 2;
+            lineRenderer.SetPosition(0, start);
+            lineRenderer.SetPosition(1, end);
+            lineRenderer.startWidth = 0.1f;
+            lineRenderer.endWidth = 0.1f;
+            lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+            lineRenderer.startColor = color;
+            lineRenderer.endColor = color;
+
+            connectionLines.Add(lineRenderer);
+        }
+
+        /// <summary>
+        /// Check if two positions are connected via relay network
+        /// </summary>
+        public static bool ArePositionsConnected(Vector3 posA, Vector3 posB, out RelayColor network)
+        {
+            network = RelayColor.None;
+
+            // Find relays near each position
+            DroneRelay relayA = null, relayB = null;
+
+            foreach (var relay in relays.Values)
+            {
+                float distA = Vector3.Distance(relay.position, posA);
+                float distB = Vector3.Distance(relay.position, posB);
+
+                if (distA <= relay.range && (relayA == null || distA < Vector3.Distance(relayA.position, posA)))
+                {
+                    relayA = relay;
+                }
+                if (distB <= relay.range && (relayB == null || distB < Vector3.Distance(relayB.position, posB)))
+                {
+                    relayB = relay;
+                }
+            }
+
+            if (relayA == null || relayB == null) return false;
+            if (relayA.networkColor != relayB.networkColor) return false;
+
+            // Check if relays are connected (directly or via multi-hop)
+            network = relayA.networkColor;
+            return AreRelaysConnected(relayA.chestId, relayB.chestId, new HashSet<uint>());
+        }
+
+        private static bool AreRelaysConnected(uint fromId, uint toId, HashSet<uint> visited)
+        {
+            if (fromId == toId) return true;
+            if (visited.Contains(fromId)) return false;
+            visited.Add(fromId);
+
+            if (!relays.TryGetValue(fromId, out var relay)) return false;
+
+            foreach (var connectedId in relay.connectedRelays)
+            {
+                if (AreRelaysConnected(connectedId, toId, visited))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Get total network coverage range (sum of all connected relay ranges)
+        /// </summary>
+        public static float GetNetworkCoverage(RelayColor network)
+        {
+            if (!networksByColor.ContainsKey(network)) return 0f;
+
+            float totalCoverage = 0f;
+            foreach (var relayId in networksByColor[network])
+            {
+                if (relays.TryGetValue(relayId, out var relay))
+                {
+                    totalCoverage += relay.range;
+                }
+            }
+            return totalCoverage;
+        }
+
+        public static int GetNetworkRelayCount(RelayColor network)
+        {
+            if (!networksByColor.ContainsKey(network)) return 0;
+            return networksByColor[network].Count;
+        }
+
+        public static void ClearAll()
+        {
+            foreach (var relay in relays.Values)
+            {
+                if (relay.visualIndicator != null)
+                {
+                    UnityEngine.Object.Destroy(relay.visualIndicator);
+                }
+            }
+            relays.Clear();
+
+            foreach (var line in connectionLines)
+            {
+                if (line != null) UnityEngine.Object.Destroy(line.gameObject);
+            }
+            connectionLines.Clear();
+
+            foreach (var network in networksByColor.Values)
+            {
+                network.Clear();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Drone Research System - Upgrade drone capabilities through tech tiers
+    /// </summary>
+    public static class DroneResearch
+    {
+        public enum DroneTier
+        {
+            Basic = 1,      // Starting tier
+            Improved = 2,   // Basic upgrades
+            Advanced = 3,   // Mid-game
+            Superior = 4,   // Late-game
+            Ultimate = 5    // End-game
+        }
+
+        public class TierData
+        {
+            public string name;
+            public string description;
+            public float speedMultiplier;
+            public float capacityMultiplier;
+            public float rangeMultiplier;
+            public int bonusDrones;
+            public int researchCost; // In research cores
+        }
+
+        public static Dictionary<DroneTier, TierData> tierData = new Dictionary<DroneTier, TierData>
+        {
+            { DroneTier.Basic, new TierData {
+                name = "Basic Drones",
+                description = "Standard drone technology. Slow but reliable.",
+                speedMultiplier = 1.0f,
+                capacityMultiplier = 1.0f,
+                rangeMultiplier = 1.0f,
+                bonusDrones = 0,
+                researchCost = 0
+            }},
+            { DroneTier.Improved, new TierData {
+                name = "Improved Drones",
+                description = "Enhanced motors and batteries. +25% speed/range.",
+                speedMultiplier = 1.25f,
+                capacityMultiplier = 1.25f,
+                rangeMultiplier = 1.25f,
+                bonusDrones = 2,
+                researchCost = 50
+            }},
+            { DroneTier.Advanced, new TierData {
+                name = "Advanced Drones",
+                description = "Optimized flight systems. +50% all stats.",
+                speedMultiplier = 1.5f,
+                capacityMultiplier = 1.5f,
+                rangeMultiplier = 1.5f,
+                bonusDrones = 4,
+                researchCost = 150
+            }},
+            { DroneTier.Superior, new TierData {
+                name = "Superior Drones",
+                description = "High-efficiency cores. +100% all stats.",
+                speedMultiplier = 2.0f,
+                capacityMultiplier = 2.0f,
+                rangeMultiplier = 2.0f,
+                bonusDrones = 6,
+                researchCost = 400
+            }},
+            { DroneTier.Ultimate, new TierData {
+                name = "Ultimate Drones",
+                description = "Cutting-edge technology. +150% all stats.",
+                speedMultiplier = 2.5f,
+                capacityMultiplier = 2.5f,
+                rangeMultiplier = 2.5f,
+                bonusDrones = 10,
+                researchCost = 1000
+            }}
+        };
+
+        public static DroneTier CurrentTier => (DroneTier)EnhancedLogisticsPlugin.CurrentDroneTier.Value;
+
+        public static TierData GetCurrentTierData()
+        {
+            return tierData[CurrentTier];
+        }
+
+        public static float GetSpeedMultiplier()
+        {
+            return tierData[CurrentTier].speedMultiplier;
+        }
+
+        public static float GetCapacityMultiplier()
+        {
+            return tierData[CurrentTier].capacityMultiplier;
+        }
+
+        public static float GetRangeMultiplier()
+        {
+            return tierData[CurrentTier].rangeMultiplier;
+        }
+
+        public static int GetBonusDrones()
+        {
+            return tierData[CurrentTier].bonusDrones;
+        }
+
+        public static bool CanUnlockTier(DroneTier tier)
+        {
+            if ((int)tier <= EnhancedLogisticsPlugin.CurrentDroneTier.Value) return false;
+            if ((int)tier > EnhancedLogisticsPlugin.CurrentDroneTier.Value + 1) return false;
+
+            // Check if player has enough research cores
+            // This would integrate with the game's resource system
+            return true; // For now, always allow (gated by UI)
+        }
+
+        public static bool TryUnlockTier(DroneTier tier)
+        {
+            if (!CanUnlockTier(tier)) return false;
+
+            // Deduct research cost (integrate with game's inventory system)
+            // For now, just unlock
+            EnhancedLogisticsPlugin.CurrentDroneTier.Value = (int)tier;
+            EnhancedLogisticsPlugin.Log.LogInfo($"Unlocked drone tier: {tier}");
+            return true;
+        }
+
+        public static string GetTierProgressString()
+        {
+            var current = GetCurrentTierData();
+            return $"Tier {(int)CurrentTier}/5: {current.name}";
         }
     }
 

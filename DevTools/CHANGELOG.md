@@ -2,6 +2,20 @@
 
 All notable changes to DevTools will be documented in this file.
 
+## [2.1.0] - 2026-01-04
+
+### Added
+- **Protection Tab** - CasperProtections features integrated
+  - Disable Protection Zones: Dig/build anywhere, ignore protected areas
+  - Disable Safe Sprint: Allow sprinting inside buildings
+  - Disable Prebuild Protections: Allow erasing prebuilt/developer objects
+  - Sprint Hold Mode: Only sprint while holding the sprint key
+
+### Technical
+- Harmony patches for GridManager, VoxelManager, SafeSpeedTriggerZoneData, PlayerFirstPersonController
+- Full integration with existing DevTools GUI
+- All settings persist via BepInEx config
+
 ## [2.0.0] - 2025-01-04
 
 ### Added

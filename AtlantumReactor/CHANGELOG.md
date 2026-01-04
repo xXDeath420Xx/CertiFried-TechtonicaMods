@@ -1,6 +1,13 @@
 # Changelog
 
-All notable changes to AtlantumReactor will be documented in this file.
+All notable changes to AtlantumReactor_Updated will be documented in this file.
+
+## [4.0.1] - 2026-01-04
+
+### Changed
+- Updated custom icon
+- Republished as AtlantumReactor_Updated
+- Maintained attribution to Equinox (original author)
 
 ## [4.0.0] - 2025-01-04
 

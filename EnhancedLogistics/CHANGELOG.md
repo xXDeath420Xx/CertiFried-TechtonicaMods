@@ -2,6 +2,42 @@
 
 All notable changes to EnhancedLogistics will be documented in this file.
 
+## [2.0.0] - 2026-01-04
+
+### Added
+- **Drone Relay Network System**
+  - Create relay stations by assigning storage chests to color-coded networks
+  - 5 network colors: Cyan, Magenta, Orange, Lime, Purple
+  - Relays within range automatically connect to extend coverage
+  - Visual connection lines between linked relays
+  - Multi-hop routing for extended delivery range
+
+- **Drone Research Tier System (5 Tiers)**
+  - Tier 1 (Basic): Base stats (x1.0)
+  - Tier 2 (Improved): +25% speed/capacity/range, +2 drones
+  - Tier 3 (Advanced): +50% all stats, +4 drones
+  - Tier 4 (Superior): +100% all stats, +6 drones
+  - Tier 5 (Ultimate): +150% all stats, +10 drones
+  - Unlock tiers through the Research tab in Drone Menu
+
+- **New Drone Menu Tabs (Press J)**
+  - Status: View active drones, spawn/clear, monitor deliveries
+  - Research: Unlock drone technology tiers
+  - Relays: Configure relay networks, view coverage statistics
+
+### Changed
+- Drone stats now scale with research tier
+- Drone window expanded with tabbed interface
+- Maximum drones per network affected by research tier
+
+## [1.0.1] - 2025-12-XX
+
+### Added
+- Custom mod icon
+
+### Fixed
+- Minor bug fixes
+
 ## [1.0.0] - 2025-01-04
 
 ### Added - Phase 3: Search UI System

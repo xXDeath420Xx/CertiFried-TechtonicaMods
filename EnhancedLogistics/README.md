@@ -1,58 +1,59 @@
 # EnhancedLogistics
 
-A comprehensive logistics enhancement mod for Techtonica featuring Search UI, Storage Networks, Better Logistics, and a Drone Delivery System!
+A comprehensive logistics enhancement mod for Techtonica featuring Drone Delivery with Relay Networks, Research Tiers, Search UI, and Storage Networks!
 
 ## Features
 
-### Phase 3: Search UI System (Ctrl+F)
+### Drone Delivery System (Press J)
 
-A powerful search function that works across all game UIs:
+Automated aerial item transport using floating drones with upgradeable technology!
+
+**Core Features:**
+- **Visual Drones** - Glowing orb drones with smooth movement
+- **Point-to-Point Delivery** - Route items between storage locations
+- **Configurable Settings** - Capacity, speed, and range options
+
+**NEW: Drone Relay Networks**
+- **Relay Stations** - Paint storage chests with special colors to create relay points
+- **Extended Coverage** - Chain relays together to extend drone network range
+- **Multiple Networks** - 5 color-coded networks (Cyan, Magenta, Orange, Lime, Purple)
+- **Visual Connections** - See network links between relays
+- **Multi-Hop Routing** - Drones navigate through connected relay chains
+
+**NEW: Drone Research Tiers (1-5)**
+
+| Tier | Name | Speed | Capacity | Range | Bonus Drones |
+|------|------|-------|----------|-------|--------------|
+| 1 | Basic | x1.0 | x1.0 | x1.0 | +0 |
+| 2 | Improved | x1.25 | x1.25 | x1.25 | +2 |
+| 3 | Advanced | x1.5 | x1.5 | x1.5 | +4 |
+| 4 | Superior | x2.0 | x2.0 | x2.0 | +6 |
+| 5 | Ultimate | x2.5 | x2.5 | x2.5 | +10 |
+
+### Search UI System (Ctrl+F)
+
+A powerful search function that works across all game data:
 
 - **Search Items** - Find any item by name or description
-- **Search Recipes** - Locate crafting recipes and their ingredients
+- **Search Recipes** - Locate crafting recipes
 - **Search Tech Tree** - Find technologies and unlocks
 - **Search Machines** - Locate buildable machines
 
-**Usage:**
-- Press `Ctrl+F` to open the search window
-- Type to search in real-time
-- Use category tabs to filter results
-- Results are sorted by relevance
-
-### Phase 4: Storage Network
+### Storage Network
 
 Extend the wormhole chest concept with automatic item routing:
 
 - **Network Channels** - Connect multiple chests to the same network
 - **Auto-Routing** - Items automatically flow to chests with space
 - **Visual Connections** - See network connections between storage
-- **Distance-Based** - Networks work within configurable range
 
-### Phase 4: Better Logistics
+### Better Logistics
 
-Enhanced inserter and logistics capabilities:
+Enhanced inserter capabilities:
 
-- **Extended Inserter Range** - 1.5x default reach (configurable up to 3x)
-- **Faster Inserters** - 1.5x operation speed (configurable up to 3x)
-- **Smart Filtering** - Intelligent item filtering for inserters
-- **Configurable Stack Sizes** - Set default filter stack sizes
-
-### Phase 5: Drone Delivery System
-
-Automated aerial item transport using floating drones:
-
-- **Drone Hubs** - Deploy and manage delivery drones
-- **Point-to-Point Delivery** - Route items between storage locations
-- **Visual Drones** - Glowing orb drones with smooth movement
-- **Configurable Capacity** - 8-128 items per drone
-- **Adjustable Speed** - 5-50 units/second
-- **Range Limits** - 50-500m maximum delivery distance
-
-**Drone Controls:**
-- Press `J` to open Drone Management menu
-- Create test drones for experimentation
-- Monitor active drones and pending deliveries
-- View drone cargo and status
+- **Extended Inserter Range** - 1.5x default reach (up to 3x)
+- **Faster Inserters** - 1.5x operation speed (up to 3x)
+- **Smart Filtering** - Intelligent item filtering
 
 ## Hotkeys
 
@@ -62,50 +63,68 @@ Automated aerial item transport using floating drones:
 | J | Toggle Drone Menu |
 | Escape | Close Search UI |
 
+## Drone Menu Tabs
+
+1. **Status** - View active drones, spawn/clear, monitor deliveries
+2. **Research** - Unlock drone technology tiers for better stats
+3. **Relays** - Configure relay networks, view coverage
+
+## Creating Drone Relays
+
+1. Place a Storage Chest
+2. Paint it with a relay color (paint indices 10-14):
+   - 10: Cyan (Network A)
+   - 11: Magenta (Network B)
+   - 12: Orange (Network C)
+   - 13: Lime (Network D)
+   - 14: Purple (Network E)
+3. Chests on the same color network will link automatically
+4. Relays within range of each other extend the network
+5. Drones can deliver anywhere within a connected relay chain
+
 ## Configuration
-
-All features can be configured via BepInEx config:
-
-### Search UI
-- `Toggle Key` - Key to toggle search (default: F)
-- `Enable Search UI` - Enable/disable search feature
-- `Search Inventory/Crafting/TechTree/BuildMenu` - Toggle search categories
-
-### Storage Network
-- `Enable Storage Network` - Enable network features
-- `Max Network Distance` - Maximum connection distance (10-500m)
-- `Auto Route Items` - Enable automatic item routing
-- `Show Network Visualization` - Display network connections
-
-### Better Logistics
-- `Enable Better Logistics` - Enable logistics enhancements
-- `Inserter Range Multiplier` - Reach multiplier (1-3x)
-- `Inserter Speed Multiplier` - Speed multiplier (1-3x)
-- `Smart Filtering` - Enable intelligent filtering
-- `Default Filter Stack Size` - Default stack size (1-100)
 
 ### Drone System
 - `Enable Drone System` - Enable drone delivery
-- `Drone Capacity` - Items per drone (8-128)
-- `Drone Speed` - Movement speed (5-50 u/s)
-- `Drone Range` - Max delivery range (50-500m)
-- `Drone Menu Key` - Key to open drone menu (default: J)
+- `Drone Capacity` - Base items per drone (8-128)
+- `Drone Speed` - Base movement speed (5-50 u/s)
+- `Drone Range` - Base delivery range (50-500m)
+
+### Drone Relays
+- `Enable Drone Relays` - Enable relay system
+- `Relay Base Range` - Base range per relay (50-500m)
+- `Show Relay Network` - Display visual connections
+- `Max Drones Per Network` - Base drone limit (1-20)
+
+### Drone Research
+- `Current Drone Tier` - Active research tier (1-5)
+- `Auto Unlock Tiers` - Dev mode: auto-unlock all
+
+### Search/Storage/Logistics
+- See config file for full options
 
 ## Installation
 
 1. Install BepInEx 5.4.2100
-2. Place `EnhancedLogistics.dll` in `BepInEx/plugins/EnhancedLogistics/`
-3. Launch the game
+2. Place `EnhancedLogistics.dll` in `BepInEx/plugins/`
+3. Launch the game and press J to access drone menu
 
 ## Changelog
 
-See CHANGELOG.md for version history.
+### v2.0.0
+- Added Drone Relay Network system with color-coded networks
+- Added 5-tier Drone Research system with stat multipliers
+- New tabbed Drone Menu with Status/Research/Relays tabs
+- Visual relay connections and network coverage display
+- Tiered stats affect speed, capacity, range, and max drones
+
+### v1.0.1
+- Added custom icon
+- Minor fixes
+
+### v1.0.0
+- Initial release with Search UI, Storage Network, Better Logistics, Drone System
 
 ## Credits
 
 - **CertiFried** - Development
-- **Techtonica Community** - Testing and feedback
-
-## License
-
-GNU General Public License v3.0 (GPL-3.0)

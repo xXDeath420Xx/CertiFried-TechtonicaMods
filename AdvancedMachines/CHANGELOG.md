@@ -2,6 +2,11 @@
 
 All notable changes to AdvancedMachines will be documented in this file.
 
+## [2.0.1] - 2026-01-04
+
+### Changed
+- Updated custom icon
+
 ## [2.0.0] - 2025-01-04
 
 ### Added

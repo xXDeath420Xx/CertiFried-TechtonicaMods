@@ -7,8 +7,8 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "EnhancedLogistics"
-versionNumber = "1.0.1"
-description = "Enhanced logistics system for Techtonica with Search UI, Storage Network, and Drone Delivery. Search inventories globally, link chests together, automate item transfers."
+versionNumber = "2.0.0"
+description = "Enhanced logistics with Drone Delivery, Relay Networks, and Research Tiers. Extend drone coverage with color-coded relays, unlock upgrades through 5 research tiers. Includes Search UI and Storage Network."
 websiteUrl = "https://github.com/xXDeath420Xx/CertiFried-EMU613-Mods"
 containsNsfwContent = false
 
