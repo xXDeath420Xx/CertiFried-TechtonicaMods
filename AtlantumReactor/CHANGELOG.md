@@ -2,10 +2,15 @@
 
 All notable changes to AtlantumReactor_Updated will be documented in this file.
 
+## [4.0.3] - 2026-01-04
+
+### Fixed
+- Changelog now properly included in Thunderstore package
+
 ## [4.0.2] - 2026-01-04
 
 ### Added
-- Changelog now included in Thunderstore package
+- Changelog metadata field added
 
 ## [4.0.1] - 2026-01-04
 

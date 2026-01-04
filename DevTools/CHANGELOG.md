@@ -2,6 +2,11 @@
 
 All notable changes to DevTools will be documented in this file.
 
+## [2.1.3] - 2026-01-04
+
+### Fixed
+- Changelog now properly included in Thunderstore package
+
 ## [2.1.2] - 2026-01-04
 
 ### Fixed
