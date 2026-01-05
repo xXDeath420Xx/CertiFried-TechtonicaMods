@@ -32,7 +32,7 @@ namespace WormholeChests
     {
         private const string MyGUID = "com.equinox.WormholeChests";
         private const string PluginName = "WormholeChests";
-        private const string VersionString = "3.0.4";
+        private const string VersionString = "3.0.5";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -629,7 +629,10 @@ namespace WormholeChests
             }
             bool channelExists = WormholeManager.DoesChannelExist(channel);
 
-            if (channelExists && WormholeManager.chestChannelMap.ContainsKey(aimedChest.commonInfo.instanceId))
+            // Only show "Linked!" if this chest is linked to THIS specific channel
+            if (channelExists &&
+                WormholeManager.chestChannelMap.TryGetValue(aimedChest.commonInfo.instanceId, out string linkedChannel) &&
+                linkedChannel == channel)
             {
                 showLinkedLabel = true;
             }

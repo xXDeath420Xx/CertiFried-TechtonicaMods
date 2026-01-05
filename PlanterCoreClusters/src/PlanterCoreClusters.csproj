@@ -50,5 +50,7 @@
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <MakeDir Directories="$(PluginDir)\$(AssemblyName)" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginDir)\$(AssemblyName)" />
+    <MakeDir Directories="..\build" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="..\build" />
   </Target>
 </Project>
