@@ -7,9 +7,9 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "WormholeChests_Updated"
-versionNumber = "3.0.5"
-description = "Chests on the same channel share their inventory, enabling item teleportation. Updated for EMU 6.1.3. Original by Equinox."
-websiteUrl = "https://github.com/xXDeath420Xx/CertiFried-EMU613-Mods"
+versionNumber = "3.0.6"
+description = "Chests on the same channel share inventory. Reduced logging for cleaner output. Updated for EMU 6.1.3."
+websiteUrl = "https://github.com/CubeSuite/TTMod-WormholeChests"
 containsNsfwContent = false
 
 [package.dependencies]
@@ -18,13 +18,12 @@ Equinox-EquinoxsModUtils = "6.1.3"
 Equinox-EMUAdditions = "2.0.0"
 
 [build]
-icon = "./build/icon.png"
+icon = "./icon.png"
 readme = "./README.md"
-changelog = "./CHANGELOG.md"
 outdir = "./build"
 
 [[build.copy]]
-source = "./build/WormholeChests.dll"
+source = "./bin/Release/net472/WormholeChests.dll"
 target = "/"
 
 [[build.copy]]

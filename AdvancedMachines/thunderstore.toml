@@ -7,7 +7,7 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "AdvancedMachines"
-versionNumber = "2.0.4"
+versionNumber = "2.0.6"
 description = "Adds Tier 4 and Tier 5 versions of Smelters, Assemblers, Drills, Threshers, and Planters with increased speeds. Also enables Hidden Machine Variants."
 websiteUrl = "https://github.com/xXDeath420Xx/CertiFried-EMU613-Mods"
 containsNsfwContent = false
@@ -18,13 +18,12 @@ Equinox-EquinoxsModUtils = "6.1.3"
 Equinox-EMUAdditions = "2.0.0"
 
 [build]
-icon = "./build/icon.png"
+icon = "./icon.png"
 readme = "./README.md"
-changelog = "./CHANGELOG.md"
 outdir = "./build"
 
 [[build.copy]]
-source = "./build/AdvancedMachines.dll"
+source = "./bin/Debug/net472/AdvancedMachines.dll"
 target = "/"
 
 [[build.copy]]

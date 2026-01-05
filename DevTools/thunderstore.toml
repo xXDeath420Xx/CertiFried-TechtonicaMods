@@ -7,8 +7,8 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "DevTools"
-versionNumber = "2.1.4"
-description = "In-game developer tools with GUI for Techtonica. Toggle game modes, player stats, machine speeds, protection zones, safe sprint, and more. Now includes CasperProtections features! Press F8 to open."
+versionNumber = "2.1.7"
+description = "In-game developer tools with GUI for Techtonica. Toggle game modes, spawn items, modify player stats, and debug features. Press F8 to open."
 websiteUrl = "https://github.com/xXDeath420Xx/CertiFried-EMU613-Mods"
 containsNsfwContent = false
 
@@ -16,13 +16,12 @@ containsNsfwContent = false
 BepInEx-BepInExPack = "5.4.2100"
 
 [build]
-icon = "./build/icon.png"
+icon = "./icon.png"
 readme = "./README.md"
-changelog = "./CHANGELOG.md"
 outdir = "./build"
 
 [[build.copy]]
-source = "./build/DevTools.dll"
+source = "./bin/Debug/net472/DevTools.dll"
 target = "/"
 
 [[build.copy]]

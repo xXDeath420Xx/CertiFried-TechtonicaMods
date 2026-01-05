@@ -10,7 +10,7 @@ namespace BeltImmunity
     {
         private const string MyGUID = "com.certifired.BeltImmunity";
         private const string PluginName = "BeltImmunity";
-        private const string VersionString = "1.0.0";
+        private const string VersionString = "1.0.2";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;

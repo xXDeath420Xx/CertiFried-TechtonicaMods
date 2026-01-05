@@ -2,12 +2,6 @@
 
 All notable changes to WormholeChests will be documented in this file.
 
-## [3.0.5] - 2026-01-04
-
-### Fixed
-- "Linked!" label now only appears when the chest is actually linked to the typed channel
-  - Previously showed incorrectly when typing any existing channel name
-
 ## [3.0.4] - 2026-01-03
 
 ### Fixed

@@ -7,7 +7,7 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "OmniseekerPlus"
-versionNumber = "1.0.4"
+versionNumber = "1.0.5"
 description = "Enhanced scanner with extended range (up to 2000m), multiple scan modes (Ores, Hard Drives, Loot, Memory Trees), and in-game GUI. Press O to cycle modes, P for quick scan."
 websiteUrl = "https://github.com/xXDeath420Xx/CertiFried-EMU613-Mods"
 containsNsfwContent = false
@@ -16,13 +16,12 @@ containsNsfwContent = false
 BepInEx-BepInExPack = "5.4.2100"
 
 [build]
-icon = "./build/icon.png"
+icon = "./icon.png"
 readme = "./README.md"
-changelog = "./CHANGELOG.md"
 outdir = "./build"
 
 [[build.copy]]
-source = "./build/OmniseekerPlus.dll"
+source = "./bin/Debug/net472/OmniseekerPlus.dll"
 target = "/"
 
 [[build.copy]]

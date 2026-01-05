@@ -1,29 +1,6 @@
 # Changelog
 
-All notable changes to AtlantumReactor_Updated will be documented in this file.
-
-## [4.0.4] - 2026-01-04
-
-### Fixed
-- Removed broken `MachineManager.RemoveMachine` Harmony patch (method doesn't exist in game)
-- Reactor tint cleanup now happens naturally when visual is destroyed
-
-## [4.0.3] - 2026-01-04
-
-### Fixed
-- Changelog now properly included in Thunderstore package
-
-## [4.0.2] - 2026-01-04
-
-### Added
-- Changelog metadata field added
-
-## [4.0.1] - 2026-01-04
-
-### Changed
-- Updated custom icon
-- Republished as AtlantumReactor_Updated
-- Maintained attribution to Equinox (original author)
+All notable changes to AtlantumReactor will be documented in this file.
 
 ## [4.0.0] - 2025-01-04
 

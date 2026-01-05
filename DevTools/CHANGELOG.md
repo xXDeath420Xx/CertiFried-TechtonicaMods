@@ -2,47 +2,6 @@
 
 All notable changes to DevTools will be documented in this file.
 
-## [2.1.4] - 2026-01-04
-
-### Fixed
-- Removed broken `GameState.OnGameModeSettingsChanged` Harmony patch (method doesn't exist in game)
-- Cat Sounds setting now applied via Update loop instead
-
-## [2.1.3] - 2026-01-04
-
-### Fixed
-- Changelog now properly included in Thunderstore package
-
-## [2.1.2] - 2026-01-04
-
-### Fixed
-- F8 hotkey now has fallback detection (also try Shift+F7 as alternative)
-- Added error handling to prevent Harmony patch failures from breaking the mod
-- Improved logging for debugging infinite crafting and hotkey issues
-
-### Changed
-- Better error handling throughout Update loop
-- Added detailed logging when cheats are applied
-
-## [2.1.1] - 2026-01-04
-
-### Added
-- Changelog now included in Thunderstore package
-
-## [2.1.0] - 2026-01-04
-
-### Added
-- **Protection Tab** - CasperProtections features integrated
-  - Disable Protection Zones: Dig/build anywhere, ignore protected areas
-  - Disable Safe Sprint: Allow sprinting inside buildings
-  - Disable Prebuild Protections: Allow erasing prebuilt/developer objects
-  - Sprint Hold Mode: Only sprint while holding the sprint key
-
-### Technical
-- Harmony patches for GridManager, VoxelManager, SafeSpeedTriggerZoneData, PlayerFirstPersonController
-- Full integration with existing DevTools GUI
-- All settings persist via BepInEx config
-
 ## [2.0.0] - 2025-01-04
 
 ### Added
