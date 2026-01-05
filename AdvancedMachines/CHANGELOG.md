@@ -2,6 +2,11 @@
 
 All notable changes to AdvancedMachines will be documented in this file.
 
+## [2.0.4] - 2026-01-04
+
+### Fixed
+- Version string now matches Thunderstore package version
+
 ## [2.0.3] - 2026-01-04
 
 ### Fixed

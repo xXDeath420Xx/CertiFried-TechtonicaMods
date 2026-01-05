@@ -2,6 +2,12 @@
 
 All notable changes to AtlantumReactor_Updated will be documented in this file.
 
+## [4.0.4] - 2026-01-04
+
+### Fixed
+- Removed broken `MachineManager.RemoveMachine` Harmony patch (method doesn't exist in game)
+- Reactor tint cleanup now happens naturally when visual is destroyed
+
 ## [4.0.3] - 2026-01-04
 
 ### Fixed

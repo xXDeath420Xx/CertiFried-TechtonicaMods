@@ -14,7 +14,7 @@ namespace DevTools
     {
         private const string MyGUID = "com.certifired.DevTools";
         private const string PluginName = "DevTools";
-        private const string VersionString = "2.1.2";
+        private const string VersionString = "2.1.4";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -949,28 +949,8 @@ namespace DevTools
         }
 
         // Note: Placeholder Voice patch disabled - DialogueManager may not be available
-        // The feature is still configurable but requires manual patch verification
-
-        /// <summary>
-        /// Ensure Cat Sounds setting persists in game mode
-        /// </summary>
-        [HarmonyPatch(typeof(GameState), "OnGameModeSettingsChanged")]
-        [HarmonyPostfix]
-        private static void RefreshCatSoundsSetting()
-        {
-            try
-            {
-                ref GameInstanceSettings settings = ref GameState.instance.gameModeSettings;
-                if (settings.Values == null) return;
-
-                int index = (int)EGameModeSettingType.General_CatSounds;
-                if (index >= 0 && index < settings.Values.Length)
-                {
-                    settings.Values[index].BoolValue = DevToolsPlugin.CatSounds.Value;
-                }
-            }
-            catch { }
-        }
+        // Note: GameState.OnGameModeSettingsChanged patch removed - method doesn't exist in game
+        // Cat Sounds setting is applied via ApplyGameModeSettings() in Update loop instead
 
         // ============================================
         // CASPERPROTECTIONS PATCHES

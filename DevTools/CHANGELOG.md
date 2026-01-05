@@ -2,6 +2,12 @@
 
 All notable changes to DevTools will be documented in this file.
 
+## [2.1.4] - 2026-01-04
+
+### Fixed
+- Removed broken `GameState.OnGameModeSettingsChanged` Harmony patch (method doesn't exist in game)
+- Cat Sounds setting now applied via Update loop instead
+
 ## [2.1.3] - 2026-01-04
 
 ### Fixed

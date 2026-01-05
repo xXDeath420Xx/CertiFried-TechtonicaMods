@@ -21,7 +21,7 @@ namespace AtlantumReactor
     {
         private const string MyGUID = "com.certifired.AtlantumReactor";
         private const string PluginName = "AtlantumReactor";
-        private const string VersionString = "4.0.0";
+        private const string VersionString = "4.0.4";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -261,15 +261,8 @@ namespace AtlantumReactor
             }
         }
 
-        /// <summary>
-        /// Clear tinted reactors when machine is deconstructed
-        /// </summary>
-        [HarmonyPatch(typeof(MachineManager), "RemoveMachine")]
-        [HarmonyPostfix]
-        private static void ClearTintedReactor(uint instanceId)
-        {
-            tintedReactors.Remove(instanceId);
-        }
+        // Note: MachineManager.RemoveMachine patch removed - method doesn't exist
+        // tintedReactors cleanup happens naturally when visual is destroyed
 
         private static void ApplyGreenMaterial(GameObject visual)
         {

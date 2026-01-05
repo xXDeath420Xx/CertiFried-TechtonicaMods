@@ -7,7 +7,7 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "AdvancedMachines"
-versionNumber = "2.0.3"
+versionNumber = "2.0.4"
 description = "Adds Tier 4 and Tier 5 versions of Smelters, Assemblers, Drills, Threshers, and Planters with increased speeds. Also enables Hidden Machine Variants."
 websiteUrl = "https://github.com/xXDeath420Xx/CertiFried-EMU613-Mods"
 containsNsfwContent = false
