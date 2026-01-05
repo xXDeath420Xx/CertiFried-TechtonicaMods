@@ -7,7 +7,7 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "PlanterCoreClusters_Updated"
-versionNumber = "3.0.5"
+versionNumber = "3.0.6"
 description = "Allows Planters to be boosted by Core Clusters (configurable % per cluster). Updated for EMU 6.1.3."
 websiteUrl = "https://github.com/CubeSuite/TTMod-PlanterCoreClusters"
 containsNsfwContent = false

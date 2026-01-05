@@ -1,36 +1,35 @@
-# PlanterCoreClusters - Updated for EMU 6.1.3
+# Planter Core Clusters
 
-Adds a Tech Tree unlock that allows Planters to benefit from Core Clusters.
+Place Core Clusters near planters to boost their growth speed.
 
 ## Features
 
-- New Tech Tree unlock: "Planter Core Boost"
-- Each Core Cluster provides 5% speed boost to nearby Planters
-- Works with all Planter types (including modded variants)
-- Stacks with other speed bonuses
+- Each Core Cluster provides a speed boost to nearby planters
+- **Configurable Boost** - Adjust boost per cluster (1-50%, default 5%)
+- Stack multiple clusters for greater effect
+
+## Requirements
+
+- BepInEx 5.4.21+
+- EquinoxsModUtils 6.1.3+
+- EMUAdditions 2.0.0+
 
 ## Installation
 
-1. Requires EquinoxsModUtils 6.1.3+
-2. Install via r2modman or extract to BepInEx/plugins
+Install via r2modman or manually place the DLL in your BepInEx/plugins folder.
+
+## Credits
+
+- Original mod by Equinox (https://github.com/CubeSuite/TTMod-PlanterCoreClusters)
+- Updated and maintained by CertiFried
 
 ## Changelog
 
-### v3.0.0
-- Updated for EquinoxsModUtils 6.1.3 compatibility
+### [3.0.5] - 2025-01-05
+- Version bump for bulk update
 
-## Credits & Attribution
+### [3.0.3] - 2025-01-03
+- Configurable boost percentage (default 5%, range 1-50%)
 
-**Original Author:** [Equinox](https://new.thunderstore.io/c/techtonica/p/Equinox/)
-
-This mod was originally created by Equinox as part of the [CubeSuite](https://github.com/CubeSuite) collection of Techtonica mods. This version has been updated for EMU 6.1.3 compatibility.
-
-- **Original Thunderstore Page:** [Equinox's PlanterCoreClusters](https://new.thunderstore.io/c/techtonica/p/Equinox/PlanterCoreClusters/)
-- **Original Source Repository:** [TTMod-PlanterCoreClusters](https://github.com/CubeSuite/TTMod-PlanterCoreClusters)
-- **Equinox's Thunderstore Profile:** [https://new.thunderstore.io/c/techtonica/p/Equinox/](https://new.thunderstore.io/c/techtonica/p/Equinox/)
-
-All credit for the original mod concept, design, and implementation goes to Equinox.
-
-## License
-
-GPL-3.0 (GNU General Public License v3.0) - See [original repository](https://github.com/CubeSuite/TTMod-PlanterCoreClusters) for full license.
+### [3.0.0] - 2025-01-02
+- API Migration to EMU 6.1.3 nested class structure

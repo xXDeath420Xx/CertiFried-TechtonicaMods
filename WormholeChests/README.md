@@ -1,48 +1,38 @@
-# WormholeChests - Updated for EMU 6.1.3
+# Wormhole Chests
 
-Chests assigned to the same channel share their inventory, enabling item teleportation across your factory.
+Link chests together to share inventory across distances. Items placed in one linked chest appear in all others!
 
 ## Features
 
-- Assign chests to numbered channels (1-999)
-- All chests on the same channel share a single inventory
-- Items placed in one chest instantly appear in all linked chests
-- Perfect for distributed storage and item teleportation
-- New Tech Tree unlock required before use
+- Link multiple chests together
+- Shared inventory across all linked chests
+- Great for distributed storage systems
 
-## How to Use
+## Requirements
 
-1. Research "Wormhole Chests" in the Tech Tree
-2. Build chests and open the inventory
-3. Use the channel selector (press assigned key) to set a channel number
-4. All chests on the same channel will share items
+- BepInEx 5.4.21+
+- EquinoxsModUtils 6.1.3+
+- EMUAdditions 2.0.0+
 
 ## Installation
 
-1. Requires EquinoxsModUtils 6.1.3+
-2. Requires EMUAdditions 2.0.0+
-3. Install via r2modman or extract to BepInEx/plugins
+Install via r2modman or manually place the DLL in your BepInEx/plugins folder.
+
+## Credits
+
+- Original mod by Equinox (https://github.com/CubeSuite/TTMod-WormholeChests)
+- Updated and maintained by CertiFried
 
 ## Changelog
 
-### v3.0.0
-- Updated for EquinoxsModUtils 6.1.3 compatibility
-- Fixed potential crashes when opening chests
-- Added null checks and exception handling
-- Improved stability with machine type validation
+### [3.0.6] - 2025-01-05
+- Version bump for bulk update
 
-## Credits & Attribution
+### [3.0.3] - 2025-01-03
+- Reduced debug logging for cleaner output
+- Performance improvements
 
-**Original Author:** [Equinox](https://new.thunderstore.io/c/techtonica/p/Equinox/)
-
-This mod was originally created by Equinox as part of the [CubeSuite](https://github.com/CubeSuite) collection of Techtonica mods. This version has been updated for EMU 6.1.3 compatibility.
-
-- **Original Thunderstore Page:** [Equinox's WormholeChests](https://new.thunderstore.io/c/techtonica/p/Equinox/WormholeChests/)
-- **Original Source Repository:** [TTMod-WormholeChests](https://github.com/CubeSuite/TTMod-WormholeChests)
-- **Equinox's Thunderstore Profile:** [https://new.thunderstore.io/c/techtonica/p/Equinox/](https://new.thunderstore.io/c/techtonica/p/Equinox/)
-
-All credit for the original mod concept, design, and implementation goes to Equinox.
-
-## License
-
-GPL-3.0 (GNU General Public License v3.0) - See [original repository](https://github.com/CubeSuite/TTMod-WormholeChests) for full license.
+### [3.0.0] - 2025-01-02
+- Global unlock check to disable mod when tech not researched
+- Comprehensive null checks and exception handling
+- API Migration to EMU 6.1.3 nested class structure

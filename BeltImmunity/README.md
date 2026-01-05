@@ -1,28 +1,34 @@
-# BeltImmunity Updated
+# Belt Immunity
 
-Makes you immune to conveyor belt movement. Walk across belts without being pushed around!
+Makes the player immune to being pushed by conveyor belts. Walk freely across your factory floor!
 
 ## Features
 
-- Prevents conveyor belts from pushing/pulling the player
-- Walk freely across any conveyor system
-- No configuration needed - just install and play
+- Walk on belts without being pushed
+- No more accidental trips into machinery
+- Toggle via config if desired
+
+## Requirements
+
+- BepInEx 5.4.21+
+- EquinoxsModUtils 6.1.3+
 
 ## Installation
 
-1. Install with r2modman or manually place in BepInEx/plugins folder
-2. That's it! You're now immune to belt movement
+Install via r2modman or manually place the DLL in your BepInEx/plugins folder.
 
-## Original Author
+## Credits
 
-This mod was originally created by **Equinox** ([CubeSuite](https://github.com/CubeSuite)).
+- Original mod by Equinox (https://github.com/CubeSuite/TTMod-BeltImmunity)
+- Updated and maintained by CertiFried
 
-Original repository: https://github.com/CubeSuite/TTMod-BeltImmunity
+## Changelog
 
-## License
+### [1.0.2] - 2025-01-05
+- Updated icon
 
-This mod is licensed under GPL-3.0, the same license as the original mod.
-
-## Updated By
-
-Updated for current game version by **CertiFried**.
+### [1.0.0] - 2025-01-03
+- Initial updated release
+- Modernized project structure
+- Compatible with latest game version
+- Optimized field caching for better performance

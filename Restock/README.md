@@ -1,40 +1,37 @@
-# Restock - Updated for EMU 6.1.3
+# Restock
 
-Automatically restocks your inventory from nearby chests.
+Automatically restocks your inventory from nearby chests when items run low.
 
 ## Features
 
-- Automatically pulls items from nearby chests to maintain configured stack counts
-- Configure desired quantity per item type in the config file
-- Adjustable scan radius (0-10 blocks)
-- Buildings default to 1 stack, items default to 0 (disabled)
+- Auto-restock from nearby chests
+- **Configurable Cooldown** - Adjust scan frequency (0.1-5s, default 0.5s)
+- Works with all chest types
 
-## Configuration
+## Requirements
 
-After first run, edit the config file to set desired stack counts for each item type:
+- BepInEx 5.4.21+
+- EquinoxsModUtils 6.1.3+
+- EMUAdditions 2.0.0+
 
-- **Restock Radius**: The radius around the player to scan for chests (0-10)
-- **Per-item settings**: Number of stacks to maintain for each resource
+## Installation
+
+Install via r2modman or manually place the DLL in your BepInEx/plugins folder.
+
+## Credits
+
+- Original mod by Equinox (https://github.com/CubeSuite/TTMod-Restock)
+- Updated and maintained by CertiFried
 
 ## Changelog
 
-### v3.0.0
-- Updated for EquinoxsModUtils 6.1.3 compatibility
-- Fixed API changes (ResourceNames -> EMU.Names.Resources)
-- Fixed duplicate key handling in configuration
+### [3.0.6] - 2025-01-05
+- Version bump for bulk update
 
-## Credits & Attribution
+### [3.0.3] - 2025-01-03
+- Configurable restock cooldown (default 0.5s)
+- Significantly reduced CPU overhead
 
-**Original Author:** [Equinox](https://new.thunderstore.io/c/techtonica/p/Equinox/)
-
-This mod was originally created by Equinox as part of the [CubeSuite](https://github.com/CubeSuite) collection of Techtonica mods. This version has been updated for EMU 6.1.3 compatibility.
-
-- **Original Thunderstore Page:** [Equinox's Restock](https://new.thunderstore.io/c/techtonica/p/Equinox/Restock/)
-- **Original Source Repository:** [TTMod-Restock](https://github.com/CubeSuite/TTMod-Restock)
-- **Equinox's Thunderstore Profile:** [https://new.thunderstore.io/c/techtonica/p/Equinox/](https://new.thunderstore.io/c/techtonica/p/Equinox/)
-
-All credit for the original mod concept, design, and implementation goes to Equinox.
-
-## License
-
-GPL-3.0 (GNU General Public License v3.0) - See [original repository](https://github.com/CubeSuite/TTMod-Restock) for full license.
+### [3.0.0] - 2025-01-02
+- Fixed duplicate key error from SafeResources list
+- API Migration to EMU 6.1.3 nested class structure

@@ -1,44 +1,34 @@
-# ChainExplosives Updated
+# Chain Explosives
 
-Interact with one explosive to detonate ALL placed explosives at once! Perfect for setting up large mining operations.
+When one explosive detonates, all nearby explosives chain react! Perfect for massive demolition projects.
 
 ## Features
 
-- Place multiple explosives around an area
-- Interact with ANY ONE of them to trigger a chain detonation
-- All tracked explosives detonate simultaneously
-- Debug mode available for troubleshooting
+- Chain reaction explosions
+- All explosives in range detonate together
+- Satisfying demolition gameplay
 
-## How to Use
+## Requirements
 
-1. Place as many explosives as you want in the area you want to clear
-2. When ready, interact with just ONE explosive
-3. Watch as ALL your placed explosives detonate at once!
+- BepInEx 5.4.21+
+- EquinoxsModUtils 6.1.3+
 
-## Configuration
+## Installation
 
-Found in `BepInEx/config/com.certifired.ChainExplosives.cfg`:
+Install via r2modman or manually place the DLL in your BepInEx/plugins folder.
 
-- **Debug Mode** (default: false) - Enable verbose logging to track explosive placement and detonation
+## Credits
 
-## Original Author
+- Original mod concept by Equinox (https://github.com/CubeSuite/TTMod-ChainExplosives)
+- Bug fixes and update by CertiFried
 
-This mod was originally created by **Equinox** ([CubeSuite](https://github.com/CubeSuite)).
+## Changelog
 
-Original repository: https://github.com/CubeSuite/TTMod-ChainExplosives
+### [1.0.2] - 2025-01-05
+- Updated icon
 
-## What Was Fixed
-
-The original mod had a bug where explosives were tracked but never actually added to the detonation list. This has been fixed:
-
-- Fixed: `explosiveVisuals` list was never populated (logging only, no actual add)
-- Fixed: Iteration over empty list caused no chain reaction
-- Improved: Now uses `ExplosiveInstance` tracking directly with proper HashSet deduplication
-
-## License
-
-This mod is licensed under GPL-3.0, the same license as the original mod.
-
-## Updated By
-
-Updated and fixed by **CertiFried**.
+### [1.0.0] - 2025-01-03
+- Critical bug fix: Original mod never added explosives to detonation list
+- Explosives now properly tracked and detonated in chain reactions
+- Simplified tracking with HashSet for O(1) duplicate detection
+- Added configurable debug mode

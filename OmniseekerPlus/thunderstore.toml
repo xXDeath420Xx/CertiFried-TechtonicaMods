@@ -7,7 +7,7 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "OmniseekerPlus"
-versionNumber = "1.0.5"
+versionNumber = "1.0.6"
 description = "Enhanced scanner with extended range (up to 2000m), multiple scan modes (Ores, Hard Drives, Loot, Memory Trees), and in-game GUI. Press O to cycle modes, P for quick scan."
 websiteUrl = "https://github.com/xXDeath420Xx/CertiFried-EMU613-Mods"
 containsNsfwContent = false

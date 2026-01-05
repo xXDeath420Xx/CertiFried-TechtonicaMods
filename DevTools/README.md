@@ -1,54 +1,55 @@
 # DevTools
 
-In-game developer tools with full GUI for Techtonica.
+Comprehensive developer and cheat tools for Techtonica with a full in-game GUI.
 
 ## Features
 
-- **In-Game GUI**: Press F8 to toggle the developer tools panel
-- **Tabbed Interface**: Organized into Player, Game Mode, Machines, Power, and Special tabs
-- **Live Value Updates**: All values update in real-time as you modify them
+Press F8 to open the DevTools GUI with these tabs:
 
 ### Player Tab
-- Infinite Health toggle
-- Infinite Stamina toggle
-- Flight Mode toggle
-- Jump Height multiplier (1x-10x)
-- Movement Speed multiplier (1x-10x)
-- No Fall Damage toggle
+- Infinite Crafting, Max Power, Ultra Pickaxe, Faster MOLE
+- Disable Encumbrance, Show Debug Coordinates
+- Hide Machine Lights/Particles (performance)
+- Simulation Speed slider (0.1x - 10x)
+- Free Camera Mode options
 
 ### Game Mode Tab
-- Skip Intro toggle
-- Disable Autosave toggle
-- Show FPS toggle
+- All Doors Unlocked, MOLE Bits Always Available, Infinite Ore
+- Player Speed slider (50% - 1000%)
+- MOLE Speed slider (50% - 1000%)
 
 ### Machines Tab
-- Instant Build toggle
-- Free Building toggle
-- No Power Required toggle
-- Unlock All Research toggle
+- Smelter/Assembler/Thresher/Planter Speed sliders
+- Inserter Base Stack Size slider
 
 ### Power Tab
-- Infinite Power toggle
-- Power Multiplier (1x-10x)
+- Fuel/Power Consumption sliders
+- Power Generation slider
 
 ### Special Tab
-- Debug Mode toggle
-- Verbose Logging toggle
+- Cat Sounds toggle (FMOD integration)
+- Rainbow Cores toggle with live color preview
+- Placeholder Voice toggle
+
+## Requirements
+
+- BepInEx 5.4.21+
+- EquinoxsModUtils 6.1.3+
 
 ## Installation
 
-1. Install BepInEx for Techtonica
-2. Place the `DevTools.dll` in your `BepInEx/plugins` folder
-3. Launch the game and press F8 to open the developer tools
-
-## Hotkeys
-
-- **F8**: Toggle DevTools GUI
-
-## Configuration
-
-All settings can be configured via the in-game GUI or the BepInEx configuration file located at `BepInEx/config/com.certifired.DevTools.cfg`
+Install via r2modman or manually place the DLL in your BepInEx/plugins folder.
 
 ## Changelog
 
-See CHANGELOG.md for version history.
+### [2.1.7] - 2025-01-05
+- Updated icon
+
+### [2.0.0] - 2025-01-04
+- Complete In-Game GUI (Press F8)
+- Draggable window with tabbed interface
+- Live value updates
+- All cheat categories organized into tabs
+
+### [1.0.0] - 2025-01-03
+- Initial release with PlayerCheats and GameModeSettings integration

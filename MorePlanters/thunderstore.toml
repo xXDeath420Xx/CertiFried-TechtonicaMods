@@ -7,7 +7,7 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "MorePlanters_Updated"
-versionNumber = "3.0.5"
+versionNumber = "3.0.6"
 description = "Adds Planter MKII (configurable speed, double yield) and MKIII (integrated Thresher). Updated for EMU 6.1.3."
 websiteUrl = "https://github.com/CubeSuite/TTMod-MorePlanters"
 containsNsfwContent = false

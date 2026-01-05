@@ -1,41 +1,39 @@
 # Atlantum Reactor
 
-A powerful endgame nuclear reactor for Techtonica that generates 20MW of power.
+Advanced nuclear reactor that generates 20MW of power using Atlantum Mixture Bricks and Shiverthorn Coolant.
 
 ## Features
 
-- **High Power Output**: Generates 20,000 kW (20MW) of power
-- **Fuel-Based**: Consumes Atlantum Mixture Bricks and Shiverthorn Coolant
-- **Distinctive Visual**: Green radioactive tint for easy identification
-- **Endgame Content**: Positioned in tech tree after HVC Reach IV
+- **20MW Power Output** - Massive power generation for endgame bases
+- **Dual Fuel System** - Requires both Atlantum Mixture Brick and Shiverthorn Coolant
+- **Visual Effects** - Distinctive green radioactive glow
+- **Configurable** - Adjust power output via config
 
-## Recipe
+## Requirements
 
-Crafted in Assembler:
-- 5x Crank Generator MKII
-- 20x Steel Frame
-- 10x Processor
-- 10x Cooling System
-- 5x Atlantum Mixture Brick
-
-## Research Requirements
-
-- Tech Category: Energy
-- Core Type: Blue
-- Core Count: 1000
+- BepInEx 5.4.21+
+- EquinoxsModUtils 6.1.3+
+- EMUAdditions 2.0.0+
 
 ## Installation
 
-1. Install BepInEx for Techtonica
-2. Install EquinoxsModUtils (EMU) 6.1.3+
-3. Install EMUAdditions 2.0.0+
-4. Place the `AtlantumReactor.dll` in your `BepInEx/plugins` folder
-
-## Configuration
-
-Power output can be configured in the BepInEx configuration file:
-- **Power Output (kW)**: Default 20000 (20MW), range 1000-100000
+Install via r2modman or manually place the DLL in your BepInEx/plugins folder.
 
 ## Changelog
 
-See CHANGELOG.md for version history.
+### [4.0.7] - 2025-01-05
+- Fixed icon path
+- Version sync with Thunderstore
+
+### [4.0.0] - 2025-01-04
+- Complete rewrite with proper PowerGeneratorDefinition architecture
+- Fixed power generation (was completely non-functional)
+- Working fuel system with Atlantum Mixture Brick and Shiverthorn Coolant
+- Green visual tint with emission glow
+- Configurable power output (default 20MW)
+
+### [3.0.0] - Previous
+- Known issues fixed in 4.0.0
+
+### [1.0.0] - Initial Release
+- First attempt (incorrect architecture)
