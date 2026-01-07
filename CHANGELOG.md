@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.4] - 2026-01-07
+
+### Changed
+- Updated AmbientLife to 2.0.1 (now includes creature AssetBundles for real 3D models)
+
 ## [1.0.3] - 2026-01-07
 
 ### Changed
