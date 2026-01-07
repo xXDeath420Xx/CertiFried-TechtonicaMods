@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Configuration;
@@ -23,7 +24,7 @@ namespace NarrativeExpansion
     {
         public const string MyGUID = "com.certifired.NarrativeExpansion";
         public const string PluginName = "NarrativeExpansion";
-        public const string VersionString = "1.0.0";
+        public const string VersionString = "2.0.0";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -33,7 +34,15 @@ namespace NarrativeExpansion
         public static ConfigEntry<bool> EnableExtendedDialogue;
         public static ConfigEntry<bool> EnableHiddenLore;
         public static ConfigEntry<bool> EnableMysteryContent;
+        public static ConfigEntry<bool> EnableNPCs;
+        public static ConfigEntry<int> MaxNPCs;
+        public static ConfigEntry<float> NPCInteractionRange;
+        public static ConfigEntry<KeyCode> NPCInteractKey;
         public static ConfigEntry<bool> DebugMode;
+
+        // Active NPCs
+        public static List<NPCController> ActiveNPCs = new List<NPCController>();
+        private static Dictionary<string, NPCDefinition> npcDefinitions = new Dictionary<string, NPCDefinition>();
 
         // Speaker IDs for existing characters (matching game's Speaker enum)
         public const string SparksId = "sparks";
@@ -78,6 +87,18 @@ namespace NarrativeExpansion
             EnableMysteryContent = Config.Bind("Content", "Enable Mystery Content", true,
                 "Enable mysterious messages and hidden story threads");
 
+            EnableNPCs = Config.Bind("NPCs", "Enable NPCs", true,
+                "Enable interactive NPCs in the world");
+
+            MaxNPCs = Config.Bind("NPCs", "Max NPCs", 5,
+                "Maximum number of NPCs to spawn");
+
+            NPCInteractionRange = Config.Bind("NPCs", "Interaction Range", 5f,
+                "Distance at which NPCs can be interacted with");
+
+            NPCInteractKey = Config.Bind("NPCs", "Interact Key", KeyCode.E,
+                "Key to interact with NPCs");
+
             DebugMode = Config.Bind("General", "Debug Mode", false, "Enable debug logging");
         }
 
@@ -87,7 +108,14 @@ namespace NarrativeExpansion
             {
                 InitializeSpeakers();
                 InitializeDialogues();
+                InitializeNPCDefinitions();
                 dialoguesInitialized = true;
+            }
+
+            // Spawn initial NPCs
+            if (EnableNPCs.Value)
+            {
+                SpawnInitialNPCs();
             }
         }
 
@@ -260,6 +288,9 @@ namespace NarrativeExpansion
 
         private void Update()
         {
+            // Don't do anything until dialogues are initialized
+            if (!dialoguesInitialized) return;
+
             // Random idle dialogue trigger
             if (UnityEngine.Random.value < 0.0001f) // Very small chance per frame
             {
@@ -370,6 +401,499 @@ namespace NarrativeExpansion
                 Log.LogInfo($"[DEBUG] {message}");
             }
         }
+
+        #region NPC System
+
+        private void InitializeNPCDefinitions()
+        {
+            LogDebug("Initializing NPC definitions...");
+
+            // The Wanderer - a mysterious traveler who hints at deeper secrets
+            RegisterNPCDefinition(new NPCDefinition
+            {
+                Id = "wanderer",
+                Name = "The Wanderer",
+                SpeakerId = UnknownId,
+                NameColor = new Color(0.6f, 0.4f, 0.8f),
+                Dialogues = new string[]
+                {
+                    "I've walked these tunnels for longer than I can remember. The machines... they whisper sometimes.",
+                    "You're not from around here, are you? I can tell. You still have hope in your eyes.",
+                    "There's a place deeper down. A sanctuary. The old ones built it. Maybe they're still there.",
+                    "Be careful what you build. Not everything that works is wise to create.",
+                    "I've seen others like you come through. Some thrived. Others... became part of the machines."
+                },
+                BehaviorType = NPCBehavior.Wandering,
+                MoveSpeed = 1.5f,
+                WanderRadius = 20f
+            });
+
+            // The Engineer - offers technical hints and tips
+            RegisterNPCDefinition(new NPCDefinition
+            {
+                Id = "engineer",
+                Name = "Old Engineer",
+                SpeakerId = PaladinId,
+                NameColor = new Color(0.8f, 0.6f, 0.2f),
+                Dialogues = new string[]
+                {
+                    "Efficiency is everything down here. Every watt counts, every conveyor matters.",
+                    "The smelters run hot. Too hot, sometimes. Keep an eye on your power grid.",
+                    "I used to maintain the old systems. Before everything went wrong. Those were simpler times.",
+                    "Pro tip: group your producers by resource type. Makes the conveyor logic much cleaner.",
+                    "The inserters are the lifeblood of any factory. Treat them well and they'll treat you well."
+                },
+                BehaviorType = NPCBehavior.Stationary,
+                MoveSpeed = 0f
+            });
+
+            // The Archivist - provides lore and historical information
+            RegisterNPCDefinition(new NPCDefinition
+            {
+                Id = "archivist",
+                Name = "The Archivist",
+                SpeakerId = SystemId,
+                NameColor = new Color(0.3f, 0.7f, 0.9f),
+                Dialogues = new string[]
+                {
+                    "Welcome, seeker of knowledge. I am the keeper of records, the last archivist.",
+                    "This facility was once home to thousands. Now only echoes remain.",
+                    "The Memory Trees hold the consciousness of those who came before. Treat them with reverence.",
+                    "There are seven levels below us. Each one deeper, each one more... changed.",
+                    "The original architects never intended for us to stay this long. They planned for rescue."
+                },
+                BehaviorType = NPCBehavior.Stationary,
+                MoveSpeed = 0f
+            });
+
+            // The Scout - a fast-moving NPC who gives area hints
+            RegisterNPCDefinition(new NPCDefinition
+            {
+                Id = "scout",
+                Name = "Swift Scout",
+                SpeakerId = SparksId,
+                NameColor = new Color(0.2f, 0.9f, 0.5f),
+                Dialogues = new string[]
+                {
+                    "Hey! You're the new one, right? I've been mapping these caves for weeks!",
+                    "Watch out for the unstable areas. The ground can give way without warning.",
+                    "There's good ore deposits to the east. Really rich veins. You should check it out!",
+                    "I found something weird earlier. A door that won't open. Maybe you can figure it out?",
+                    "Race you to the next checkpoint! Ha, just kidding. You're way too slow with all that gear."
+                },
+                BehaviorType = NPCBehavior.Wandering,
+                MoveSpeed = 3f,
+                WanderRadius = 40f
+            });
+
+            // The Oracle - mysterious prophecies and cryptic messages
+            RegisterNPCDefinition(new NPCDefinition
+            {
+                Id = "oracle",
+                Name = "The Oracle",
+                SpeakerId = AncientAIId,
+                NameColor = new Color(1f, 0.8f, 0.3f),
+                Dialogues = new string[]
+                {
+                    "The patterns align. You are the variable that changes the equation.",
+                    "Three paths diverge before you. Only one leads to restoration.",
+                    "When the deep ones wake, the surface will tremble. Prepare.",
+                    "Your machines sing a song older than this facility. Do you hear it?",
+                    "The Core remembers. The Core waits. The Core... hopes."
+                },
+                BehaviorType = NPCBehavior.Stationary,
+                MoveSpeed = 0f
+            });
+
+            LogDebug($"Registered {npcDefinitions.Count} NPC definitions");
+        }
+
+        private static void RegisterNPCDefinition(NPCDefinition def)
+        {
+            npcDefinitions[def.Id] = def;
+        }
+
+        private void SpawnInitialNPCs()
+        {
+            LogDebug("Spawning initial NPCs...");
+
+            var player = Player.instance;
+            if (player == null) return;
+
+            Vector3 basePos = ((Component)player).transform.position;
+
+            // Spawn one of each NPC type at various distances from player
+            float distance = 30f;
+            int npcIndex = 0;
+
+            foreach (var def in npcDefinitions.Values)
+            {
+                if (ActiveNPCs.Count >= MaxNPCs.Value) break;
+
+                float angle = (npcIndex / (float)npcDefinitions.Count) * Mathf.PI * 2f;
+                Vector3 spawnPos = basePos + new Vector3(
+                    Mathf.Cos(angle) * distance,
+                    0,
+                    Mathf.Sin(angle) * distance
+                );
+
+                // Find ground level
+                if (Physics.Raycast(spawnPos + Vector3.up * 50f, Vector3.down, out RaycastHit hit, 100f))
+                {
+                    spawnPos = hit.point + Vector3.up * 0.5f;
+                }
+
+                SpawnNPC(def.Id, spawnPos);
+                npcIndex++;
+            }
+
+            Log.LogInfo($"Spawned {ActiveNPCs.Count} NPCs");
+        }
+
+        /// <summary>
+        /// Spawn an NPC by ID at a specific position
+        /// </summary>
+        public static NPCController SpawnNPC(string npcId, Vector3 position)
+        {
+            if (!npcDefinitions.TryGetValue(npcId, out var def))
+            {
+                Log.LogWarning($"NPC definition not found: {npcId}");
+                return null;
+            }
+
+            GameObject npcObj = new GameObject($"NPC_{def.Name}");
+            npcObj.transform.position = position;
+
+            var controller = npcObj.AddComponent<NPCController>();
+            controller.Initialize(def);
+
+            ActiveNPCs.Add(controller);
+
+            LogDebug($"Spawned NPC: {def.Name} at {position}");
+            return controller;
+        }
+
+        /// <summary>
+        /// Trigger NPC dialogue via direct logging for now (subtitle system would require more framework hooks)
+        /// </summary>
+        public static void TriggerNPCDialogue(string speakerId, string dialogue, float duration = 5f)
+        {
+            // Create a temporary dialogue entry and trigger it
+            string tempId = $"npc_temp_{Time.time}";
+            FrameworkAPI.RegisterDialogue(tempId, speakerId, dialogue, duration);
+            FrameworkAPI.TriggerDialogue(tempId);
+        }
+
+        #endregion
     }
 
+    #region NPC Classes
+
+    /// <summary>
+    /// NPC behavior types
+    /// </summary>
+    public enum NPCBehavior
+    {
+        Stationary,     // Stays in one place
+        Wandering,      // Moves randomly within a radius
+        Patrolling,     // Follows a set path
+        Following       // Follows the player
+    }
+
+    /// <summary>
+    /// Definition for an NPC character
+    /// </summary>
+    public class NPCDefinition
+    {
+        public string Id;
+        public string Name;
+        public string SpeakerId;
+        public Color NameColor = Color.white;
+        public string[] Dialogues;
+        public NPCBehavior BehaviorType = NPCBehavior.Stationary;
+        public float MoveSpeed = 2f;
+        public float WanderRadius = 15f;
+        public float InteractionCooldown = 30f;
+    }
+
+    /// <summary>
+    /// NPC controller - handles AI, movement, and player interaction
+    /// </summary>
+    public class NPCController : MonoBehaviour
+    {
+        public NPCDefinition Definition { get; private set; }
+        public bool IsInteracting { get; private set; }
+
+        // Movement
+        private Vector3 homePosition;
+        private Vector3 targetPosition;
+        private float moveTimer;
+
+        // Interaction
+        private float lastInteractionTime = -999f;
+        private int dialogueIndex = 0;
+        private bool playerInRange = false;
+
+        // Visual
+        private GameObject visual;
+        private Light npcLight;
+        private TextMesh nameTag;
+
+        public void Initialize(NPCDefinition def)
+        {
+            Definition = def;
+            homePosition = transform.position;
+            targetPosition = transform.position;
+            moveTimer = UnityEngine.Random.Range(2f, 5f);
+
+            CreateVisual();
+            CreateNameTag();
+        }
+
+        private void CreateVisual()
+        {
+            // Create NPC body
+            visual = new GameObject("Visual");
+            visual.transform.SetParent(transform);
+            visual.transform.localPosition = Vector3.zero;
+
+            // Body
+            var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            body.transform.SetParent(visual.transform);
+            body.transform.localPosition = Vector3.up * 0.5f;
+            body.transform.localScale = new Vector3(0.6f, 0.8f, 0.6f);
+            body.GetComponent<Renderer>().material.color = Definition.NameColor;
+            UnityEngine.Object.Destroy(body.GetComponent<Collider>());
+
+            // Head
+            var head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            head.transform.SetParent(visual.transform);
+            head.transform.localPosition = Vector3.up * 1.5f;
+            head.transform.localScale = Vector3.one * 0.4f;
+            head.GetComponent<Renderer>().material.color = Definition.NameColor * 1.2f;
+            UnityEngine.Object.Destroy(head.GetComponent<Collider>());
+
+            // Eyes (glowing)
+            for (int i = -1; i <= 1; i += 2)
+            {
+                var eye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                eye.transform.SetParent(head.transform);
+                eye.transform.localPosition = new Vector3(i * 0.1f, 0.05f, 0.15f);
+                eye.transform.localScale = Vector3.one * 0.3f;
+                eye.GetComponent<Renderer>().material.color = new Color(0.9f, 0.9f, 1f);
+                eye.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.white);
+                UnityEngine.Object.Destroy(eye.GetComponent<Collider>());
+            }
+
+            // Ambient light
+            var lightObj = new GameObject("NPCLight");
+            lightObj.transform.SetParent(visual.transform);
+            lightObj.transform.localPosition = Vector3.up * 1f;
+            npcLight = lightObj.AddComponent<Light>();
+            npcLight.type = LightType.Point;
+            npcLight.range = 5f;
+            npcLight.intensity = 0.5f;
+            npcLight.color = Definition.NameColor;
+        }
+
+        private void CreateNameTag()
+        {
+            var tagObj = new GameObject("NameTag");
+            tagObj.transform.SetParent(transform);
+            tagObj.transform.localPosition = Vector3.up * 2.2f;
+
+            nameTag = tagObj.AddComponent<TextMesh>();
+            nameTag.text = Definition.Name;
+            nameTag.fontSize = 32;
+            nameTag.characterSize = 0.1f;
+            nameTag.anchor = TextAnchor.MiddleCenter;
+            nameTag.alignment = TextAlignment.Center;
+            nameTag.color = Definition.NameColor;
+        }
+
+        private void Update()
+        {
+            // Face camera for name tag
+            if (nameTag != null && Camera.main != null)
+            {
+                nameTag.transform.LookAt(Camera.main.transform);
+                nameTag.transform.Rotate(0, 180, 0);
+            }
+
+            // Movement behavior
+            UpdateMovement();
+
+            // Check for player proximity
+            CheckPlayerProximity();
+
+            // Handle interaction input
+            HandleInteraction();
+
+            // Light pulsing
+            if (npcLight != null)
+            {
+                float pulse = 0.5f + Mathf.Sin(Time.time * 2f) * 0.2f;
+                npcLight.intensity = playerInRange ? 1.5f : pulse;
+            }
+
+            // Cleanup
+            if (transform.position.y < -500f)
+            {
+                // NPC fell through world, respawn
+                transform.position = homePosition;
+            }
+        }
+
+        private void UpdateMovement()
+        {
+            if (Definition.BehaviorType == NPCBehavior.Stationary)
+                return;
+
+            moveTimer -= Time.deltaTime;
+
+            if (moveTimer <= 0)
+            {
+                // Pick new target
+                PickNewTarget();
+                moveTimer = UnityEngine.Random.Range(3f, 8f);
+            }
+
+            // Move towards target
+            if (Definition.MoveSpeed > 0)
+            {
+                Vector3 direction = (targetPosition - transform.position);
+                direction.y = 0;
+
+                if (direction.magnitude > 0.5f)
+                {
+                    direction.Normalize();
+                    transform.position += direction * Definition.MoveSpeed * Time.deltaTime;
+
+                    // Face movement direction
+                    if (direction != Vector3.zero)
+                    {
+                        transform.rotation = Quaternion.Slerp(
+                            transform.rotation,
+                            Quaternion.LookRotation(direction),
+                            Time.deltaTime * 5f
+                        );
+                    }
+                }
+            }
+        }
+
+        private void PickNewTarget()
+        {
+            switch (Definition.BehaviorType)
+            {
+                case NPCBehavior.Wandering:
+                    // Random point within wander radius
+                    Vector2 randomCircle = UnityEngine.Random.insideUnitCircle * Definition.WanderRadius;
+                    targetPosition = homePosition + new Vector3(randomCircle.x, 0, randomCircle.y);
+
+                    // Raycast to find ground
+                    if (Physics.Raycast(targetPosition + Vector3.up * 50f, Vector3.down, out RaycastHit hit, 100f))
+                    {
+                        targetPosition = hit.point + Vector3.up * 0.5f;
+                    }
+                    break;
+
+                case NPCBehavior.Following:
+                    var player = Player.instance;
+                    if (player != null)
+                    {
+                        targetPosition = ((Component)player).transform.position +
+                                        UnityEngine.Random.insideUnitSphere * 3f;
+                        targetPosition.y = ((Component)player).transform.position.y;
+                    }
+                    break;
+            }
+        }
+
+        private void CheckPlayerProximity()
+        {
+            var player = Player.instance;
+            if (player == null)
+            {
+                playerInRange = false;
+                return;
+            }
+
+            float distance = Vector3.Distance(transform.position,
+                ((Component)player).transform.position);
+
+            playerInRange = distance <= NarrativeExpansionPlugin.NPCInteractionRange.Value;
+
+            // Update name tag visibility
+            if (nameTag != null)
+            {
+                string baseText = Definition.Name;
+                if (playerInRange && CanInteract())
+                {
+                    nameTag.text = $"{baseText}\n<Press {NarrativeExpansionPlugin.NPCInteractKey.Value} to talk>";
+                    nameTag.color = Color.yellow;
+                }
+                else
+                {
+                    nameTag.text = baseText;
+                    nameTag.color = Definition.NameColor;
+                }
+            }
+        }
+
+        private bool CanInteract()
+        {
+            return Time.time - lastInteractionTime >= Definition.InteractionCooldown;
+        }
+
+        private void HandleInteraction()
+        {
+            if (!playerInRange) return;
+            if (!CanInteract()) return;
+
+            if (Input.GetKeyDown(NarrativeExpansionPlugin.NPCInteractKey.Value))
+            {
+                Interact();
+            }
+        }
+
+        /// <summary>
+        /// Interact with this NPC
+        /// </summary>
+        public void Interact()
+        {
+            if (Definition.Dialogues == null || Definition.Dialogues.Length == 0)
+                return;
+
+            lastInteractionTime = Time.time;
+
+            // Get next dialogue line (cycles through)
+            string dialogue = Definition.Dialogues[dialogueIndex];
+            dialogueIndex = (dialogueIndex + 1) % Definition.Dialogues.Length;
+
+            // Show dialogue
+            NarrativeExpansionPlugin.TriggerNPCDialogue(Definition.SpeakerId, dialogue, 5f);
+
+            NarrativeExpansionPlugin.LogDebug($"NPC {Definition.Name} says: {dialogue}");
+
+            // Face the player
+            var player = Player.instance;
+            if (player != null)
+            {
+                Vector3 lookDir = ((Component)player).transform.position - transform.position;
+                lookDir.y = 0;
+                if (lookDir != Vector3.zero)
+                {
+                    transform.rotation = Quaternion.LookRotation(lookDir);
+                }
+            }
+        }
+
+        private void OnDestroy()
+        {
+            NarrativeExpansionPlugin.ActiveNPCs.Remove(this);
+        }
+    }
+
+    #endregion
 }

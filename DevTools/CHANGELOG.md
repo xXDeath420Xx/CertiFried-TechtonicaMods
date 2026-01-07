@@ -5,7 +5,7 @@ All notable changes to DevTools will be documented in this file.
 ## [2.0.0] - 2025-01-04
 
 ### Added
-- **Complete In-Game GUI** (Press F8 to toggle)
+- **Complete In-Game GUI** (Press Insert to toggle)
   - Draggable window with tabbed interface
   - Live value updates - changes apply immediately
   - Visual feedback for all settings
@@ -44,7 +44,7 @@ All notable changes to DevTools will be documented in this file.
 
 ### Changed
 - Settings now apply continuously for live updates
-- Configurable GUI toggle hotkey (default F8)
+- Configurable GUI toggle hotkey (default Insert)
 - GUI state persists in config
 
 ## [1.1.0] - 2025-01-04

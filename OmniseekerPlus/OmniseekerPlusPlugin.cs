@@ -14,7 +14,7 @@ namespace OmniseekerPlus
     {
         private const string MyGUID = "com.certifired.OmniseekerPlus";
         private const string PluginName = "OmniseekerPlus";
-        private const string VersionString = "1.0.5";
+        private const string VersionString = "1.0.7";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;

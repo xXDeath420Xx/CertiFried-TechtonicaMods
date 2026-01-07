@@ -14,6 +14,7 @@ using UnityEngine;
 using TechCategory = Unlock.TechCategory;
 using CoreType = ResearchCoreDefinition.CoreType;
 using ResearchTier = TechTreeState.ResearchTier;
+using TechtonicaFramework.TechTree;
 
 namespace WormholeChests
 {
@@ -28,11 +29,12 @@ namespace WormholeChests
     [BepInPlugin(MyGUID, PluginName, VersionString)]
     [BepInDependency("com.equinox.EquinoxsModUtils")]
     [BepInDependency("com.equinox.EMUAdditions")]
+    [BepInDependency("com.certifired.TechtonicaFramework")]
     public class WormholeChestsPlugin : BaseUnityPlugin
     {
         private const string MyGUID = "com.equinox.WormholeChests";
         private const string PluginName = "WormholeChests";
-        private const string VersionString = "3.0.6";
+        private const string VersionString = "3.1.0";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -41,6 +43,9 @@ namespace WormholeChests
         public static Texture2D wormholeTexture;
 
         public static ConfigEntry<bool> freeWormholeChests;
+        public static ConfigEntry<bool> useRelativePositioning;
+        public static ConfigEntry<float> relativeXPercent;
+        public static ConfigEntry<float> relativeYPercent;
         public static ConfigEntry<float> channelBoxXOffset;
         public static ConfigEntry<float> channelBoxYOffset;
         public static ConfigEntry<float> channelBoxWidth;
@@ -69,7 +74,7 @@ namespace WormholeChests
             // Add new unlock using EMUAdditions (EMU 6.1.3 compatible - no numScansNeeded)
             EMUAdditions.AddNewUnlock(new NewUnlockDetails
             {
-                category = TechCategory.Science,
+                category = ModdedTabModule.ModdedCategory,
                 coreTypeNeeded = CoreType.Blue,
                 coreCountNeeded = 2000,
                 description = "Allow chests on the same channel to share inventories.",
@@ -172,14 +177,26 @@ namespace WormholeChests
         {
             freeWormholeChests = Config.Bind("General", "Free Wormhole Chests", false,
                 new ConfigDescription("Disables the cost of creating Wormhole Chests. Cheat, not recommended."));
-            channelBoxXOffset = Config.Bind("GUI Layout", "Channel Box X Offset", 32f,
-                new ConfigDescription("Controls the horizontal position of the Channel box in a Chest's GUI."));
-            channelBoxYOffset = Config.Bind("GUI Layout", "Channel Box Y Offset", -355f,
-                new ConfigDescription("Controls the vertical position of the Channel box in a Chest's GUI."));
+
+            // Resolution-aware positioning (recommended)
+            useRelativePositioning = Config.Bind("GUI Layout", "Use Relative Positioning", true,
+                new ConfigDescription("When enabled, UI positions are calculated as percentage of screen size for proper scaling across all resolutions. Disable to use fixed pixel offsets instead."));
+            relativeXPercent = Config.Bind("GUI Layout", "Relative X Position", 0.517f,
+                new ConfigDescription("Horizontal position as percentage of screen width (0.0 = left, 0.5 = center, 1.0 = right). Only used when Use Relative Positioning is enabled.",
+                new AcceptableValueRange<float>(0f, 1f)));
+            relativeYPercent = Config.Bind("GUI Layout", "Relative Y Position", 0.17f,
+                new ConfigDescription("Vertical position as percentage of screen height (0.0 = top, 0.5 = center, 1.0 = bottom). Only used when Use Relative Positioning is enabled.",
+                new AcceptableValueRange<float>(0f, 1f)));
+
+            // Fixed pixel offsets (legacy, for manual fine-tuning)
+            channelBoxXOffset = Config.Bind("GUI Layout (Fixed)", "Channel Box X Offset", 32f,
+                new ConfigDescription("Fixed pixel offset from screen center. Only used when Use Relative Positioning is disabled."));
+            channelBoxYOffset = Config.Bind("GUI Layout (Fixed)", "Channel Box Y Offset", -355f,
+                new ConfigDescription("Fixed pixel offset from screen center. Only used when Use Relative Positioning is disabled. For ultrawide (3440x1440), try -550."));
             channelBoxWidth = Config.Bind("GUI Layout", "Channel Box Width", 240f,
-                new ConfigDescription("Controls the width of the Channel box in a Chest's GUI."));
+                new ConfigDescription("Width of the Channel input box."));
             createButtonXOffset = Config.Bind("GUI Layout", "Create Button X Offset", 444f,
-                new ConfigDescription("Controls the horizontal position of the Create / Link button in a Chest's GUI."));
+                new ConfigDescription("Horizontal offset of Create/Link button from the Channel box."));
         }
 
         private void ApplyPatches()
@@ -499,12 +516,20 @@ namespace WormholeChests
         private static Texture2D textBoxHover;
 
         public static bool freeChests => WormholeChestsPlugin.freeWormholeChests.Value;
+        public static bool useRelative => WormholeChestsPlugin.useRelativePositioning.Value;
         public static float channelBoxXOffset => WormholeChestsPlugin.channelBoxXOffset.Value;
         public static float channelBoxYOffset => WormholeChestsPlugin.channelBoxYOffset.Value;
         public static float channelBoxWidth => WormholeChestsPlugin.channelBoxWidth.Value;
         public static float createButtonXOffset => WormholeChestsPlugin.createButtonXOffset.Value;
-        public static float xPos => Screen.width / 2f + channelBoxXOffset;
-        public static float yPos => Screen.height / 2f + channelBoxYOffset;
+
+        // Resolution-aware positioning: use percentage-based or fixed offset based on config
+        public static float xPos => useRelative
+            ? Screen.width * WormholeChestsPlugin.relativeXPercent.Value
+            : Screen.width / 2f + channelBoxXOffset;
+
+        public static float yPos => useRelative
+            ? Screen.height * WormholeChestsPlugin.relativeYPercent.Value
+            : Screen.height / 2f + channelBoxYOffset;
 
         public static void LoadImages()
         {

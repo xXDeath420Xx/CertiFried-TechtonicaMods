@@ -4,9 +4,9 @@ schemaVersion = "0.0.1"
 [package]
 namespace = "CertiFried"
 name = "BeltImmunity_Updated"
-versionNumber = "1.0.3"
+versionNumber = "1.0.4"
 description = "Makes you immune to conveyor belt movement. Walk across belts without being pushed around!"
-websiteUrl = "https://github.com/CubeSuite/TTMod-BeltImmunity"
+websiteUrl = "https://github.com/xXDeath420Xx/TTMod-BeltImmunity"
 containsNsfwContent = false
 
 [package.dependencies]

@@ -13,7 +13,7 @@ namespace DevTools
     {
         private const string MyGUID = "com.certifired.DevTools";
         private const string PluginName = "DevTools";
-        private const string VersionString = "2.1.7";
+        private const string VersionString = "2.2.0";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -101,7 +101,7 @@ namespace DevTools
             Log.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loading...");
 
             // GUI Settings
-            GuiToggleKey = Config.Bind("GUI", "Toggle Key", KeyCode.F8,
+            GuiToggleKey = Config.Bind("GUI", "Toggle Key", KeyCode.Insert,
                 "Key to toggle the DevTools GUI");
             ShowGui = Config.Bind("GUI", "Show GUI", false,
                 "Whether the GUI is currently visible");

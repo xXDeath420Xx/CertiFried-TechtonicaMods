@@ -21,7 +21,7 @@ namespace AtlantumReactor
     {
         private const string MyGUID = "com.certifired.AtlantumReactor";
         private const string PluginName = "AtlantumReactor";
-        private const string VersionString = "4.0.7";
+        private const string VersionString = "4.0.9";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;

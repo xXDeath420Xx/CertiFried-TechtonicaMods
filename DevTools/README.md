@@ -4,7 +4,7 @@ Comprehensive developer and cheat tools for Techtonica with a full in-game GUI.
 
 ## Features
 
-Press F8 to open the DevTools GUI with these tabs:
+Press **Insert** to open the DevTools GUI with these tabs:
 
 ### Player Tab
 - Infinite Crafting, Max Power, Ultra Pickaxe, Faster MOLE
@@ -46,7 +46,7 @@ Install via r2modman or manually place the DLL in your BepInEx/plugins folder.
 - Updated icon
 
 ### [2.0.0] - 2025-01-04
-- Complete In-Game GUI (Press F8)
+- Complete In-Game GUI (Press Insert)
 - Draggable window with tabbed interface
 - Live value updates
 - All cheat categories organized into tabs

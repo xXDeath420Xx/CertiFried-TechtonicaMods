@@ -15,7 +15,7 @@ namespace Restock
     {
         private const string MyGUID = "com.equinox.Restock";
         private const string PluginName = "Restock";
-        private const string VersionString = "3.0.6";
+        private const string VersionString = "3.0.8";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log = new ManualLogSource(PluginName);

@@ -13,17 +13,19 @@ using UnityEngine;
 using TechCategory = Unlock.TechCategory;
 using CoreType = ResearchCoreDefinition.CoreType;
 using ResearchTier = TechTreeState.ResearchTier;
+using TechtonicaFramework.TechTree;
 
 namespace MorePlanters
 {
     [BepInPlugin(MyGUID, PluginName, VersionString)]
     [BepInDependency("com.equinox.EquinoxsModUtils")]
     [BepInDependency("com.equinox.EMUAdditions")]
+    [BepInDependency("com.certifired.TechtonicaFramework")]
     public class MorePlantersPlugin : BaseUnityPlugin
     {
         private const string MyGUID = "com.equinox.MorePlanters";
         private const string PluginName = "MorePlanters";
-        private const string VersionString = "3.0.5";
+        private const string VersionString = "3.0.7";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -51,11 +53,11 @@ namespace MorePlanters
             // Add Planter MKII unlock
             EMUAdditions.AddNewUnlock(new NewUnlockDetails
             {
-                category = TechCategory.Synthesis,
+                category = ModdedTabModule.ModdedCategory,
                 coreTypeNeeded = CoreType.Blue,
                 coreCountNeeded = 100,
                 description = "Produces plants at 2x speed. Can produce two plants per seed.",
-                displayName = PlanterMk2Name,
+                displayName = "Planter MKII Tech",
                 requiredTier = ResearchTier.Tier1,
                 treePosition = 0
             });
@@ -63,11 +65,11 @@ namespace MorePlanters
             // Add Planter MKIII unlock
             EMUAdditions.AddNewUnlock(new NewUnlockDetails
             {
-                category = TechCategory.Synthesis,
+                category = ModdedTabModule.ModdedCategory,
                 coreTypeNeeded = CoreType.Blue,
                 coreCountNeeded = 250,
                 description = "Produces plants at 2x speed with integrated Thresher. Outputs processed materials directly.",
-                displayName = PlanterMk3Name,
+                displayName = "Planter MKIII Tech",
                 requiredTier = ResearchTier.Tier1,
                 treePosition = 0
             });
@@ -83,7 +85,7 @@ namespace MorePlanters
                 craftTierRequired = 0,
                 maxStackCount = 50,
                 sortPriority = 100,
-                unlockName = PlanterMk2Name,
+                unlockName = "Planter MKII Tech",
                 parentName = "Planter"
             });
 
@@ -97,7 +99,7 @@ namespace MorePlanters
                 craftTierRequired = 0,
                 maxStackCount = 50,
                 sortPriority = 101,
-                unlockName = PlanterMk3Name,
+                unlockName = "Planter MKIII Tech",
                 parentName = "Planter"
             });
 
@@ -108,7 +110,7 @@ namespace MorePlanters
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
                 duration = 5f,
-                unlockName = PlanterMk2Name,
+                unlockName = "Planter MKII Tech",
                 ingredients = new List<RecipeResourceInfo>
                 {
                     new RecipeResourceInfo("Planter", 1),
@@ -128,7 +130,7 @@ namespace MorePlanters
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
                 duration = 10f,
-                unlockName = PlanterMk3Name,
+                unlockName = "Planter MKIII Tech",
                 ingredients = new List<RecipeResourceInfo>
                 {
                     new RecipeResourceInfo(PlanterMk2Name, 1),
