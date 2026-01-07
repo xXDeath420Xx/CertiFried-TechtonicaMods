@@ -1,0 +1,35 @@
+[config]
+schemaVersion = "0.0.1"
+
+[general]
+repository = "https://thunderstore.io"
+
+[package]
+namespace = "CertiFried"
+name = "EnhancedLogistics"
+versionNumber = "3.2.0"
+description = "Comprehensive logistics with Search UI, Storage Networks, and DRONE SYSTEM. Three drone types: Delivery (item transport), Combat (engages aliens), Repair (fixes machines). Build Drone Ports to deploy autonomous drones."
+websiteUrl = "https://github.com/xXDeath420Xx/TTMod-EnhancedLogistics"
+containsNsfwContent = false
+
+[package.dependencies]
+BepInEx-BepInExPack = "5.4.2100"
+Equinox-EquinoxsModUtils = "6.1.3"
+Equinox-EMUAdditions = "2.0.0"
+
+[build]
+icon = "./icon.png"
+readme = "./README.md"
+outdir = "./build"
+
+[[build.copy]]
+source = "./bin/Debug/net472/EnhancedLogistics.dll"
+target = "/"
+
+[[build.copy]]
+source = "./CHANGELOG.md"
+target = "/"
+
+[publish]
+repository = "https://thunderstore.io"
+communities = ["techtonica"]

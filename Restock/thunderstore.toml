@@ -1,0 +1,34 @@
+[config]
+schemaVersion = "0.0.1"
+
+[general]
+repository = "https://thunderstore.io"
+
+[package]
+namespace = "CertiFried"
+name = "Restock_Updated"
+versionNumber = "3.0.8"
+description = "Auto-restocks inventory from nearby chests. Now with configurable cooldown for better performance. Updated for EMU 6.1.3."
+websiteUrl = "https://github.com/xXDeath420Xx/TTMod-Restock"
+containsNsfwContent = false
+
+[package.dependencies]
+BepInEx-BepInExPack = "5.4.2100"
+Equinox-EquinoxsModUtils = "6.1.3"
+
+[build]
+icon = "./icon.png"
+readme = "./README.md"
+outdir = "./build"
+
+[[build.copy]]
+source = "./bin/Release/net472/Restock.dll"
+target = "/"
+
+[[build.copy]]
+source = "./CHANGELOG.md"
+target = "/"
+
+[publish]
+repository = "https://thunderstore.io"
+communities = ["techtonica"]

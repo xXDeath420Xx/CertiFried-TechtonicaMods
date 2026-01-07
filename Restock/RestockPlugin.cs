@@ -1,0 +1,119 @@
+using BepInEx;
+using BepInEx.Configuration;
+using BepInEx.Logging;
+using EquinoxsModUtils;
+using HarmonyLib;
+using Mirror;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace Restock
+{
+    [BepInPlugin(MyGUID, PluginName, VersionString)]
+    public class RestockPlugin : BaseUnityPlugin
+    {
+        private const string MyGUID = "com.equinox.Restock";
+        private const string PluginName = "Restock";
+        private const string VersionString = "3.0.8";
+
+        private static readonly Harmony Harmony = new Harmony(MyGUID);
+        public static ManualLogSource Log = new ManualLogSource(PluginName);
+
+        public static string restockRadiusKey = "Restock Radius";
+        public static ConfigEntry<int> restockRadius;
+        public static ConfigEntry<float> restockCooldown;
+        private float lastRestockTime = 0f;
+
+        internal static Dictionary<string, ConfigEntry<int>> stacksDictionary = new Dictionary<string, ConfigEntry<int>>();
+
+        private Bounds scanZone;
+        private int buildablesMask = 2097512;
+
+        // Unity Functions
+
+        private void Awake() {
+            Logger.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loading...");
+            Harmony.PatchAll();
+
+            restockCooldown = Config.Bind<float>("General", "Restock Cooldown", 0.5f,
+                new ConfigDescription("Seconds between restock checks (reduces CPU usage)", new AcceptableValueRange<float>(0.1f, 5.0f)));
+            restockRadius = Config.Bind<int>("General", restockRadiusKey, 5, new ConfigDescription("The radius around the player to scan for chests", new AcceptableValueRange<int>(0, 10)));
+
+            foreach (string name in EMU.Names.Resources.SafeResources) {
+                // Skip duplicates in the resource list
+                if (stacksDictionary.ContainsKey(name)) continue;
+
+                bool isBuilding = IsItemBuilding(name);
+                string category = isBuilding ? "Buildings" : "Items";
+                int defaultValue = isBuilding ? 1 : 0;
+                stacksDictionary.Add(name, Config.Bind(category, name, defaultValue, new ConfigDescription($"The number of stacks of {name} to restock up to", new AcceptableValueRange<int>(0, int.MaxValue))));
+            }
+
+            Logger.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loaded.");
+            Log = Logger;
+        }
+
+        private void FixedUpdate() {
+            // MULTIPLAYER FIX: Only run on host/server to prevent inventory desync
+            // In multiplayer, only the server should modify inventories - clients would cause
+            // items to appear/disappear erratically as server resyncs its authoritative state
+            if (!NetworkServer.active) return;
+
+            // Throttle restock checks for performance
+            if (Time.time - lastRestockTime < restockCooldown.Value) return;
+            lastRestockTime = Time.time;
+
+            if (Player.instance == null) return;
+            int radius = restockRadius.Value;
+            scanZone = new Bounds {
+                center = Player.instance.transform.position,
+                extents = new Vector3(radius, 1, radius)
+            };
+
+            Collider[] colliders = Physics.OverlapBox(scanZone.center, scanZone.extents, Quaternion.identity, buildablesMask);
+            foreach(Collider collider in colliders) {
+                GenericMachineInstanceRef machine = FHG_Utils.FindMachineRef(collider.gameObject);
+                if (!machine.IsValid()) continue;
+                if (machine.typeIndex != MachineTypeEnum.Chest) continue;
+
+                ChestInstance chest = machine.Get<ChestInstance>();
+                Inventory inventory = chest.GetCommonInfo().inventories[0];
+                List<ResourceStack> nonEmptyStacks = inventory.myStacks.Where(stack => !stack.isEmpty).Distinct().ToList();
+                foreach (ResourceStack stack in nonEmptyStacks) {
+                    int maxStack = stack.maxStack;
+                    int amountInInventory = Player.instance.inventory.GetResourceCount(stack.info);
+                    int desiredAmount = 0;
+                    if (stacksDictionary.ContainsKey(stack.info.displayName)) {
+                        desiredAmount = stacksDictionary[stack.info.displayName].Value * maxStack;
+                    }
+
+                    if (amountInInventory >= desiredAmount || desiredAmount == 0) continue;
+
+                    int numPlayerNeeds = desiredAmount - amountInInventory;
+                    int toSend = numPlayerNeeds > stack.count ? stack.count - 1 : numPlayerNeeds;
+                    if (toSend == 0) continue;
+
+                    int resID = stack.info.uniqueId;
+                    if(!Player.instance.inventory.CanAddResources(resID, toSend)) continue;
+
+                    inventory.TryRemoveResources(stack.info.uniqueId, toSend);
+                    Player.instance.inventory.AddResources(resID, toSend);
+                }
+            }
+        }
+
+        // Private Functions
+
+        private bool IsItemBuilding(string name) {
+            int index = EMU.Names.Resources.SafeResources.IndexOf(name);
+            int bioBrickIndex = EMU.Names.Resources.SafeResources.IndexOf(EMU.Names.Resources.Biobrick);
+            int powerFloorIndex = EMU.Names.Resources.SafeResources.IndexOf(EMU.Names.Resources.PowerFloor);
+            int cornerIndex = EMU.Names.Resources.SafeResources.IndexOf(EMU.Names.Resources.SectionalCorner2x2);
+
+            if (index < bioBrickIndex) return true;
+            if (index >= powerFloorIndex && index <= cornerIndex) return true;
+            return false;
+        }
+    }
+}

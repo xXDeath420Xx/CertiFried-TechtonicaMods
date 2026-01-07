@@ -1,0 +1,30 @@
+[config]
+schemaVersion = "0.0.1"
+
+[package]
+namespace = "CertiFried"
+name = "BeltImmunity_Updated"
+versionNumber = "1.0.4"
+description = "Makes you immune to conveyor belt movement. Walk across belts without being pushed around!"
+websiteUrl = "https://github.com/xXDeath420Xx/TTMod-BeltImmunity"
+containsNsfwContent = false
+
+[package.dependencies]
+BepInEx-BepInExPack = "5.4.2100"
+
+[build]
+icon = "./icon.png"
+readme = "./README.md"
+outdir = "./thunderstore_build"
+
+[[build.copy]]
+source = "./bin/Release/net472/BeltImmunity.dll"
+target = "/"
+
+[[build.copy]]
+source = "./CHANGELOG.md"
+target = "/"
+
+[publish]
+repository = "https://thunderstore.io"
+communities = ["techtonica"]

@@ -1,0 +1,35 @@
+[config]
+schemaVersion = "0.0.1"
+
+[general]
+repository = "https://thunderstore.io"
+
+[package]
+namespace = "CertiFried"
+name = "AtlantumEnrichment"
+versionNumber = "1.0.0"
+description = "Dangerous Atlantum enrichment system with explosion risk, safety modules, and radiation zones. High risk, high reward!"
+websiteUrl = "https://github.com/CertiFried/TechtonicaMods"
+containsNsfwContent = false
+
+[package.dependencies]
+BepInEx-BepInExPack = "5.4.2100"
+Equinox-EquinoxsModUtils = "6.1.3"
+Equinox-EMUAdditions = "2.0.0"
+
+[build]
+icon = "./icon.png"
+readme = "./README.md"
+outdir = "./build"
+
+[[build.copy]]
+source = "./bin/Debug/net472/AtlantumEnrichment.dll"
+target = "/"
+
+[[build.copy]]
+source = "./CHANGELOG.md"
+target = "/"
+
+[publish]
+repository = "https://thunderstore.io"
+communities = ["techtonica"]
