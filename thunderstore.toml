@@ -7,9 +7,9 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "CertiFriedModpack"
-versionNumber = "1.0.0"
+versionNumber = "1.0.3"
 description = "Complete CertiFried mod collection for Techtonica. Adds advanced machines, new gameplay systems, logistics, exploration creatures, and quality-of-life improvements."
-websiteUrl = "https://github.com/xXDeath420Xx/CertiFried-Modpack"
+websiteUrl = "https://github.com/xXDeath420Xx/CertiFried-EMU613-Mods"
 containsNsfwContent = false
 
 [package.dependencies]
@@ -32,12 +32,12 @@ CertiFried-PlanterCoreClusters_Updated = "3.0.7"
 CertiFried-Restock_Updated = "3.0.8"
 CertiFried-SurvivalElements = "2.6.1"
 CertiFried-WormholeChests_Updated = "3.1.1"
-CertiFried-AmbientLife = "1.0.0"
-CertiFried-AtlantumEnrichment = "1.0.0"
-CertiFried-BioProcessing = "1.0.0"
-CertiFried-DroneLogistics = "1.1.0"
-CertiFried-PetsCompanions = "1.4.0"
-CertiFried-Recycler = "1.0.0"
+CertiFried-AmbientLife = "2.0.0"
+CertiFried-AtlantumEnrichment = "1.0.1"
+CertiFried-BioProcessing = "1.0.1"
+CertiFried-DroneLogistics = "1.1.1"
+CertiFried-PetsCompanions = "1.4.2"
+CertiFried-Recycler = "1.0.1"
 
 [build]
 icon = "./icon.png"
