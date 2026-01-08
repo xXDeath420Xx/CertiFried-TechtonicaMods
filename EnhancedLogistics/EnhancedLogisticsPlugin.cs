@@ -24,7 +24,7 @@ namespace EnhancedLogistics
     {
         private const string MyGUID = "com.certifired.EnhancedLogistics";
         private const string PluginName = "EnhancedLogistics";
-        private const string VersionString = "3.2.2";
+        private const string VersionString = "3.3.0";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -75,6 +75,17 @@ namespace EnhancedLogistics
         public static ConfigEntry<float> RepairDroneSpeed;
         public static ConfigEntry<float> RepairDroneRate;
         public static ConfigEntry<int> MaxDronesPerPort;
+
+        // ============================================
+        // STACK LIMIT FIXES (from Gratak-StackLimitsFixesAndCustomization)
+        // ============================================
+        public static ConfigEntry<bool> EnableStackLimitFixes;
+        public static ConfigEntry<int> SpectralCubeStackLimit;
+        public static ConfigEntry<int> CarbonPowderStackLimit;
+        public static ConfigEntry<int> ScrapOreStackLimit;
+        public static ConfigEntry<string> CustomStackOverrides;
+
+        private static bool stackLimitsApplied = false;
 
         // Machine Names
         public const string DronePortName = "Drone Port";
@@ -180,6 +191,18 @@ namespace EnhancedLogistics
                 new ConfigDescription("Health restored per second by repair drones", new AcceptableValueRange<float>(1f, 50f)));
             MaxDronesPerPort = Config.Bind("Drone Types", "Max Drones Per Port", 3,
                 new ConfigDescription("Maximum drones each port can deploy", new AcceptableValueRange<int>(1, 10)));
+
+            // Stack Limit Fixes (from Gratak-StackLimitsFixesAndCustomization)
+            EnableStackLimitFixes = Config.Bind("Stack Limits", "Enable Stack Limit Fixes", true,
+                "Enable fixes for broken stack limits (Spectral Cube, Carbon Powder, Scrap Ore)");
+            SpectralCubeStackLimit = Config.Bind("Stack Limits", "Spectral Cube X100 Limit", 500,
+                new ConfigDescription("Stack limit for Spectral Cube X100 (default 1 is bugged, should be 500)", new AcceptableValueRange<int>(1, 1000)));
+            CarbonPowderStackLimit = Config.Bind("Stack Limits", "Carbon Powder Limit", 1000,
+                new ConfigDescription("Stack limit for Carbon Powder (default 500 causes issues with blast smelting)", new AcceptableValueRange<int>(500, 5000)));
+            ScrapOreStackLimit = Config.Bind("Stack Limits", "Scrap Ore Limit", 500,
+                new ConfigDescription("Stack limit for Scrap Ore (default 250 causes crushing to get stuck)", new AcceptableValueRange<int>(250, 2000)));
+            CustomStackOverrides = Config.Bind("Stack Limits", "Custom Stack Overrides", "",
+                "Custom stack limits in format: ItemName:Limit,ItemName2:Limit2 (e.g., 'Copper Ingot:2000,Iron Ingot:2000')");
 
             Harmony.PatchAll();
 
@@ -369,6 +392,98 @@ namespace EnhancedLogistics
         private void OnGameDefinesLoaded()
         {
             InitializeMaterials();
+            ApplyStackLimitFixes();
+        }
+
+        /// <summary>
+        /// Apply stack limit fixes for broken items (from Gratak-StackLimitsFixesAndCustomization)
+        /// </summary>
+        private void ApplyStackLimitFixes()
+        {
+            if (!EnableStackLimitFixes.Value || stackLimitsApplied) return;
+
+            try
+            {
+                int fixedCount = 0;
+
+                // Fix Spectral Cube X100 (displayName contains "Spectral Cube" and is colorless/x100 variant)
+                fixedCount += FixStackLimit("Spectral Cube Colorless X100", SpectralCubeStackLimit.Value);
+
+                // Fix Carbon Powder
+                fixedCount += FixStackLimit("Carbon Powder", CarbonPowderStackLimit.Value);
+
+                // Fix Scrap Ore
+                fixedCount += FixStackLimit("Scrap Ore", ScrapOreStackLimit.Value);
+
+                // Apply custom overrides
+                if (!string.IsNullOrEmpty(CustomStackOverrides.Value))
+                {
+                    var overrides = CustomStackOverrides.Value.Split(',');
+                    foreach (var entry in overrides)
+                    {
+                        var parts = entry.Trim().Split(':');
+                        if (parts.Length == 2 && int.TryParse(parts[1].Trim(), out int limit))
+                        {
+                            string itemName = parts[0].Trim();
+                            fixedCount += FixStackLimit(itemName, limit);
+                        }
+                    }
+                }
+
+                stackLimitsApplied = true;
+                Log.LogInfo($"Stack limit fixes applied: {fixedCount} items modified");
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"Failed to apply stack limit fixes: {ex.Message}");
+            }
+        }
+
+        private int FixStackLimit(string itemName, int newLimit)
+        {
+            try
+            {
+                // Try to find the resource by display name or internal name
+                ResourceInfo resource = null;
+
+                // First try direct name lookup
+                resource = EMU.Resources.GetResourceInfoByName(itemName);
+
+                // If not found, search through all resources
+                if (resource == null && GameDefines.instance?.resources != null)
+                {
+                    foreach (var res in GameDefines.instance.resources)
+                    {
+                        if (res != null &&
+                            (res.displayName.Equals(itemName, StringComparison.OrdinalIgnoreCase) ||
+                             res.name.Equals(itemName, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            resource = res;
+                            break;
+                        }
+                    }
+                }
+
+                if (resource != null)
+                {
+                    int oldLimit = resource.maxStackCount;
+                    if (oldLimit != newLimit)
+                    {
+                        resource.maxStackCount = newLimit;
+                        Log.LogInfo($"Stack limit fixed: {resource.displayName} ({oldLimit} -> {newLimit})");
+                        return 1;
+                    }
+                }
+                else
+                {
+                    Log.LogWarning($"Could not find item for stack fix: {itemName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to fix stack limit for {itemName}: {ex.Message}");
+            }
+            return 0;
         }
 
         private void OnTechTreeStateLoaded()

@@ -3,6 +3,7 @@ using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using UnityEngine;
 
 namespace ChainExplosives
 {
@@ -11,7 +12,7 @@ namespace ChainExplosives
     {
         private const string MyGUID = "com.certifired.ChainExplosives";
         private const string PluginName = "ChainExplosives";
-        private const string VersionString = "1.0.4";
+        private const string VersionString = "1.1.0";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -23,6 +24,11 @@ namespace ChainExplosives
         // Config options
         public static ConfigEntry<bool> debugMode;
 
+        // Bigger Explosives config (from Equinox-BiggerExplosives)
+        public static ConfigEntry<int> ExplosionWidth;
+        public static ConfigEntry<int> ExplosionDepth;
+        public static ConfigEntry<bool> BiggerExplosivesEnabled;
+
         private void Awake()
         {
             Log = Logger;
@@ -30,11 +36,22 @@ namespace ChainExplosives
             debugMode = Config.Bind("Debug", "Debug Mode", false,
                 "Enable debug logging for troubleshooting");
 
+            // Bigger Explosives settings
+            BiggerExplosivesEnabled = Config.Bind("Bigger Explosives", "Enabled", true,
+                "Enable configurable explosion size (like Equinox-BiggerExplosives)");
+            ExplosionWidth = Config.Bind("Bigger Explosives", "Explosion Width", 11,
+                new ConfigDescription("Width of the resulting tunnel (0-15)", new AcceptableValueRange<int>(0, 15)));
+            ExplosionDepth = Config.Bind("Bigger Explosives", "Explosion Depth", 20,
+                new ConfigDescription("Distance from the explosive to dig (1-30)", new AcceptableValueRange<int>(1, 30)));
+
             Logger.LogInfo($"{PluginName} v{VersionString} is loading...");
             Harmony.PatchAll(typeof(ExplosiveDefinitionPatch));
             Harmony.PatchAll(typeof(ExplosiveInteractionPatch));
             Harmony.PatchAll(typeof(ExplosiveInstancePatch));
-            Logger.LogInfo($"{PluginName} v{VersionString} loaded - Interact with any explosive to detonate ALL placed explosives!");
+            Harmony.PatchAll(typeof(BiggerExplosivesPatch));
+            Logger.LogInfo($"{PluginName} v{VersionString} loaded!");
+            Logger.LogInfo($"  Chain Detonation: Interact with any explosive to detonate ALL");
+            Logger.LogInfo($"  Bigger Explosives: Width={ExplosionWidth.Value}, Depth={ExplosionDepth.Value}");
         }
 
         public static void LogDebug(string message)
@@ -133,6 +150,68 @@ namespace ChainExplosives
                 ChainExplosivesPlugin.explosives.RemoveAll(e => e.commonInfo.instanceId == instanceId);
                 ChainExplosivesPlugin.LogDebug($"Removed explosive #{instanceId} from tracking");
             }
+        }
+    }
+
+    /// <summary>
+    /// Bigger Explosives - Modifies explosion width and depth
+    /// Based on Equinox-BiggerExplosives functionality
+    /// </summary>
+    [HarmonyPatch(typeof(ExplosiveDefinition))]
+    public static class BiggerExplosivesPatch
+    {
+        /// <summary>
+        /// Modify explosion parameters before detonation
+        /// ExplosiveDefinition contains the blast parameters
+        /// </summary>
+        [HarmonyPatch("Detonate")]
+        [HarmonyPrefix]
+        static void ModifyExplosionSize(ExplosiveDefinition __instance, ref ExplosiveInstance explosive)
+        {
+            if (!ChainExplosivesPlugin.BiggerExplosivesEnabled.Value) return;
+
+            try
+            {
+                // ExplosiveDefinition has blast parameters we can modify
+                // blastWidth controls the width of the tunnel
+                // blastDistance controls how far the explosion digs
+
+                int configWidth = ChainExplosivesPlugin.ExplosionWidth.Value;
+                int configDepth = ChainExplosivesPlugin.ExplosionDepth.Value;
+
+                // Store original values for logging
+                int origWidth = __instance.blastWidth;
+                int origDist = __instance.blastDistance;
+
+                // Apply configured values
+                __instance.blastWidth = configWidth;
+                __instance.blastDistance = configDepth;
+
+                ChainExplosivesPlugin.LogDebug($"Modified explosion: Width {origWidth}->{configWidth}, Depth {origDist}->{configDepth}");
+            }
+            catch (System.Exception ex)
+            {
+                ChainExplosivesPlugin.Log.LogWarning($"Failed to modify explosion size: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Alternative patch for VoxelBlaster if ExplosiveDefinition.Detonate doesn't have the params
+        /// VoxelBlaster.BlastDirectional is called with width/distance parameters
+        /// </summary>
+        [HarmonyPatch(typeof(VoxelBlaster), "BlastDirectional")]
+        [HarmonyPrefix]
+        static void ModifyBlastDirectional(ref int width, ref int distance)
+        {
+            if (!ChainExplosivesPlugin.BiggerExplosivesEnabled.Value) return;
+
+            int origWidth = width;
+            int origDist = distance;
+
+            width = ChainExplosivesPlugin.ExplosionWidth.Value;
+            distance = ChainExplosivesPlugin.ExplosionDepth.Value;
+
+            ChainExplosivesPlugin.LogDebug($"BlastDirectional modified: Width {origWidth}->{width}, Distance {origDist}->{distance}");
         }
     }
 }

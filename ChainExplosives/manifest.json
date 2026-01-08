@@ -1,8 +1,8 @@
 {
   "name": "ChainExplosives_Updated",
-  "version_number": "1.0.0",
+  "version_number": "1.1.0",
   "website_url": "https://github.com/CubeSuite/TTMod-ChainExplosives",
-  "description": "Interact with one explosive to detonate ALL placed explosives at once! Chain reaction mining!",
+  "description": "Chain detonation + Bigger Explosives! Interact with one explosive to detonate ALL. Configurable width (0-15) and depth (1-30).",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100"
   ]

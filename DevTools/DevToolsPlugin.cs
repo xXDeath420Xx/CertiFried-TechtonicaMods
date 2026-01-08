@@ -13,7 +13,7 @@ namespace DevTools
     {
         private const string MyGUID = "com.certifired.DevTools";
         private const string PluginName = "DevTools";
-        private const string VersionString = "2.2.0";
+        private const string VersionString = "2.3.0";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -68,6 +68,20 @@ namespace DevTools
         public static ConfigEntry<bool> RainbowCores;
         public static ConfigEntry<bool> PlaceholderVoice;
 
+        // ============================================
+        // FREEBIES (from CaspersFreebies)
+        // ============================================
+        public static ConfigEntry<bool> UnlockAllRecipes;
+
+        // ============================================
+        // PROTECTION REMOVAL (from CasperProtections)
+        // ============================================
+        public static ConfigEntry<bool> DisableDigProtection;
+        public static ConfigEntry<bool> DisablePrebuildProtection;
+        public static ConfigEntry<bool> DisableSafeSprint;
+        public static ConfigEntry<bool> HoldToSprint;
+
+        private static bool recipesUnlocked = false;
         private static bool isInitialized = false;
         private static bool settingsApplied = false;
         private static float rainbowHue = 0f;
@@ -77,7 +91,7 @@ namespace DevTools
         private static Rect windowRect = new Rect(20, 20, 420, 600);
         private static Vector2 scrollPosition = Vector2.zero;
         private static int currentTab = 0;
-        private static string[] tabNames = { "Player", "Game Mode", "Machines", "Power", "Special" };
+        private static string[] tabNames = { "Player", "Game Mode", "Machines", "Power", "Special", "Freebies" };
         private static GUIStyle headerStyle;
         private static GUIStyle boxStyle;
         private static bool stylesInitialized = false;
@@ -170,6 +184,20 @@ namespace DevTools
                 "Memory Tree cores cycle through rainbow colors");
             PlaceholderVoice = Config.Bind("SpecialCheats", "Placeholder Voice", false,
                 "Enable placeholder voice lines (developer audio)");
+
+            // Freebies (from CaspersFreebies)
+            UnlockAllRecipes = Config.Bind("Freebies", "Unlock All Recipes", false,
+                "Unlock all recipes in the game (like CaspersFreebies)");
+
+            // Protection Removal (from CasperProtections)
+            DisableDigProtection = Config.Bind("ProtectionRemoval", "Disable Dig Protection", false,
+                "Remove protection zones for digging - unrestricted excavation");
+            DisablePrebuildProtection = Config.Bind("ProtectionRemoval", "Disable Prebuild Protection", false,
+                "Allow dismantling and modifying pre-built objects");
+            DisableSafeSprint = Config.Bind("ProtectionRemoval", "Disable Safe Sprint", false,
+                "Allow full sprint speed indoors (no slow running in buildings)");
+            HoldToSprint = Config.Bind("ProtectionRemoval", "Hold To Sprint", false,
+                "Sprint only while holding the sprint key (no toggle)");
 
             // Initialize input fields
             simSpeedInput = SimSpeed.Value.ToString("F1");
@@ -298,6 +326,7 @@ namespace DevTools
                 case 2: DrawMachinesTab(); break;
                 case 3: DrawPowerTab(); break;
                 case 4: DrawSpecialTab(); break;
+                case 5: DrawFreebiesTab(); break;
             }
 
             GUILayout.EndScrollView();
@@ -649,6 +678,111 @@ namespace DevTools
             GUILayout.EndVertical();
         }
 
+        private void DrawFreebiesTab()
+        {
+            GUILayout.Label("Freebies & Protection Removal", headerStyle);
+            GUILayout.Label("Features from CaspersFreebies & CasperProtections", GUI.skin.label);
+            GUILayout.Space(10);
+
+            // Freebies Section
+            GUILayout.BeginVertical(boxStyle);
+            GUILayout.Label("Recipe Unlocks", headerStyle);
+            GUILayout.Space(5);
+
+            GUI.color = UnlockAllRecipes.Value ? Color.green : Color.white;
+            UnlockAllRecipes.Value = GUILayout.Toggle(UnlockAllRecipes.Value, " Unlock All Recipes");
+            GUI.color = Color.white;
+            GUILayout.Label("  Unlocks every recipe in the game", GUI.skin.label);
+            GUILayout.Label("  Build anything without tech tree progress", GUI.skin.label);
+
+            if (UnlockAllRecipes.Value && !recipesUnlocked)
+            {
+                GUILayout.Space(5);
+                if (GUILayout.Button("Apply Recipe Unlock Now", GUILayout.Height(30)))
+                {
+                    UnlockAllRecipesNow();
+                }
+            }
+
+            if (recipesUnlocked)
+            {
+                GUILayout.Label("  Status: All recipes unlocked!", GUI.skin.label);
+            }
+
+            GUILayout.Space(10);
+            GUILayout.Label("Note: InfiniteCrafting (Player tab) = build without resources", GUI.skin.label);
+            GUILayout.EndVertical();
+
+            GUILayout.Space(10);
+
+            // Protection Removal Section
+            GUILayout.BeginVertical(boxStyle);
+            GUILayout.Label("Protection Removal", headerStyle);
+            GUILayout.Space(5);
+
+            GUI.color = DisableDigProtection.Value ? Color.yellow : Color.white;
+            DisableDigProtection.Value = GUILayout.Toggle(DisableDigProtection.Value, " Disable Dig Protection");
+            GUI.color = Color.white;
+            GUILayout.Label("  Remove protection zones for digging", GUI.skin.label);
+            GUILayout.Label("  Dig anywhere without restrictions", GUI.skin.label);
+            GUILayout.Space(5);
+
+            GUI.color = DisablePrebuildProtection.Value ? Color.yellow : Color.white;
+            DisablePrebuildProtection.Value = GUILayout.Toggle(DisablePrebuildProtection.Value, " Disable Prebuild Protection");
+            GUI.color = Color.white;
+            GUILayout.Label("  Dismantle pre-built structures", GUI.skin.label);
+            GUILayout.Label("  Modify any existing objects", GUI.skin.label);
+            GUILayout.Space(5);
+
+            GUI.color = DisableSafeSprint.Value ? Color.yellow : Color.white;
+            DisableSafeSprint.Value = GUILayout.Toggle(DisableSafeSprint.Value, " Disable Safe Sprint");
+            GUI.color = Color.white;
+            GUILayout.Label("  Full sprint speed indoors", GUI.skin.label);
+            GUILayout.Label("  No slow running in buildings", GUI.skin.label);
+            GUILayout.Space(5);
+
+            GUI.color = HoldToSprint.Value ? Color.cyan : Color.white;
+            HoldToSprint.Value = GUILayout.Toggle(HoldToSprint.Value, " Hold To Sprint");
+            GUI.color = Color.white;
+            GUILayout.Label("  Sprint only while holding key", GUI.skin.label);
+            GUILayout.Label("  No toggle mode", GUI.skin.label);
+
+            GUILayout.EndVertical();
+        }
+
+        private void UnlockAllRecipesNow()
+        {
+            try
+            {
+                if (GameResources.instance == null)
+                {
+                    Log.LogWarning("Cannot unlock recipes - GameResources not available");
+                    return;
+                }
+
+                int count = 0;
+                var unlocks = GameResources.instance.allUnlocks;
+                if (unlocks != null)
+                {
+                    foreach (var unlock in unlocks)
+                    {
+                        if (unlock != null && !TechTreeState.instance.IsUnlockKnown(unlock.uniqueId))
+                        {
+                            TechTreeState.instance.Unlock(unlock, false);
+                            count++;
+                        }
+                    }
+                }
+
+                recipesUnlocked = true;
+                Log.LogInfo($"Unlocked {count} recipes/technologies!");
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"Failed to unlock recipes: {ex.Message}");
+            }
+        }
+
         private void ApplyPlayerCheats()
         {
             var cheats = Player.instance?.cheats;
@@ -820,5 +954,90 @@ namespace DevTools
 
         // Note: OnGameModeSettingsChanged patch removed - method doesn't exist in current game version
         // Cat sounds are applied directly in Update() via ApplyCatSounds()
+
+        // ============================================
+        // PROTECTION REMOVAL PATCHES (from CasperProtections)
+        // ============================================
+
+        /// <summary>
+        /// Disable dig protection zones - allows digging anywhere
+        /// </summary>
+        [HarmonyPatch(typeof(VoxelBlaster), "IsPositionProtected")]
+        [HarmonyPrefix]
+        private static bool DisableDigProtection(ref bool __result)
+        {
+            if (!DevToolsPlugin.DisableDigProtection.Value) return true; // Run original
+
+            __result = false; // Position is never protected
+            return false; // Skip original method
+        }
+
+        /// <summary>
+        /// Disable prebuild protection - allows dismantling pre-built objects
+        /// </summary>
+        [HarmonyPatch(typeof(SaveState), "IsMachineIndestructible")]
+        [HarmonyPrefix]
+        private static bool DisablePrebuildProtection(ref bool __result)
+        {
+            if (!DevToolsPlugin.DisablePrebuildProtection.Value) return true; // Run original
+
+            __result = false; // Machine is never indestructible
+            return false; // Skip original method
+        }
+
+        /// <summary>
+        /// Disable safe sprint - allows full sprint speed indoors
+        /// Patches the movement system to ignore indoor sprint restrictions
+        /// </summary>
+        [HarmonyPatch(typeof(CharacterMovement), "GetMaxSpeed")]
+        [HarmonyPostfix]
+        private static void DisableSafeSprint(ref float __result, CharacterMovement __instance)
+        {
+            if (!DevToolsPlugin.DisableSafeSprint.Value) return;
+
+            try
+            {
+                // If player is sprinting but speed was reduced due to being indoors,
+                // restore the full sprint speed
+                if (__instance.IsSprinting && __result < __instance.sprintSpeed)
+                {
+                    __result = __instance.sprintSpeed;
+                }
+            }
+            catch
+            {
+                // Silently ignore
+            }
+        }
+
+        /// <summary>
+        /// Hold to sprint - sprint only while holding the key (no toggle)
+        /// </summary>
+        [HarmonyPatch(typeof(CharacterMovement), "UpdateSprintState")]
+        [HarmonyPrefix]
+        private static bool HoldToSprintPatch(CharacterMovement __instance)
+        {
+            if (!DevToolsPlugin.HoldToSprint.Value) return true; // Run original
+
+            try
+            {
+                // Simple hold-to-sprint: sprint state matches key state directly
+                bool sprintKeyHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+                // Use reflection to set sprint state since it may be private
+                var sprintingField = typeof(CharacterMovement).GetField("isSprinting",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (sprintingField != null)
+                {
+                    sprintingField.SetValue(__instance, sprintKeyHeld);
+                }
+
+                return false; // Skip original toggle logic
+            }
+            catch
+            {
+                return true; // Run original if we fail
+            }
+        }
     }
 }
