@@ -1,9 +1,9 @@
 {
-  "name": "BeltImmunity",
-  "version_number": "1.0.0",
-  "website_url": "https://github.com/CubeSuite/TTMod-BeltImmunity",
-  "description": "Makes you immune to conveyor belt movement. Walk across belts without being pushed around!",
-  "dependencies": [
-    "BepInEx-BepInExPack-5.4.2100"
-  ]
+    "name":  "BeltImmunity_Updated",
+    "version_number":  "1.0.0",
+    "website_url":  "https://github.com/CubeSuite/TTMod-BeltImmunity",
+    "description":  "Makes you immune to conveyor belt movement. Walk across belts without being pushed around!",
+    "dependencies":  [
+                         "BepInEx-BepInExPack-5.4.2100"
+                     ]
 }

@@ -1,10 +1,10 @@
 {
-  "name": "Restock",
-  "version_number": "3.0.8",
-  "website_url": "https://github.com/CertiFried-Mods/TTMod-Restock",
-  "description": "Automatic inventory restocking system for convenient resource management",
-  "dependencies": [
-    "BepInEx-BepInExPack-5.4.2100",
-    "Equinox-EquinoxsModUtils-6.1.1"
-  ]
+    "name":  "Restock_Updated",
+    "version_number":  "3.0.8",
+    "website_url":  "https://github.com/CertiFried-Mods/TTMod-Restock",
+    "description":  "Automatic inventory restocking system for convenient resource management",
+    "dependencies":  [
+                         "BepInEx-BepInExPack-5.4.2100",
+                         "Equinox-EquinoxsModUtils-6.1.1"
+                     ]
 }
