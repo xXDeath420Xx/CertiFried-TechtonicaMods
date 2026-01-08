@@ -24,7 +24,7 @@ namespace MechSuit
     {
         public const string MyGUID = "com.certifired.MechSuit";
         public const string PluginName = "MechSuit";
-        public const string VersionString = "1.0.0";
+        public const string VersionString = "1.1.0";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -83,10 +83,10 @@ namespace MechSuit
         {
             EnableMechSuits = Config.Bind("General", "Enable Mech Suits", true,
                 "Enable mech suit functionality");
-            ToggleSuitKey = Config.Bind("Controls", "Toggle Suit Key", KeyCode.F10,
-                "Key to toggle mech suit on/off (F10 - no conflicts with game or other mods)");
-            AbilityKey = Config.Bind("Controls", "Ability Key", KeyCode.G,
-                "Key to activate special ability (G - no conflicts)");
+            ToggleSuitKey = Config.Bind("Controls", "Toggle Suit Key", KeyCode.Keypad5,
+                "Key to toggle mech suit on/off (Numpad 5 - F10 conflicts with HazardousWorld)");
+            AbilityKey = Config.Bind("Controls", "Ability Key", KeyCode.Keypad6,
+                "Key to activate special ability (Numpad 6 - G may conflict with game interactions)");
             SelectedVariant = Config.Bind("Mech", "Mech Variant", MechVariant.Standard,
                 "Selected mech suit variant (Standard/Heavy/Light)");
             SuitScale = Config.Bind("Visuals", "Suit Scale", 1.0f,

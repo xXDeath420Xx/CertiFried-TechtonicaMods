@@ -26,7 +26,7 @@ namespace NarrativeExpansion
     {
         public const string MyGUID = "com.certifired.NarrativeExpansion";
         public const string PluginName = "NarrativeExpansion";
-        public const string VersionString = "2.7.0";
+        public const string VersionString = "2.8.0";
         public static string PluginPath;
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
@@ -108,8 +108,8 @@ namespace NarrativeExpansion
             NPCInteractionRange = Config.Bind("NPCs", "Interaction Range", 5f,
                 "Distance at which NPCs can be interacted with");
 
-            NPCInteractKey = Config.Bind("NPCs", "Interact Key", KeyCode.K,
-                "Key to interact with NPCs (K for 'talk' - E is used by game for machine interaction)");
+            NPCInteractKey = Config.Bind("NPCs", "Interact Key", KeyCode.Backslash,
+                "Key to interact with NPCs (\\ - K is game's Databank menu)");
 
             DebugMode = Config.Bind("General", "Debug Mode", false, "Enable debug logging");
         }

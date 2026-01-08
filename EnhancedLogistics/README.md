@@ -30,7 +30,7 @@ Enhanced Logistics is a comprehensive mod that adds powerful logistics features 
 
 ### Universal Search System
 
-Press **Ctrl+F** to open a powerful in-game search interface that lets you find anything quickly.
+Press **]** (Right Bracket) to open a powerful in-game search interface that lets you find anything quickly.
 
 **Capabilities:**
 - **Real-time search** - Results update as you type (minimum 2 characters)
@@ -45,7 +45,7 @@ Press **Ctrl+F** to open a powerful in-game search interface that lets you find 
 - **Resolution independent** - UI scales properly for any screen size
 
 **Search UI Configuration Options:**
-- Toggle Key (default: F, used with Ctrl modifier)
+- Toggle Key (default: RightBracket `]` - L is game's Log menu)
 - Enable/Disable search functionality
 - Toggle searching in Inventory, Crafting, Tech Tree, and Build Menu independently
 
@@ -92,7 +92,7 @@ Enhance your factory's inserters with improved performance and smart features.
 
 A comprehensive drone system featuring three specialized drone types, each with their own port machines and behaviors.
 
-Press **J** to open the Drone Management window.
+Press **[** (Left Bracket) to open the Drone Management window.
 
 #### Drone Types
 
@@ -127,7 +127,7 @@ Each port can deploy up to 3 drones (configurable, 1-10).
 
 #### Drone Management UI
 
-The Drone Management window (press J) provides:
+The Drone Management window (press `[`) provides:
 - Active drone count by type
 - Drone port status
 - Pending delivery queue
@@ -140,7 +140,7 @@ The Drone Management window (press J) provides:
 - Drone Capacity (8-128 items)
 - Drone Speed (5-50 units/second)
 - Drone Range (50-500 meters)
-- Drone Menu Key (default: J)
+- Drone Menu Key (default: LeftBracket `[` - J is game's Journal menu)
 - Delivery Drone Speed (5-30)
 - Combat Drone Speed (5-40)
 - Combat Drone Damage (5-100)
@@ -262,8 +262,12 @@ Enhanced Logistics is designed to work with and enhance other mods:
 
 ## Changelog
 
-### [3.2.2] - Latest
-- Current stable release
+### [3.4.0] - Latest
+- **KEYBINDING FIX**: Changed Search Toggle from L to RightBracket (]) - L is game's Log menu
+- **KEYBINDING FIX**: Changed Drone Menu from J to LeftBracket ([) - J is game's Journal menu
+
+### [3.3.0] - Previous
+- Stack limit fixes integration
 
 ### [2.0.4] - 2025-01-05
 - Updated icon
@@ -320,4 +324,4 @@ For the full license text, see: https://www.gnu.org/licenses/gpl-3.0.en.html
 
 ---
 
-*Enhanced Logistics v3.2.2 - Making factory automation smarter*
+*Enhanced Logistics v3.4.0 - Making factory automation smarter*

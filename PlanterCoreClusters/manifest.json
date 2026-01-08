@@ -1,11 +1,12 @@
 {
   "name": "PlanterCoreClusters",
-  "version_number": "3.0.7",
+  "version_number": "3.1.0",
   "website_url": "https://github.com/CertiFried-Mods/TTMod-PlanterCoreClusters",
   "description": "Adds cluster planting capabilities for cores with efficient mass production",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100",
     "Equinox-EquinoxsModUtils-6.1.1",
-    "Equinox-EMUAdditions-2.1.1"
+    "Equinox-EMUAdditions-2.1.1",
+    "CertiFried-TechtonicaFramework-1.4.0"
   ]
 }

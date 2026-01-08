@@ -14,7 +14,7 @@ namespace OmniseekerPlus
     {
         private const string MyGUID = "com.certifired.OmniseekerPlus";
         private const string PluginName = "OmniseekerPlus";
-        private const string VersionString = "1.0.7";
+        private const string VersionString = "1.1.0";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -102,15 +102,15 @@ namespace OmniseekerPlus
                 new ConfigDescription("Intensity of the scan pulse effect", new AcceptableValueRange<float>(0.5f, 3f)));
 
             // Hotkeys
-            CycleModeKey = Config.Bind("Hotkeys", "Cycle Mode Key", KeyCode.O,
-                "Key to cycle through scan modes");
-            QuickScanKey = Config.Bind("Hotkeys", "Quick Scan Key", KeyCode.P,
-                "Key to perform a quick area scan");
+            CycleModeKey = Config.Bind("Hotkeys", "Cycle Mode Key", KeyCode.Keypad4,
+                "Key to cycle through scan modes (Numpad 4 - O may be remapped in game)");
+            QuickScanKey = Config.Bind("Hotkeys", "Quick Scan Key", KeyCode.Keypad3,
+                "Key to perform a quick area scan (Numpad 3 - P is game's Power menu)");
 
             Harmony.PatchAll();
 
             Log.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loaded.");
-            Log.LogInfo($"Press {CycleModeKey.Value} to cycle scan modes, {QuickScanKey.Value} for quick scan");
+            Log.LogInfo($"Press Numpad4 to cycle scan modes, Numpad3 for quick scan");
         }
 
         private void Update()
@@ -128,7 +128,7 @@ namespace OmniseekerPlus
                 PerformQuickScan();
             }
 
-            // Toggle GUI with shift+O
+            // Toggle GUI with shift+Numpad4
             if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(CycleModeKey.Value))
             {
                 showGui = !showGui;

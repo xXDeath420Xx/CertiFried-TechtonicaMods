@@ -36,9 +36,11 @@ The mod features six distinct scan modes, configurable hotkeys for quick access,
 6. **Custom**: Use your individual config settings to create a personalized scan profile
 
 ### Quick Access Controls
-- **Quick Scan Hotkey** (Default: `P`): Perform an instant area scan with one keypress
-- **Mode Cycling** (Default: `O`): Quickly cycle through all six scan modes
-- **GUI Toggle** (Default: `Shift+O`): Open the full in-game interface
+- **Quick Scan Hotkey** (Default: `Numpad 3`): Perform an instant area scan with one keypress
+- **Mode Cycling** (Default: `Numpad 4`): Quickly cycle through all six scan modes
+- **GUI Toggle** (Default: `Shift+Numpad 4`): Open the full in-game interface
+
+> **Note:** Original keys O and P were changed to Numpad keys to avoid conflicts with game menus (P is Power menu).
 
 ### In-Game GUI
 - Mode selection buttons for quick switching
@@ -63,22 +65,22 @@ The mod features six distinct scan modes, configurable hotkeys for quick access,
 ## How to Use
 
 ### Basic Scanning
-1. Press `P` (default) to perform a quick scan of your surroundings
+1. Press `Numpad 3` (default) to perform a quick scan of your surroundings
 2. Results will be logged to the console and stored for GUI viewing
-3. Press `Shift+O` to open the GUI and see detailed results
+3. Press `Shift+Numpad 4` to open the GUI and see detailed results
 
 ### Changing Scan Modes
-1. Press `O` (default) to cycle through available modes
-2. Alternatively, open the GUI with `Shift+O` and click mode buttons
+1. Press `Numpad 4` (default) to cycle through available modes
+2. Alternatively, open the GUI with `Shift+Numpad 4` and click mode buttons
 3. The current mode affects what objects are detected during scans
 
 ### Using the GUI
-1. Press `Shift+O` to open/close the interface
+1. Press `Shift+Numpad 4` to open/close the interface
 2. Click any mode button to switch scan modes
 3. Click "Perform Quick Scan" to scan with current settings
 4. Scroll through results sorted by distance
 5. Use toggles at the bottom to adjust display options
-6. Click "Close" or press `Shift+O` again to close
+6. Click "Close" or press `Shift+Numpad 4` again to close
 
 ### Configuration
 All settings can be adjusted in the config file located at:
@@ -104,8 +106,8 @@ All settings can be adjusted in the config file located at:
 - `Pulse Intensity`: 0.5 - 3.0 (default: 1.5)
 
 **Hotkeys:**
-- `Cycle Mode Key`: Any KeyCode (default: O)
-- `Quick Scan Key`: Any KeyCode (default: P)
+- `Cycle Mode Key`: Any KeyCode (default: Numpad 4 - O may be remapped in game)
+- `Quick Scan Key`: Any KeyCode (default: Numpad 3 - P is game's Power menu)
 
 ---
 
@@ -147,8 +149,12 @@ All settings can be adjusted in the config file located at:
 
 ## Changelog
 
-### [1.0.7] - Current
-- Latest stable release
+### [1.1.0] - Current
+- **KEYBINDING FIX**: Changed Cycle Mode from O to Numpad 4 - O may be remapped in game
+- **KEYBINDING FIX**: Changed Quick Scan from P to Numpad 3 - P is game's Power menu
+
+### [1.0.7] - Previous
+- Stability improvements
 
 ### [1.0.5] - 2025-01-05
 - Updated mod icon

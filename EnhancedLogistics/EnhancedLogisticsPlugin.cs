@@ -24,7 +24,7 @@ namespace EnhancedLogistics
     {
         private const string MyGUID = "com.certifired.EnhancedLogistics";
         private const string PluginName = "EnhancedLogistics";
-        private const string VersionString = "3.3.0";
+        private const string VersionString = "3.4.0";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -129,8 +129,8 @@ namespace EnhancedLogistics
             Log.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loading...");
 
             // Search UI Settings
-            SearchToggleKey = Config.Bind("Search UI", "Toggle Key", KeyCode.L,
-                "Key to toggle the search UI (Ctrl+L for 'locate' - F is game's flashlight)");
+            SearchToggleKey = Config.Bind("Search UI", "Toggle Key", KeyCode.RightBracket,
+                "Key to toggle the search UI (] for 'locate' - L is game's Log menu)");
             EnableSearchUI = Config.Bind("Search UI", "Enable Search UI", true,
                 "Enable the search functionality");
             SearchInventory = Config.Bind("Search UI", "Search Inventory", true,
@@ -173,8 +173,8 @@ namespace EnhancedLogistics
                 new ConfigDescription("Drone movement speed (units/second)", new AcceptableValueRange<float>(5f, 50f)));
             DroneRange = Config.Bind("Drone System", "Drone Range", 200f,
                 new ConfigDescription("Maximum drone delivery range", new AcceptableValueRange<float>(50f, 500f)));
-            DroneMenuKey = Config.Bind("Drone System", "Drone Menu Key", KeyCode.J,
-                "Key to open drone management menu");
+            DroneMenuKey = Config.Bind("Drone System", "Drone Menu Key", KeyCode.LeftBracket,
+                "Key to open drone management menu ([ - J is game's Journal menu)");
 
             // Drone Type Settings
             DeliveryDroneSpeed = Config.Bind("Drone Types", "Delivery Drone Speed", 12f,

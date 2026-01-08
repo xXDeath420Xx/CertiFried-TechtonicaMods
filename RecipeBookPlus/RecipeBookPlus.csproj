@@ -1,10 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <AssemblyName>PlanterCoreClusters</AssemblyName>
-    <RootNamespace>PlanterCoreClusters</RootNamespace>
+    <AssemblyName>RecipeBookPlus</AssemblyName>
+    <RootNamespace>RecipeBookPlus</RootNamespace>
     <LangVersion>latest</LangVersion>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -25,10 +24,6 @@
       <HintPath>$(GameDir)\Techtonica_Data\Managed\publicized_assemblies\Assembly-CSharp_publicized.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>$(GameDir)\Techtonica_Data\Managed\publicized_assemblies\Assembly-CSharp-firstpass_publicized.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>$(GameDir)\Techtonica_Data\Managed\UnityEngine.dll</HintPath>
       <Private>false</Private>
@@ -37,16 +32,20 @@
       <HintPath>$(GameDir)\Techtonica_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(GameDir)\Techtonica_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(GameDir)\Techtonica_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="EquinoxsModUtils">
       <HintPath>$(PluginDir)\Equinox-EquinoxsModUtils\EquinoxsModUtils\EquinoxsModUtils.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="EMUAdditions">
-      <HintPath>$(PluginDir)\Equinox-EMUAdditions\EMUAdditions\EMUAdditions.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="TechtonicaFramework">
-      <HintPath>..\TechtonicaFramework\bin\Release\net472\TechtonicaFramework.dll</HintPath>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(GameDir)\Techtonica_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>

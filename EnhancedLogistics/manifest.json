@@ -1,6 +1,6 @@
 {
   "name": "EnhancedLogistics",
-  "version_number": "3.3.0",
+  "version_number": "3.4.0",
   "website_url": "https://github.com/CertiFried-Mods/TTMod-EnhancedLogistics",
   "description": "Enhanced logistics with drones, search UI, stack limit fixes (Spectral Cube, Carbon Powder, Scrap Ore), and custom stack sizes!",
   "dependencies": [

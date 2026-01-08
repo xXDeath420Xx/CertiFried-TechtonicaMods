@@ -178,7 +178,7 @@ Configuration options are available in `BepInEx/config/com.certifired.NarrativeE
 | `Enable NPCs` | `true` | Enable interactive NPCs in the world |
 | `Max NPCs` | `5` | Maximum number of NPCs to spawn |
 | `Interaction Range` | `5.0` | Distance at which NPCs can be interacted with (in units) |
-| `Interact Key` | `E` | Key to interact with NPCs |
+| `Interact Key` | `Backslash (\)` | Key to interact with NPCs (K is game's Databank menu) |
 
 ### General Settings
 
@@ -222,7 +222,10 @@ All dependencies will be installed automatically if using r2modman.
 
 ## Changelog
 
-### [2.7.0] - Current Version
+### [2.8.0] - Current Version
+- **KEYBINDING FIX**: Changed NPC Interact Key from K to Backslash (\) - K is game's Databank menu
+
+### [2.7.0]
 - **Authentic Game Character Voices**: 4 new NPCs that play real voiced dialogue from the game
 - Sparks Terminal, Paladin Echo, Mirage Hologram, Groundbreaker Monument NPCs
 - GameVoiceManager system to access existing game dialogue

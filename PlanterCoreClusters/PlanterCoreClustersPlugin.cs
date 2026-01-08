@@ -7,6 +7,7 @@ using EquinoxsModUtils;
 using EquinoxsModUtils.Additions;
 using HarmonyLib;
 using UnityEngine;
+using TechtonicaFramework.TechTree;
 
 // Type aliases for nested game types
 using TechCategory = Unlock.TechCategory;
@@ -18,11 +19,12 @@ namespace PlanterCoreClusters
     [BepInPlugin(MyGUID, PluginName, VersionString)]
     [BepInDependency("com.equinox.EquinoxsModUtils")]
     [BepInDependency("com.equinox.EMUAdditions")]
+    [BepInDependency("com.certifired.TechtonicaFramework")]
     public class PlanterCoreClustersPlugin : BaseUnityPlugin
     {
         private const string MyGUID = "com.equinox.PlanterCoreClusters";
         private const string PluginName = "PlanterCoreClusters";
-        private const string VersionString = "3.0.7";
+        private const string VersionString = "3.1.0";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -44,13 +46,13 @@ namespace PlanterCoreClusters
             // Add new unlock using EMUAdditions (EMU 6.1.3 compatible)
             EMUAdditions.AddNewUnlock(new NewUnlockDetails
             {
-                category = TechCategory.Science,
+                category = ModdedTabModule.ModdedCategory, // Category 7 (Modded)
                 coreTypeNeeded = CoreType.Blue,
                 coreCountNeeded = 100,
                 description = "Increases speed of all Planters by configurable % per Core Cluster (default 5%).",
                 displayName = coreBoostGrowingName,
-                requiredTier = ResearchTier.Tier1,
-                treePosition = 0
+                requiredTier = ResearchTier.Tier6, // VICTOR zone
+                treePosition = 50
             });
 
             // Use EMU 6.1.3 Action-based event
