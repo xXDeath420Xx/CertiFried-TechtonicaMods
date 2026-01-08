@@ -61,6 +61,14 @@ MODS_TO_REMOVE = [
     "Equinox-PlanterCoreClusters",
     "Equinox-WormholeChests",
     "Equinox-EarlyBaseBuilding",  # conflicts with CertiFried-BaseBuilding
+
+    # Features now incorporated into CertiFried mods
+    "Equinox-BiggerExplosives",  # -> ChainExplosives v1.1.0
+    "Casper_Dev-CaspersFreebies",  # -> DevTools v2.3.0
+    "Casper_Dev-CasperProtections",  # -> DevTools v2.3.0
+    "Gratak-StackLimitsFixesAndCustomization",  # -> EnhancedLogistics v3.3.0
+    "Casper_Dev-MassScan",  # -> OmniseekerPlus (superior)
+    "UnFoundBug-ScanGrenade",  # -> OmniseekerPlus (covered)
 ]
 
 def get_image_base64(image_path):
