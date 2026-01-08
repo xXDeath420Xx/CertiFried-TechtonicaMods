@@ -29,6 +29,10 @@ namespace DroneLogistics
         public float Charge => charge;
         public float ChargePercent => charge * 100f;
 
+        // Charging state
+        private Vector3 assignedDockingPosition;
+        private bool hasDockingAssignment = false;
+
         // Cargo
         private List<CargoData> cargo = new List<CargoData>();
         public IReadOnlyList<CargoData> Cargo => cargo;
@@ -190,7 +194,24 @@ namespace DroneLogistics
             // Check if we need to charge
             if (charge < 0.3f)
             {
+                RequestCharging();
+            }
+        }
+
+        private void RequestCharging()
+        {
+            if (HomePad != null && HomePad.RequestCharging(this))
+            {
                 State = DroneState.Charging;
+            }
+            else
+            {
+                // No home pad or can't charge - try to find another relay
+                var nearestPad = DroneLogisticsPlugin.FindNearestPad(transform.position);
+                if (nearestPad != null && nearestPad.RequestCharging(this))
+                {
+                    State = DroneState.Charging;
+                }
             }
         }
 
@@ -281,27 +302,44 @@ namespace DroneLogistics
 
             if (MoveToward(homePos, speed))
             {
-                State = charge < 0.5f ? DroneState.Charging : DroneState.Idle;
+                // Request charging if low on battery
+                if (charge < 0.5f)
+                {
+                    RequestCharging();
+                }
+                else
+                {
+                    State = DroneState.Idle;
+                }
             }
         }
 
         private void UpdateCharging()
         {
-            // Land on pad
-            if (HomePad != null)
+            // Move to assigned docking position (or hover at pad if waiting)
+            Vector3 targetPos;
+
+            if (hasDockingAssignment)
             {
-                Vector3 landPos = HomePad.transform.position + Vector3.up * 0.5f;
-                MoveToward(landPos, speed * 0.2f);
+                targetPos = assignedDockingPosition;
+            }
+            else if (HomePad != null)
+            {
+                // Waiting for slot - hover near pad
+                targetPos = HomePad.transform.position + Vector3.up * (hoverHeight * 0.5f);
+                targetPos.x += Mathf.Sin(Time.time + DroneId) * 1.5f;
+                targetPos.z += Mathf.Cos(Time.time + DroneId) * 1.5f;
+            }
+            else
+            {
+                // No pad - just hover in place
+                targetPos = transform.position;
             }
 
-            // Charge up
-            charge += chargeRate * Time.deltaTime;
+            MoveToward(targetPos, speed * 0.3f);
 
-            if (charge >= 1f)
-            {
-                charge = 1f;
-                State = DroneState.Idle;
-            }
+            // Note: Actual charging is handled by the DronePadController
+            // We just wait here until OnChargingComplete is called
         }
 
         #endregion
@@ -400,6 +438,52 @@ namespace DroneLogistics
         {
             Velocity = Vector3.zero;
             State = DroneState.Idle;
+        }
+
+        #endregion
+
+        #region Charging Callbacks
+
+        /// <summary>
+        /// Called by DronePadController when a docking slot is assigned
+        /// </summary>
+        public void OnDockingAssigned(Vector3 dockingPosition)
+        {
+            assignedDockingPosition = dockingPosition;
+            hasDockingAssignment = true;
+            DroneLogisticsPlugin.Log($"Drone {DroneId} assigned docking position");
+        }
+
+        /// <summary>
+        /// Called by DronePadController to add charge
+        /// </summary>
+        public void AddCharge(float amount)
+        {
+            charge = Mathf.Clamp01(charge + amount);
+        }
+
+        /// <summary>
+        /// Called by DronePadController when charging is complete
+        /// </summary>
+        public void OnChargingComplete()
+        {
+            charge = 1f;
+            hasDockingAssignment = false;
+            State = DroneState.Idle;
+            DroneLogisticsPlugin.Log($"Drone {DroneId} charging complete, returning to idle");
+        }
+
+        /// <summary>
+        /// Cancel current charging and return to idle/returning
+        /// </summary>
+        public void CancelCharging()
+        {
+            if (State == DroneState.Charging)
+            {
+                hasDockingAssignment = false;
+                HomePad?.CancelCharging(this);
+                State = DroneState.Idle;
+            }
         }
 
         #endregion

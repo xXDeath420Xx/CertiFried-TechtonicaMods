@@ -1,0 +1,9 @@
+C:\Users\crawf\TechtonicaMods\NewMods\BioProcessing\bin\Debug\net472\BioProcessing.dll
+C:\Users\crawf\TechtonicaMods\NewMods\BioProcessing\bin\Debug\net472\BioProcessing.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\BioProcessing\obj\Debug\net472\BioProcessing.csproj.AssemblyReference.cache
+C:\Users\crawf\TechtonicaMods\NewMods\BioProcessing\obj\Debug\net472\BioProcessing.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\crawf\TechtonicaMods\NewMods\BioProcessing\obj\Debug\net472\BioProcessing.AssemblyInfoInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\BioProcessing\obj\Debug\net472\BioProcessing.AssemblyInfo.cs
+C:\Users\crawf\TechtonicaMods\NewMods\BioProcessing\obj\Debug\net472\BioProcessing.csproj.CoreCompileInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\BioProcessing\obj\Debug\net472\BioProcessing.dll
+C:\Users\crawf\TechtonicaMods\NewMods\BioProcessing\obj\Debug\net472\BioProcessing.pdb

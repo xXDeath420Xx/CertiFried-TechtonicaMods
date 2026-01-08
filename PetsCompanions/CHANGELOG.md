@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.4.1
+- Updated icon
+
+## v1.4.0
+- Updated TechtonicaFramework dependency to 1.2.0
+- Various bug fixes and improvements
+
 ## v1.0.0
 - Initial release
 - Added 5 companion pet types:

@@ -25,7 +25,7 @@ namespace MorePlanters
     {
         private const string MyGUID = "com.equinox.MorePlanters";
         private const string PluginName = "MorePlanters";
-        private const string VersionString = "3.0.7";
+        private const string VersionString = "3.0.9";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -171,23 +171,55 @@ namespace MorePlanters
 
         private void OnTechTreeLoaded()
         {
-            // Position unlocks in tech tree
-            Unlock atlantum = EMU.Unlocks.GetUnlockByName("Atlantum Ingot");
-            Unlock thresherMk2 = EMU.Unlocks.GetUnlockByName("Thresher MKII");
-            Unlock assemblerMk2 = EMU.Unlocks.GetUnlockByName("Assembler MKII");
+            // Configure unlock sprites and tiers
+            // Tech names match the displayName used in AddNewUnlock
+            const string Mk2UnlockName = "Planter MKII Tech";
+            const string Mk3UnlockName = "Planter MKIII Tech";
 
-            Unlock mk2Unlock = EMU.Unlocks.GetUnlockByName(PlanterMk2Name);
-            if (mk2Unlock != null && atlantum != null && assemblerMk2 != null)
+            // Get the base Planter for sprite reference
+            ResourceInfo basePlanter = EMU.Resources.GetResourceInfoByName("Planter");
+            Sprite planterSprite = basePlanter?.sprite;
+
+            // Configure MKII unlock - Tier5 (early floor 2)
+            Unlock mk2Unlock = EMU.Unlocks.GetUnlockByName(Mk2UnlockName);
+            if (mk2Unlock != null)
             {
-                mk2Unlock.requiredTier = atlantum.requiredTier;
-                mk2Unlock.treePosition = assemblerMk2.treePosition;
+                mk2Unlock.requiredTier = ResearchTier.Tier5;
+                mk2Unlock.treePosition = 20;
+                // Always set sprite to ensure proper icon display
+                if (planterSprite != null)
+                    mk2Unlock.sprite = planterSprite;
+                // Clear "new" flag if already unlocked to hide the badge
+                if (TechTreeState.instance != null && TechTreeState.instance.IsUnlockActive(mk2Unlock.uniqueId))
+                {
+                    mk2Unlock.ClearIsNew();
+                }
+                Log.LogInfo($"Configured {Mk2UnlockName}: Tier5, pos=20, sprite={(mk2Unlock.sprite != null ? "SET" : "NULL")}");
+            }
+            else
+            {
+                Log.LogWarning($"Could not find unlock: {Mk2UnlockName}");
             }
 
-            Unlock mk3Unlock = EMU.Unlocks.GetUnlockByName(PlanterMk3Name);
-            if (mk3Unlock != null && thresherMk2 != null && assemblerMk2 != null)
+            // Configure MKIII unlock - Tier7 (mid floor 2)
+            Unlock mk3Unlock = EMU.Unlocks.GetUnlockByName(Mk3UnlockName);
+            if (mk3Unlock != null)
             {
-                mk3Unlock.requiredTier = thresherMk2.requiredTier;
-                mk3Unlock.treePosition = assemblerMk2.treePosition;
+                mk3Unlock.requiredTier = ResearchTier.Tier7;
+                mk3Unlock.treePosition = 40;
+                // Always set sprite to ensure proper icon display
+                if (planterSprite != null)
+                    mk3Unlock.sprite = planterSprite;
+                // Clear "new" flag if already unlocked to hide the badge
+                if (TechTreeState.instance != null && TechTreeState.instance.IsUnlockActive(mk3Unlock.uniqueId))
+                {
+                    mk3Unlock.ClearIsNew();
+                }
+                Log.LogInfo($"Configured {Mk3UnlockName}: Tier7, pos=40, sprite={(mk3Unlock.sprite != null ? "SET" : "NULL")}");
+            }
+            else
+            {
+                Log.LogWarning($"Could not find unlock: {Mk3UnlockName}");
             }
         }
 

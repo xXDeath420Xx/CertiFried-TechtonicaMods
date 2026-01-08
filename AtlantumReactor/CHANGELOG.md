@@ -2,6 +2,37 @@
 
 All notable changes to AtlantumReactor will be documented in this file.
 
+## [4.1.0] - 2026-01-07
+
+### Fixed
+- **Fuel input ports** - Changed visual model from Crank Generator to Smelter MKII for proper conveyor/inserter fuel input
+- **Inventory stacking** - Reactor now properly stacks to 50 in inventory (was incorrectly set to 1)
+- **Fuel consumption rate** - Added proper fuelConsumptionRate (0.1f) for slow, efficient fuel burning
+
+### Changed
+- Visual model now uses Smelter MKII instead of Crank Generator MKII
+- Model has proper input ports for fuel via belts and inserters
+
+## [4.0.11] - 2026-01-07
+
+### Changed
+- All items now appear in unified "Modded" build menu tab
+- Updated dependency on TechtonicaFramework 1.2.0
+
+### Fixed
+- Build menu organization for cleaner UI
+
+## [4.0.10] - 2025-01-06
+
+### Fixed
+- **Moved to Modded category** - Reactor unlock now appears in the Modded tech tree tab instead of vanilla Energy category
+- **Fixed vanilla tech tree conflicts** - No longer overlaps with HVC Reach IV and other vanilla items
+- **Added TechtonicaFramework dependency** - Uses ModdedTabModule for proper tech tree placement
+
+### Changed
+- Research tier set to Tier7 (endgame)
+- Tree position set to 100 for clear visibility in Modded tab
+
 ## [4.0.0] - 2025-01-04
 
 ### Changed - COMPLETE REWRITE

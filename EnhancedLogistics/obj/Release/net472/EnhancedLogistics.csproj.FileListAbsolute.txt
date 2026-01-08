@@ -1,0 +1,9 @@
+C:\Users\crawf\TechtonicaMods\NewMods\EnhancedLogistics\obj\Release\net472\EnhancedLogistics.csproj.AssemblyReference.cache
+C:\Users\crawf\TechtonicaMods\NewMods\EnhancedLogistics\obj\Release\net472\EnhancedLogistics.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\crawf\TechtonicaMods\NewMods\EnhancedLogistics\obj\Release\net472\EnhancedLogistics.AssemblyInfoInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\EnhancedLogistics\obj\Release\net472\EnhancedLogistics.AssemblyInfo.cs
+C:\Users\crawf\TechtonicaMods\NewMods\EnhancedLogistics\obj\Release\net472\EnhancedLogistics.csproj.CoreCompileInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\EnhancedLogistics\bin\Release\net472\EnhancedLogistics.dll
+C:\Users\crawf\TechtonicaMods\NewMods\EnhancedLogistics\bin\Release\net472\EnhancedLogistics.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\EnhancedLogistics\obj\Release\net472\EnhancedLogistics.dll
+C:\Users\crawf\TechtonicaMods\NewMods\EnhancedLogistics\obj\Release\net472\EnhancedLogistics.pdb

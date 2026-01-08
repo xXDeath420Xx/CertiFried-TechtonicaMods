@@ -1,0 +1,10 @@
+C:\Users\crawf\TechtonicaMods\NewMods\BeltImmunity\bin\Debug\net472\BeltImmunity.dll
+C:\Users\crawf\TechtonicaMods\NewMods\BeltImmunity\bin\Debug\net472\BeltImmunity.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\BeltImmunity\obj\Debug\net472\BeltImmunity.csproj.AssemblyReference.cache
+C:\Users\crawf\TechtonicaMods\NewMods\BeltImmunity\obj\Debug\net472\BeltImmunity.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\crawf\TechtonicaMods\NewMods\BeltImmunity\obj\Debug\net472\BeltImmunity.AssemblyInfoInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\BeltImmunity\obj\Debug\net472\BeltImmunity.AssemblyInfo.cs
+C:\Users\crawf\TechtonicaMods\NewMods\BeltImmunity\obj\Debug\net472\BeltImmunity.csproj.CoreCompileInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\BeltImmunity\obj\Debug\net472\BeltImmunity.dll
+C:\Users\crawf\TechtonicaMods\NewMods\BeltImmunity\obj\Debug\net472\BeltImmunity.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\BeltImmunity\obj\Debug\net472\BeltImmunity.sourcelink.json

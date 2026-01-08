@@ -8,6 +8,7 @@ using EquinoxsModUtils;
 using EquinoxsModUtils.Additions;
 using HarmonyLib;
 using TechtonicaFramework.TechTree;
+using TechtonicaFramework.BuildMenu;
 using UnityEngine;
 
 namespace PetsCompanions
@@ -149,7 +150,7 @@ namespace PetsCompanions
                 description = desc,
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Companions",
+                headerTitle = "Modded",
                 maxStackCount = 1,
                 sortPriority = priority,
                 unlockName = PetUnlock,

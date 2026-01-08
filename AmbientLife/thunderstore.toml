@@ -7,13 +7,14 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "AmbientLife"
-versionNumber = "1.0.0"
-description = "Adds ambient wildlife and creatures for atmosphere. Includes butterflies, birds, fireflies, and more passive creatures."
+versionNumber = "2.1.0"
+description = "Adds ambient wildlife with smart AI using real 3D creature assets. Includes spiders, beetles, wolves, dogs, cats, deer, and flying insects. Creatures follow terrain, avoid clipping, and have configurable density."
 websiteUrl = "https://github.com/xXDeath420Xx/TTMod-AmbientLife"
 containsNsfwContent = false
 
 [package.dependencies]
 BepInEx-BepInExPack = "5.4.2100"
+CertiFried-TechtonicaFramework = "1.2.0"
 
 [build]
 icon = "./icon.png"
@@ -27,6 +28,30 @@ target = "/"
 [[build.copy]]
 source = "./CHANGELOG.md"
 target = "/"
+
+[[build.copy]]
+source = "./Bundles/creatures_spiders"
+target = "/Bundles/"
+
+[[build.copy]]
+source = "./Bundles/creatures_beetles"
+target = "/Bundles/"
+
+[[build.copy]]
+source = "./Bundles/creatures_wolf"
+target = "/Bundles/"
+
+[[build.copy]]
+source = "./Bundles/creatures_tortoise"
+target = "/Bundles/"
+
+[[build.copy]]
+source = "./Bundles/creatures_animals"
+target = "/Bundles/"
+
+[[build.copy]]
+source = "./Bundles/creatures_gamekit"
+target = "/Bundles/"
 
 [publish]
 repository = "https://thunderstore.io"

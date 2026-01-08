@@ -10,6 +10,7 @@ using EquinoxsModUtils;
 using EquinoxsModUtils.Additions;
 using HarmonyLib;
 using TechtonicaFramework.TechTree;
+using TechtonicaFramework.BuildMenu;
 using UnityEngine;
 
 namespace EnhancedLogistics
@@ -23,7 +24,7 @@ namespace EnhancedLogistics
     {
         private const string MyGUID = "com.certifired.EnhancedLogistics";
         private const string PluginName = "EnhancedLogistics";
-        private const string VersionString = "3.2.1";
+        private const string VersionString = "3.2.2";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -256,7 +257,7 @@ namespace EnhancedLogistics
                 description = "Deploys delivery drones that automatically transport items between connected storage. Requires power (30kW).",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Logistics",
+                headerTitle = "Modded",
                 maxStackCount = 10,
                 sortPriority = 300,
                 unlockName = DroneUnlockName,
@@ -295,7 +296,7 @@ namespace EnhancedLogistics
                 description = "Deploys combat drones that patrol and engage hostile targets. Requires power (60kW). Best paired with TurretDefense mod.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Defense",
+                headerTitle = "Modded",
                 maxStackCount = 10,
                 sortPriority = 301,
                 unlockName = AdvancedDroneUnlockName,
@@ -334,7 +335,7 @@ namespace EnhancedLogistics
                 description = "Deploys repair drones that automatically fix damaged machines. Requires power (45kW). Best paired with SurvivalElements mod.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Logistics",
+                headerTitle = "Modded",
                 maxStackCount = 10,
                 sortPriority = 302,
                 unlockName = AdvancedDroneUnlockName,
@@ -391,17 +392,34 @@ namespace EnhancedLogistics
             try
             {
                 var unlock = EMU.Unlocks.GetUnlockByName(unlockName);
-                if (unlock == null) return;
+                if (unlock == null)
+                {
+                    Log.LogWarning($"Could not find unlock: {unlockName}");
+                    return;
+                }
                 unlock.requiredTier = tier;
                 unlock.treePosition = position;
 
-                // Try to get a sprite from an existing resource
-                if (unlock.sprite == null)
+                // Always try to set sprite for proper icon display
+                Sprite sprite = null;
+
+                // Try Inserter first
+                var inserter = EMU.Resources.GetResourceInfoByName("Inserter");
+                if (inserter?.sprite != null)
+                    sprite = inserter.sprite;
+
+                // Fallback to Filter Inserter
+                if (sprite == null)
                 {
-                    var inserter = EMU.Resources.GetResourceInfoByName("Inserter");
-                    if (inserter?.sprite != null)
-                        unlock.sprite = inserter.sprite;
+                    var filterInserter = EMU.Resources.GetResourceInfoByName("Filter Inserter");
+                    if (filterInserter?.sprite != null)
+                        sprite = filterInserter.sprite;
                 }
+
+                if (sprite != null)
+                    unlock.sprite = sprite;
+
+                Log.LogInfo($"Configured {unlockName}: tier={tier}, pos={position}, sprite={(unlock.sprite != null ? "SET" : "NULL")}");
             }
             catch (Exception ex)
             {

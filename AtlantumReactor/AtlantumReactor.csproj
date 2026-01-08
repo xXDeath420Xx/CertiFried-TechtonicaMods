@@ -45,6 +45,10 @@
       <HintPath>$(GameDir)\Techtonica_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>$(GameDir)\Techtonica_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="EquinoxsModUtils">
       <HintPath>$(PluginDir)\Equinox-EquinoxsModUtils\EquinoxsModUtils\EquinoxsModUtils.dll</HintPath>
       <Private>false</Private>
@@ -53,10 +57,14 @@
       <HintPath>$(PluginDir)\Equinox-EMUAdditions\EMUAdditions\EMUAdditions.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="TechtonicaFramework">
+      <HintPath>$(PluginDir)\CertiFried-TechtonicaFramework\TechtonicaFramework.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <MakeDir Directories="$(PluginDir)\$(AssemblyName)" />
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginDir)\$(AssemblyName)" />
-  </Target>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\radiation.png" />
+  </ItemGroup>
+
 </Project>

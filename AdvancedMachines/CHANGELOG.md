@@ -2,6 +2,22 @@
 
 All notable changes to AdvancedMachines will be documented in this file.
 
+## [2.4.2] - 2026-01-07
+
+### Changed
+- All items now appear in unified "Modded" build menu tab
+- Updated dependency on TechtonicaFramework 1.2.0
+- Improved compatibility with other CertiFried mods
+
+### Fixed
+- Build menu organization for cleaner UI
+
+## [2.4.0] - 2026-01-06
+
+### Changed
+- Moved to Modded tech tree category
+- Updated tier requirements
+
 ## [2.0.0] - 2025-01-04
 
 ### Added

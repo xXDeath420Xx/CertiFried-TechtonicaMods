@@ -1,0 +1,10 @@
+C:\Users\crawf\TechtonicaMods\NewMods\CoreComposerPlus\bin\Debug\net472\CoreComposerPlus.dll
+C:\Users\crawf\TechtonicaMods\NewMods\CoreComposerPlus\bin\Debug\net472\CoreComposerPlus.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\CoreComposerPlus\obj\Debug\net472\CoreComposerPlus.csproj.AssemblyReference.cache
+C:\Users\crawf\TechtonicaMods\NewMods\CoreComposerPlus\obj\Debug\net472\CoreComposerPlus.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\crawf\TechtonicaMods\NewMods\CoreComposerPlus\obj\Debug\net472\CoreComposerPlus.AssemblyInfoInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\CoreComposerPlus\obj\Debug\net472\CoreComposerPlus.AssemblyInfo.cs
+C:\Users\crawf\TechtonicaMods\NewMods\CoreComposerPlus\obj\Debug\net472\CoreComposerPlus.csproj.CoreCompileInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\CoreComposerPlus\obj\Debug\net472\CoreComposerPlus.sourcelink.json
+C:\Users\crawf\TechtonicaMods\NewMods\CoreComposerPlus\obj\Debug\net472\CoreComposerPlus.dll
+C:\Users\crawf\TechtonicaMods\NewMods\CoreComposerPlus\obj\Debug\net472\CoreComposerPlus.pdb

@@ -7,7 +7,7 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "TurretDefense"
-versionNumber = "4.3.0"
+versionNumber = "4.5.4"
 description = "EPIC BOSS BATTLES! Adds defensive turrets, alien waves, and 5 unique boss encounters (Overlord, Behemoth, Hivemind, Dreadnought, Harvester). Custom Defense tab in tech tree!"
 websiteUrl = "https://github.com/xXDeath420Xx/TTMod-TurretDefense"
 containsNsfwContent = false
@@ -31,6 +31,38 @@ target = "/"
 source = "./CHANGELOG.md"
 target = "/"
 
+
+[[build.copy]]
+source = "./Bundles/icons_ammo"
+target = "/Bundles/"
+
+[[build.copy]]
+source = "./Bundles/icons_skymon"
+target = "/Bundles/"
+
+[[build.copy]]
+source = "./Bundles/icons_heathen"
+target = "/Bundles/"
+
+[[build.copy]]
+source = "./Bundles/icons_turret_gatling"
+target = "/Bundles/"
+
+[[build.copy]]
+source = "./Bundles/icons_turret_laser"
+target = "/Bundles/"
+
+[[build.copy]]
+source = "./Bundles/icons_turret_lightning"
+target = "/Bundles/"
+
+[[build.copy]]
+source = "./Bundles/icons_turret_railgun"
+target = "/Bundles/"
+
+[[build.copy]]
+source = "./Bundles/icons_turret_rocket"
+target = "/Bundles/"
 [publish]
 repository = "https://thunderstore.io"
 communities = ["techtonica"]

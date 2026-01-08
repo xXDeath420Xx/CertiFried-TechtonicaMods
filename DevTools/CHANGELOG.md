@@ -2,6 +2,12 @@
 
 All notable changes to DevTools will be documented in this file.
 
+## [2.2.0] - 2026-01-07
+
+### Changed
+- Minor improvements and stability fixes
+- Compatible with TechtonicaFramework 1.2.0
+
 ## [2.0.0] - 2025-01-04
 
 ### Added

@@ -1,0 +1,9 @@
+C:\Users\crawf\TechtonicaMods\NewMods\DevTools\bin\Release\net472\DevTools.dll
+C:\Users\crawf\TechtonicaMods\NewMods\DevTools\bin\Release\net472\DevTools.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.csproj.AssemblyReference.cache
+C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.AssemblyInfoInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.AssemblyInfo.cs
+C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.csproj.CoreCompileInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.dll
+C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.pdb

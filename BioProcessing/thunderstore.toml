@@ -7,9 +7,9 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "BioProcessing"
-versionNumber = "1.0.0"
+versionNumber = "1.0.1"
 description = "Biological processing system with algae vats, mushroom farms, bio-reactors, and composters. Produces biofuel and biogas from organic materials."
-websiteUrl = "https://github.com/CertiFried/TechtonicaMods"
+websiteUrl = "https://github.com/xXDeath420Xx/TTMod-BioProcessing"
 containsNsfwContent = false
 
 [package.dependencies]

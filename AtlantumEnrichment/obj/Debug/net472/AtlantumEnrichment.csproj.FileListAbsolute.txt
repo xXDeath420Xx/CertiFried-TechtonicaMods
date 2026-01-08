@@ -1,0 +1,9 @@
+C:\Users\crawf\TechtonicaMods\NewMods\AtlantumEnrichment\obj\Debug\net472\AtlantumEnrichment.csproj.AssemblyReference.cache
+C:\Users\crawf\TechtonicaMods\NewMods\AtlantumEnrichment\obj\Debug\net472\AtlantumEnrichment.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\crawf\TechtonicaMods\NewMods\AtlantumEnrichment\obj\Debug\net472\AtlantumEnrichment.AssemblyInfoInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\AtlantumEnrichment\obj\Debug\net472\AtlantumEnrichment.AssemblyInfo.cs
+C:\Users\crawf\TechtonicaMods\NewMods\AtlantumEnrichment\obj\Debug\net472\AtlantumEnrichment.csproj.CoreCompileInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\AtlantumEnrichment\bin\Debug\net472\AtlantumEnrichment.dll
+C:\Users\crawf\TechtonicaMods\NewMods\AtlantumEnrichment\bin\Debug\net472\AtlantumEnrichment.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\AtlantumEnrichment\obj\Debug\net472\AtlantumEnrichment.dll
+C:\Users\crawf\TechtonicaMods\NewMods\AtlantumEnrichment\obj\Debug\net472\AtlantumEnrichment.pdb

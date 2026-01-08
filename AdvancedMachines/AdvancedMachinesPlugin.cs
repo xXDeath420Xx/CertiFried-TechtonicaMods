@@ -8,6 +8,7 @@ using EquinoxsModUtils.Additions;
 using HarmonyLib;
 using UnityEngine;
 using TechtonicaFramework.TechTree;
+using TechtonicaFramework.BuildMenu;
 
 using TechCategory = Unlock.TechCategory;
 using CoreType = ResearchCoreDefinition.CoreType;
@@ -23,7 +24,7 @@ namespace AdvancedMachines
     {
         private const string MyGUID = "com.certifired.AdvancedMachines";
         private const string PluginName = "AdvancedMachines";
-        private const string VersionString = "2.3.0";
+        private const string VersionString = "2.4.2";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -96,7 +97,7 @@ namespace AdvancedMachines
 
             // ========== SMELTER MKIV ==========
             RegisterUnlock(SmelterMk4Name, TechCategory.Synthesis, CoreType.Gold, 500,
-                "Advanced smelter with 2x processing speed.", ResearchTier.Tier6);
+                "Advanced smelter with 2x processing speed.", ResearchTier.Tier14);
 
             SmelterDefinition smelterMk4Def = ScriptableObject.CreateInstance<SmelterDefinition>();
             smelterMk4Def.craftingEfficiency = Tier4SpeedMult;
@@ -109,7 +110,7 @@ namespace AdvancedMachines
                 description = $"High-performance smelter with {Tier4SpeedMult}x processing speed. Requires more power but processes ores faster.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Production",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 50,
                 sortPriority = 100,
@@ -127,7 +128,7 @@ namespace AdvancedMachines
 
             // ========== ASSEMBLER MKIII ==========
             RegisterUnlock(AssemblerMk3Name, TechCategory.Synthesis, CoreType.Gold, 500,
-                "Advanced assembler with 2x crafting speed.", ResearchTier.Tier6);
+                "Advanced assembler with 2x crafting speed.", ResearchTier.Tier10);
 
             AssemblerDefinition assemblerMk3Def = ScriptableObject.CreateInstance<AssemblerDefinition>();
 
@@ -137,7 +138,7 @@ namespace AdvancedMachines
                 description = $"High-performance assembler with {Tier4SpeedMult}x crafting speed.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Production",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 50,
                 sortPriority = 100,
@@ -155,7 +156,7 @@ namespace AdvancedMachines
 
             // ========== MINING DRILL MKIII ==========
             RegisterUnlock(DrillMk3Name, TechCategory.Synthesis, CoreType.Gold, 500,
-                "Advanced mining drill with 2x dig speed.", ResearchTier.Tier6);
+                "Advanced mining drill with 2x dig speed.", ResearchTier.Tier10);
 
             DrillDefinition drillMk3Def = ScriptableObject.CreateInstance<DrillDefinition>();
 
@@ -165,7 +166,7 @@ namespace AdvancedMachines
                 description = $"High-performance mining drill with {Tier4SpeedMult}x dig speed.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Production",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 50,
                 sortPriority = 100,
@@ -183,7 +184,7 @@ namespace AdvancedMachines
 
             // ========== THRESHER MKIII ==========
             RegisterUnlock(ThresherMk3Name, TechCategory.Synthesis, CoreType.Gold, 300,
-                "Improved thresher with 1.5x processing speed.", ResearchTier.Tier6);
+                "Improved thresher with 1.5x processing speed.", ResearchTier.Tier10);
 
             ThresherDefinition thresherMk3Def = ScriptableObject.CreateInstance<ThresherDefinition>();
 
@@ -193,7 +194,7 @@ namespace AdvancedMachines
                 description = "Improved thresher with 1.5x processing speed.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Production",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 50,
                 sortPriority = 99,
@@ -211,7 +212,7 @@ namespace AdvancedMachines
 
             // ========== Thresher MKIV ==========
             RegisterUnlock(ThresherMk4Name, TechCategory.Synthesis, CoreType.Gold, 500,
-                "Advanced thresher with 2x processing speed.", ResearchTier.Tier6);
+                "Advanced thresher with 2x processing speed.", ResearchTier.Tier14);
 
             ThresherDefinition thresherMk4Def = ScriptableObject.CreateInstance<ThresherDefinition>();
 
@@ -221,7 +222,7 @@ namespace AdvancedMachines
                 description = $"High-performance thresher with {Tier4SpeedMult}x processing speed.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Production",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 50,
                 sortPriority = 100,
@@ -239,7 +240,7 @@ namespace AdvancedMachines
 
             // ========== PLANTER MKIV (extends MorePlanters MKIII) ==========
             RegisterUnlock(PlanterMk4Name, TechCategory.Synthesis, CoreType.Gold, 500,
-                "Advanced planter with 2.5x growth speed.", ResearchTier.Tier6);
+                "Advanced planter with 2.5x growth speed.", ResearchTier.Tier14);
 
             PlanterDefinition planterMk4Def = ScriptableObject.CreateInstance<PlanterDefinition>();
 
@@ -249,7 +250,7 @@ namespace AdvancedMachines
                 description = $"High-performance planter with 2.5x growth speed. Extends MorePlanters' Planter MKIII.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Production",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 50,
                 sortPriority = 100,
@@ -272,7 +273,7 @@ namespace AdvancedMachines
         {
             // ========== SMELTER MKV ==========
             RegisterUnlock(SmelterMk5Name, TechCategory.Synthesis, CoreType.Green, 1000,
-                "Ultimate smelter with 3x processing speed.", ResearchTier.Tier7);
+                "Ultimate smelter with 3x processing speed.", ResearchTier.Tier18);
 
             SmelterDefinition smelterMk5Def = ScriptableObject.CreateInstance<SmelterDefinition>();
             smelterMk5Def.craftingEfficiency = Tier5SpeedMult;
@@ -285,7 +286,7 @@ namespace AdvancedMachines
                 description = $"Ultimate smelter with {Tier5SpeedMult}x processing speed. Peak performance for large-scale operations.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Production",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 50,
                 sortPriority = 101,
@@ -303,7 +304,7 @@ namespace AdvancedMachines
 
             // ========== ASSEMBLER MKIV ==========
             RegisterUnlock(AssemblerMk4Name, TechCategory.Synthesis, CoreType.Green, 1000,
-                "Ultimate assembler with 3x crafting speed.", ResearchTier.Tier7);
+                "Ultimate assembler with 3x crafting speed.", ResearchTier.Tier14);
 
             AssemblerDefinition assemblerMk4Def = ScriptableObject.CreateInstance<AssemblerDefinition>();
 
@@ -313,7 +314,7 @@ namespace AdvancedMachines
                 description = $"Ultimate assembler with {Tier5SpeedMult}x crafting speed.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Production",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 50,
                 sortPriority = 101,
@@ -331,7 +332,7 @@ namespace AdvancedMachines
 
             // ========== MINING DRILL MKIV ==========
             RegisterUnlock(DrillMk4Name, TechCategory.Synthesis, CoreType.Green, 1000,
-                "Ultimate mining drill with 3x dig speed.", ResearchTier.Tier7);
+                "Ultimate mining drill with 3x dig speed.", ResearchTier.Tier14);
 
             DrillDefinition drillMk4Def = ScriptableObject.CreateInstance<DrillDefinition>();
 
@@ -341,7 +342,7 @@ namespace AdvancedMachines
                 description = $"Ultimate mining drill with {Tier5SpeedMult}x dig speed.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Production",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 50,
                 sortPriority = 101,
@@ -359,7 +360,7 @@ namespace AdvancedMachines
 
             // ========== THRESHER MKV ==========
             RegisterUnlock(ThresherMk5Name, TechCategory.Synthesis, CoreType.Green, 1000,
-                "Ultimate thresher with 3x processing speed.", ResearchTier.Tier7);
+                "Ultimate thresher with 3x processing speed.", ResearchTier.Tier18);
 
             ThresherDefinition thresherMk5Def = ScriptableObject.CreateInstance<ThresherDefinition>();
 
@@ -369,7 +370,7 @@ namespace AdvancedMachines
                 description = $"Ultimate thresher with {Tier5SpeedMult}x processing speed.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Production",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 50,
                 sortPriority = 101,
@@ -387,7 +388,7 @@ namespace AdvancedMachines
 
             // ========== PLANTER MKV (extends MKIV) ==========
             RegisterUnlock(PlanterMk5Name, TechCategory.Synthesis, CoreType.Green, 1000,
-                "Ultimate planter with 4x growth speed.", ResearchTier.Tier7);
+                "Ultimate planter with 4x growth speed.", ResearchTier.Tier18);
 
             PlanterDefinition planterMk5Def = ScriptableObject.CreateInstance<PlanterDefinition>();
 
@@ -397,7 +398,7 @@ namespace AdvancedMachines
                 description = $"Ultimate planter with 4x growth speed. Peak agricultural performance.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Production",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 50,
                 sortPriority = 101,
@@ -531,29 +532,29 @@ namespace AdvancedMachines
 
         private void OnTechTreeStateLoaded()
         {
-            // Configure unlocks with CORRECT tiers and WELL-SPACED positions
-            // PT level tier mapping (from game):
-            // - LIMA: Tier1-Tier4
-            // - VICTOR: Tier5-Tier11
-            // - XRAY: Tier12-Tier16
-            // - SIERRA: Tier17-Tier24
+            // Configure unlocks with CORRECT tiers matching ForcedTiers dictionary
+            // Tech Tree Layout (4 floors):
+            // - Floor 1: Tiers 1-4 (LIMA)
+            // - Floor 2: Tiers 5-10 (VICTOR) - MKIII = Tier10 (late floor 2)
+            // - Floor 3: Tiers 11-17 (XRAY) - MKIV = Tier14 (mid floor 3)
+            // - Floor 4: Tiers 17-24 (SIERRA) - MKV = Tier18 (early-mid floor 4)
 
-            // VICTOR (Tier6-8) - MKIII machines - mid-game
-            ConfigureUnlock(AssemblerMk3Name, "Assembler", ResearchTier.Tier6, 10);
-            ConfigureUnlock(DrillMk3Name, "Mining Drill", ResearchTier.Tier7, 10);
-            ConfigureUnlock(ThresherMk3Name, "Thresher", ResearchTier.Tier8, 10);
+            // MKIII machines - Tier10 (late floor 2 / VICTOR)
+            ConfigureUnlock(AssemblerMk3Name, "Assembler", ResearchTier.Tier10, 10);
+            ConfigureUnlock(DrillMk3Name, "Mining Drill", ResearchTier.Tier10, 30);
+            ConfigureUnlock(ThresherMk3Name, "Thresher", ResearchTier.Tier10, 50);
 
-            // XRAY (Tier12-14) - MKIV machines - late-game
-            ConfigureUnlock(SmelterMk4Name, "Smelter", ResearchTier.Tier12, 10);
-            ConfigureUnlock(AssemblerMk4Name, "Assembler", ResearchTier.Tier12, 30);
-            ConfigureUnlock(DrillMk4Name, "Mining Drill", ResearchTier.Tier13, 10);
-            ConfigureUnlock(ThresherMk4Name, "Thresher", ResearchTier.Tier13, 30);
-            ConfigureUnlock(PlanterMk4Name, "Planter", ResearchTier.Tier14, 10);
+            // MKIV machines - Tier14 (mid floor 3 / XRAY)
+            ConfigureUnlock(SmelterMk4Name, "Smelter", ResearchTier.Tier14, 10);
+            ConfigureUnlock(AssemblerMk4Name, "Assembler", ResearchTier.Tier14, 30);
+            ConfigureUnlock(DrillMk4Name, "Mining Drill", ResearchTier.Tier14, 50);
+            ConfigureUnlock(ThresherMk4Name, "Thresher", ResearchTier.Tier14, 70);
+            ConfigureUnlock(PlanterMk4Name, "Planter", ResearchTier.Tier14, 90);
 
-            // SIERRA (Tier17-19) - MKV machines - end-game
-            ConfigureUnlock(SmelterMk5Name, "Smelter", ResearchTier.Tier17, 10);
-            ConfigureUnlock(ThresherMk5Name, "Thresher", ResearchTier.Tier17, 30);
-            ConfigureUnlock(PlanterMk5Name, "Planter", ResearchTier.Tier17, 50);
+            // MKV machines - Tier18 (early-mid floor 4 / SIERRA)
+            ConfigureUnlock(SmelterMk5Name, "Smelter", ResearchTier.Tier18, 10);
+            ConfigureUnlock(ThresherMk5Name, "Thresher", ResearchTier.Tier18, 30);
+            ConfigureUnlock(PlanterMk5Name, "Planter", ResearchTier.Tier18, 50);
 
             Log.LogInfo("Configured unlock tiers and sprites");
         }
@@ -577,26 +578,31 @@ namespace AdvancedMachines
                 unlock.treePosition = position;
 
                 // Copy sprite from base machine for proper icon display
-                if (unlock.sprite == null)
+                // Always try to set sprite even if one exists (may be placeholder)
+                Sprite sourceSprite = null;
+
+                // Try to get sprite from the base machine resource
+                ResourceInfo sourceResource = EMU.Resources.GetResourceInfoByName(spriteSourceName);
+                if (sourceResource != null && sourceResource.sprite != null)
                 {
-                    // Try to get sprite from the base machine resource
-                    ResourceInfo sourceResource = EMU.Resources.GetResourceInfoByName(spriteSourceName);
-                    if (sourceResource != null && sourceResource.sprite != null)
+                    sourceSprite = sourceResource.sprite;
+                }
+                else
+                {
+                    // Try unlock with that name
+                    Unlock sourceUnlock = EMU.Unlocks.GetUnlockByName(spriteSourceName);
+                    if (sourceUnlock != null && sourceUnlock.sprite != null)
                     {
-                        unlock.sprite = sourceResource.sprite;
-                    }
-                    else
-                    {
-                        // Try unlock with that name
-                        Unlock sourceUnlock = EMU.Unlocks.GetUnlockByName(spriteSourceName);
-                        if (sourceUnlock != null && sourceUnlock.sprite != null)
-                        {
-                            unlock.sprite = sourceUnlock.sprite;
-                        }
+                        sourceSprite = sourceUnlock.sprite;
                     }
                 }
 
-                Log.LogInfo($"Configured {unlockName}: tier={tier}, position={position}");
+                if (sourceSprite != null)
+                {
+                    unlock.sprite = sourceSprite;
+                }
+
+                Log.LogInfo($"Configured {unlockName}: tier={tier}, pos={position}, sprite={(unlock.sprite != null ? "SET" : "NULL")}");
             }
             catch (Exception ex)
             {
@@ -622,26 +628,27 @@ namespace AdvancedMachines
     internal static class ForceTierPatches
     {
         // Map of unlock names to their FORCED tiers - save data CANNOT override these
-        // Tech Tree Layout:
-        // - Tier5 (Xray T5): MKIII machines - basic improvements
-        // - Tier7 (Sierra T4): MKIV machines - advanced tier
-        // - Tier8 (Sierra T5): MKV machines - ultimate tier
+        // Tech Tree Layout (4 floors):
+        // - Floor 1: Tiers 1-4
+        // - Floor 2: Tiers 5-10 (MKIII = late floor 2 = Tier10)
+        // - Floor 3: Tiers 11-17 (MKIV = mid floor 3 = Tier14)
+        // - Floor 4: Tiers 17-24 (MKV = early-mid floor 4 = Tier18)
         private static readonly Dictionary<string, TechTreeState.ResearchTier> ForcedTiers = new Dictionary<string, TechTreeState.ResearchTier>
         {
-            // MKIII machines - Tier5 (Xray T5) - basic improvements
-            { "Assembler MKIII", TechTreeState.ResearchTier.Tier5 },
-            { "Mining Drill MKIII", TechTreeState.ResearchTier.Tier5 },
-            { "Thresher MKIII", TechTreeState.ResearchTier.Tier5 },
-            // MKIV machines - Tier7 (Sierra T4) - advanced
-            { "Smelter MKIV", TechTreeState.ResearchTier.Tier7 },
-            { "Assembler MKIV", TechTreeState.ResearchTier.Tier7 },
-            { "Mining Drill MKIV", TechTreeState.ResearchTier.Tier7 },
-            { "Thresher MKIV", TechTreeState.ResearchTier.Tier7 },
-            { "Planter MKIV", TechTreeState.ResearchTier.Tier7 },
-            // MKV machines - Tier8 (Sierra T5) - ultimate
-            { "Smelter MKV", TechTreeState.ResearchTier.Tier8 },
-            { "Thresher MKV", TechTreeState.ResearchTier.Tier8 },
-            { "Planter MKV", TechTreeState.ResearchTier.Tier8 },
+            // MKIII machines - Tier10 (late floor 2)
+            { "Assembler MKIII", TechTreeState.ResearchTier.Tier10 },
+            { "Mining Drill MKIII", TechTreeState.ResearchTier.Tier10 },
+            { "Thresher MKIII", TechTreeState.ResearchTier.Tier10 },
+            // MKIV machines - Tier14 (mid floor 3)
+            { "Smelter MKIV", TechTreeState.ResearchTier.Tier14 },
+            { "Assembler MKIV", TechTreeState.ResearchTier.Tier14 },
+            { "Mining Drill MKIV", TechTreeState.ResearchTier.Tier14 },
+            { "Thresher MKIV", TechTreeState.ResearchTier.Tier14 },
+            { "Planter MKIV", TechTreeState.ResearchTier.Tier14 },
+            // MKV machines - Tier18 (early-mid floor 4)
+            { "Smelter MKV", TechTreeState.ResearchTier.Tier18 },
+            { "Thresher MKV", TechTreeState.ResearchTier.Tier18 },
+            { "Planter MKV", TechTreeState.ResearchTier.Tier18 },
         };
 
         /// <summary>
@@ -775,22 +782,29 @@ namespace AdvancedMachines
     internal static class HiddenVariantsPatches
     {
         /// <summary>
-        /// Patch to always return true for variant availability
+        /// Patch to enable hidden variants, but only for valid indices
         /// </summary>
         [HarmonyPatch(typeof(BuilderInfo), nameof(BuilderInfo.IsVariantAvailable))]
         [HarmonyPrefix]
-        private static bool IsVariantAvailablePrefix(ref bool __result, int index)
+        private static bool IsVariantAvailablePrefix(ref bool __result, BuilderInfo __instance, int index)
         {
             if (!AdvancedMachinesPlugin.EnableHiddenVariants.Value)
                 return true; // Run original method
 
-            // Force all variants to be available
-            __result = true;
+            // Only mark as available if index is within bounds
+            if (__instance.variationData != null && index >= 0 && index < __instance.variationData.Length)
+            {
+                __result = true;
+                return false; // Skip original method
+            }
+
+            // Invalid index - return false
+            __result = false;
             return false; // Skip original method
         }
 
         /// <summary>
-        /// Patch TechTreeState variant check
+        /// Patch TechTreeState variant check, but only for valid indices
         /// </summary>
         [HarmonyPatch(typeof(TechTreeState), nameof(TechTreeState.IsVariantAvailable))]
         [HarmonyPrefix]
@@ -799,8 +813,15 @@ namespace AdvancedMachines
             if (!AdvancedMachinesPlugin.EnableHiddenVariants.Value)
                 return true; // Run original method
 
-            // Force all variants to be available
-            __result = true;
+            // Only mark as available if index is within bounds
+            if (info != null && info.variationData != null && variationIndex >= 0 && variationIndex < info.variationData.Length)
+            {
+                __result = true;
+                return false; // Skip original method
+            }
+
+            // Invalid index - return false
+            __result = false;
             return false; // Skip original method
         }
     }

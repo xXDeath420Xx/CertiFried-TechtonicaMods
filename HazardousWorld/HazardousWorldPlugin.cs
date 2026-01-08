@@ -12,6 +12,7 @@ using TechtonicaFramework.API;
 using TechtonicaFramework.Environment;
 using TechtonicaFramework.Core;
 using TechtonicaFramework.TechTree;
+using TechtonicaFramework.BuildMenu;
 
 namespace HazardousWorld
 {
@@ -268,7 +269,7 @@ namespace HazardousWorld
                 description = "Protective suit that reduces toxic damage by 80%. Essential for exploring contaminated areas.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Equipment",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 1,
                 sortPriority = 110,
@@ -303,7 +304,7 @@ namespace HazardousWorld
                 description = "Lead-lined shield that reduces radiation damage by 90%. Critical for working near reactors.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Equipment",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 1,
                 sortPriority = 111,
@@ -338,7 +339,7 @@ namespace HazardousWorld
                 description = "Instantly removes toxic status effects. Crafted from Shiverthorn.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Equipment",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 20,
                 sortPriority = 120,

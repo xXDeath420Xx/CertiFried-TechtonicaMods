@@ -7,9 +7,9 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "CertiFried"
 name = "Recycler"
-versionNumber = "1.0.0"
+versionNumber = "1.0.1"
 description = "Four-tier recycling system that breaks down crafted items back into raw resources. Higher tiers offer better efficiency rates."
-websiteUrl = "https://github.com/CertiFried/TechtonicaMods"
+websiteUrl = "https://github.com/xXDeath420Xx/TTMod-Recycler"
 containsNsfwContent = false
 
 [package.dependencies]

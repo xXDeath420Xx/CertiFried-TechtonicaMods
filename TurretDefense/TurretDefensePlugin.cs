@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -10,6 +11,7 @@ using EquinoxsModUtils;
 using EquinoxsModUtils.Additions;
 using HarmonyLib;
 using TechtonicaFramework.TechTree;
+using TechtonicaFramework.BuildMenu;
 using UnityEngine;
 
 namespace TurretDefense
@@ -26,7 +28,7 @@ namespace TurretDefense
     {
         public const string MyGUID = "com.certifired.TurretDefense";
         public const string PluginName = "TurretDefense";
-        public const string VersionString = "4.4.0";
+        public const string VersionString = "4.5.4";
 
         private static readonly Harmony Harmony = new Harmony(MyGUID);
         public static ManualLogSource Log;
@@ -101,6 +103,9 @@ namespace TurretDefense
         // ========== SPAWN POINTS ==========
         private static List<Vector3> spawnPointOffsets = new List<Vector3>();
 
+        // ========== CUSTOM ICONS ==========
+        private static Dictionary<string, Sprite> customIcons = new Dictionary<string, Sprite>();
+
         private void Awake()
         {
             Instance = this;
@@ -113,6 +118,7 @@ namespace TurretDefense
             Harmony.PatchAll();
 
             AssetLoader = new AssetBundleLoader(PluginPath);
+            LoadCustomIcons();
 
             RegisterContent();
 
@@ -168,32 +174,203 @@ namespace TurretDefense
             }
         }
 
+        /// <summary>
+        /// Load sprite from embedded resource PNG file
+        /// </summary>
+        private static Sprite LoadEmbeddedSprite(string resourceName, int width = 256, int height = 256)
+        {
+            try
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                string fullName = assembly.GetManifestResourceNames()
+                    .FirstOrDefault(n => n.EndsWith(resourceName));
+
+                if (string.IsNullOrEmpty(fullName))
+                {
+                    LogDebug($"Embedded resource not found: {resourceName}");
+                    return null;
+                }
+
+                using (var stream = assembly.GetManifestResourceStream(fullName))
+                {
+                    if (stream == null) return null;
+
+                    byte[] data = new byte[stream.Length];
+                    stream.Read(data, 0, data.Length);
+
+                    Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+                    tex.filterMode = FilterMode.Bilinear;
+
+                    // Use LoadImage (extension method from UnityEngine)
+                    if (tex.LoadImage(data))
+                    {
+                        tex.Apply();
+                        Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+                        LogDebug($"Loaded embedded sprite: {resourceName} ({tex.width}x{tex.height})");
+                        return sprite;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to load embedded sprite {resourceName}: {ex.Message}");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Load all custom icons from embedded resources
+        /// </summary>
+        private void LoadCustomIcons()
+        {
+            // Turret icons - mapped to our turret machine names (embedded resources first)
+            customIcons["Gatling Turret"] = LoadEmbeddedSprite("Icon_MGTower.png");
+            customIcons["Rocket Turret"] = LoadEmbeddedSprite("Icon_MissileTower.png");
+            customIcons["Laser Turret"] = LoadEmbeddedSprite("Icon_LaserTower.png");
+            customIcons["Railgun Turret"] = LoadEmbeddedSprite("Icon_CannonTower.png");
+            customIcons["Lightning Turret"] = LoadEmbeddedSprite("Icon_AOETower.png");
+
+            // Alien drops - use alien texture thumbnails if available
+            customIcons["Alien Power Core"] = LoadEmbeddedSprite("AlienDestroyer_AlbedoTransparency.png");
+            customIcons["Alien Alloy"] = LoadEmbeddedSprite("AlienFighter_AlbedoTransparency.png");
+
+            int loaded = customIcons.Values.Count(s => s != null);
+            Log.LogInfo($"Loaded {loaded}/{customIcons.Count} custom icons from embedded resources");
+        }
+
+        /// <summary>
+        /// Load icons from asset bundles (called after bundles are loaded)
+        /// </summary>
+        private void LoadBundleIcons()
+        {
+            int loaded = 0;
+
+            // Ammo icon from Navidtbt bullet icons
+            var ammoSprite = AssetLoader.GetSprite("icons_ammo", "Bullet1");
+            if (ammoSprite != null)
+            {
+                customIcons[TurretAmmo] = ammoSprite;
+                loaded++;
+            }
+
+            // High-quality turret icons from PBR texture bundles
+            // Each bundle contains L1, L2, L3 variants - use L2 as default (middle tier)
+            var turretIconMappings = new Dictionary<string, (string bundle, string texture)>
+            {
+                // Gatling uses PBRTurrets GatlingGun textures
+                { "Gatling Turret", ("icons_turret_gatling", "GatlingGun_L2_Low_ColorChanging_AlbedoTransparency") },
+                // Rocket uses RocketLauncher textures
+                { "Rocket Turret", ("icons_turret_rocket", "RocketLauncher_L2_Low_ColorChanging_AlbedoTransparency") },
+                // Laser uses Flamethrower textures (similar energy weapon aesthetic)
+                { "Laser Turret", ("icons_turret_laser", "FlameThrower_L2_Low_ColorChanging_AlbedoTransparency") },
+                // Railgun uses RailGun textures
+                { "Railgun Turret", ("icons_turret_railgun", "RailGun_L2_Low_ColorChanging_AlbedoTransparency") },
+                // Lightning uses LighteningGun textures
+                { "Lightning Turret", ("icons_turret_lightning", "LighteningGun_Base_L2_Low_ColorChanging_AlbedoTransparency") }
+            };
+
+            foreach (var mapping in turretIconMappings)
+            {
+                var sprite = AssetLoader.GetSprite(mapping.Value.bundle, mapping.Value.texture);
+                if (sprite != null)
+                {
+                    customIcons[mapping.Key] = sprite;
+                    loaded++;
+                    LogDebug($"Loaded PBR turret icon for {mapping.Key}: {mapping.Value.texture}");
+                }
+                else
+                {
+                    // Fallback to Skymon icons if PBR bundle fails
+                    var fallbackMappings = new Dictionary<string, string>
+                    {
+                        { "Gatling Turret", "tower" },
+                        { "Rocket Turret", "rocket" },
+                        { "Laser Turret", "bolt" },
+                        { "Railgun Turret", "meteor" },
+                        { "Lightning Turret", "lightning" }
+                    };
+
+                    if (fallbackMappings.TryGetValue(mapping.Key, out var fallbackName))
+                    {
+                        var fallbackSprite = AssetLoader.GetSprite("icons_skymon", fallbackName);
+                        if (fallbackSprite != null)
+                        {
+                            customIcons[mapping.Key] = fallbackSprite;
+                            loaded++;
+                            LogDebug($"Loaded fallback icon for {mapping.Key}: {fallbackName}");
+                        }
+                    }
+                }
+            }
+
+            Log.LogInfo($"Loaded {loaded} turret icons from asset bundles");
+        }
+
+        /// <summary>
+        /// Apply custom icons to resource definitions using reflection
+        /// </summary>
+        private void ApplyCustomIcons()
+        {
+            // Get the rawSprite field via reflection since 'sprite' is a read-only property
+            var spriteField = typeof(ResourceInfo).GetField("rawSprite", BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (var kvp in customIcons)
+            {
+                if (kvp.Value == null) continue;
+
+                var resourceInfo = EMU.Resources.GetResourceInfoByName(kvp.Key);
+                if (resourceInfo != null)
+                {
+                    // Try reflection to set the sprite field
+                    if (spriteField != null)
+                    {
+                        spriteField.SetValue(resourceInfo, kvp.Value);
+                        LogDebug($"Applied custom icon to {kvp.Key}");
+                    }
+                    else
+                    {
+                        // Fallback: try to find any Sprite property/field
+                        var members = typeof(ResourceInfo).GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                        foreach (var member in members)
+                        {
+                            if (member.Name.ToLower().Contains("sprite"))
+                            {
+                                LogDebug($"Found sprite member: {member.Name} ({member.MemberType})");
+                            }
+                        }
+                        Log.LogWarning($"Could not find sprite field on ResourceInfo for {kvp.Key}");
+                    }
+                }
+            }
+        }
+
         private void RegisterContent()
         {
             if (!EnableTurrets.Value) return;
 
             // ========== UNLOCKS ==========
             // Use Modded category (index 7) - provided by TechtonicaFramework
+            // TESTING MODE: Set to 0 cores for free unlocks
             EMUAdditions.AddNewUnlock(new NewUnlockDetails
             {
                 category = ModdedTabModule.ModdedCategory,
-                coreTypeNeeded = ResearchCoreDefinition.CoreType.Gold,
-                coreCountNeeded = 200,
+                coreTypeNeeded = ResearchCoreDefinition.CoreType.Blue,
+                coreCountNeeded = 0, // FREE FOR TESTING
                 description = "Alien ships have been detected in orbit. Research automated defense turrets to protect your factory from alien raiders. Warning: Deploying turrets may attract more hostile attention.",
                 displayName = TurretUnlock,
                 requiredTier = TechTreeState.ResearchTier.Tier0,
-                treePosition = 0
+                treePosition = 10
             });
 
             EMUAdditions.AddNewUnlock(new NewUnlockDetails
             {
                 category = ModdedTabModule.ModdedCategory,
-                coreTypeNeeded = ResearchCoreDefinition.CoreType.Green,
-                coreCountNeeded = 300,
+                coreTypeNeeded = ResearchCoreDefinition.CoreType.Blue,
+                coreCountNeeded = 0, // FREE FOR TESTING
                 description = "Advanced energy-based defense systems utilizing recovered alien technology. Higher power draw but devastating effectiveness against armored targets.",
                 displayName = AdvancedTurretUnlock,
                 requiredTier = TechTreeState.ResearchTier.Tier0,
-                treePosition = 0
+                treePosition = 30
             });
 
             // ========== ALIEN DROPS (Resources) ==========
@@ -203,7 +380,7 @@ namespace TurretDefense
                 description = "A pulsing energy core salvaged from destroyed alien ships. Contains unknown power generation technology that PALADIN is eager to study.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Alien Tech",
+                headerTitle = "Modded",
                 maxStackCount = 100,
                 sortPriority = 250,
                 unlockName = TurretUnlock,
@@ -216,7 +393,7 @@ namespace TurretDefense
                 description = "Strange metallic alloy from alien hull plating. Incredibly durable and lightweight. Could revolutionize construction techniques.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Alien Tech",
+                headerTitle = "Modded",
                 maxStackCount = 200,
                 sortPriority = 251,
                 unlockName = TurretUnlock,
@@ -230,7 +407,7 @@ namespace TurretDefense
                 description = "High-velocity ammunition for ballistic turrets. Each Gatling and Rocket turret consumes ammo while firing.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Defense Systems",
+                headerTitle = "Modded",
                 maxStackCount = 500,
                 sortPriority = 200,
                 unlockName = TurretUnlock,
@@ -263,7 +440,7 @@ namespace TurretDefense
                 description = "Upgrade kit to enhance turret damage, range, and fire rate. Apply to any turret for improved performance.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Defense Systems",
+                headerTitle = "Modded",
                 maxStackCount = 20,
                 sortPriority = 205,
                 unlockName = AdvancedTurretUnlock,
@@ -297,50 +474,35 @@ namespace TurretDefense
                 "High fire rate defense turret. Excellent against swarms. Connects to power grid (50kW).",
                 TurretUnlock, 210, 50, new List<RecipeResourceInfo>
                 {
-                    new RecipeResourceInfo("Steel Frame", 10),
-                    new RecipeResourceInfo("Copper Wire", 20),
-                    new RecipeResourceInfo("Iron Components", 15),
-                    new RecipeResourceInfo("Processor Unit", 2)
+                    new RecipeResourceInfo("Limestone", 1)  // FREE FOR TESTING
                 });
 
             RegisterTurretMachine(RocketTurretMachine,
                 "Explosive rocket turret with area damage. High damage, slow fire rate. Connects to power grid (80kW).",
                 TurretUnlock, 211, 80, new List<RecipeResourceInfo>
                 {
-                    new RecipeResourceInfo("Steel Frame", 15),
-                    new RecipeResourceInfo("Iron Components", 20),
-                    new RecipeResourceInfo("Processor Unit", 3),
-                    new RecipeResourceInfo("Shiverthorn Extract", 10)
+                    new RecipeResourceInfo("Limestone", 1)  // FREE FOR TESTING
                 });
 
             RegisterTurretMachine(LaserTurretMachine,
                 "Continuous beam laser turret. Perfect accuracy, no ammo required. Connects to power grid (120kW).",
                 AdvancedTurretUnlock, 220, 120, new List<RecipeResourceInfo>
                 {
-                    new RecipeResourceInfo("Steel Frame", 20),
-                    new RecipeResourceInfo("Copper Wire", 30),
-                    new RecipeResourceInfo("Processor Unit", 5),
-                    new RecipeResourceInfo("Shiverthorn Extract", 5)
+                    new RecipeResourceInfo("Limestone", 1)  // FREE FOR TESTING
                 });
 
             RegisterTurretMachine(RailgunTurretMachine,
                 "Electromagnetic railgun turret. Extreme range and damage. Connects to power grid (200kW).",
                 AdvancedTurretUnlock, 221, 200, new List<RecipeResourceInfo>
                 {
-                    new RecipeResourceInfo("Steel Frame", 30),
-                    new RecipeResourceInfo("Copper Wire", 50),
-                    new RecipeResourceInfo("Processor Unit", 10),
-                    new RecipeResourceInfo("Steel Mixture", 20)
+                    new RecipeResourceInfo("Limestone", 1)  // FREE FOR TESTING
                 });
 
             RegisterTurretMachine(LightningTurretMachine,
                 "Tesla coil turret. Chain lightning hits multiple targets. Connects to power grid (150kW).",
                 AdvancedTurretUnlock, 222, 150, new List<RecipeResourceInfo>
                 {
-                    new RecipeResourceInfo("Steel Frame", 25),
-                    new RecipeResourceInfo("Copper Wire", 100),
-                    new RecipeResourceInfo("Processor Unit", 8),
-                    new RecipeResourceInfo("Kindlevine Extract", 10)
+                    new RecipeResourceInfo("Limestone", 1)  // FREE FOR TESTING
                 });
 
             Log.LogInfo("All turret machines registered as proper buildings!");
@@ -363,7 +525,7 @@ namespace TurretDefense
                 description = $"{desc}\n\nPower Draw: {powerKW} kW",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Defense Systems",      // Main category header
+                headerTitle = "Modded",      // Main category header
                 maxStackCount = 10,
                 sortPriority = priority,
                 unlockName = unlock,
@@ -392,7 +554,9 @@ namespace TurretDefense
         private void OnGameDefinesLoaded()
         {
             LoadAssetBundles();
+            LoadBundleIcons();
             InitializeMaterials();
+            ApplyCustomIcons();
 
             // Track turret machine definition IDs
             var gatlingInfo = EMU.Resources.GetResourceInfoByName(GatlingTurretMachine);
@@ -438,21 +602,12 @@ namespace TurretDefense
 
         private void OnTechTreeStateLoaded()
         {
-            // PT level tier mapping (from game):
-            // - LIMA: Tier1-Tier4
-            // - VICTOR: Tier5-Tier11
-            // - XRAY: Tier12-Tier16
-            // - SIERRA: Tier17-Tier24
+            // TESTING MODE: Keep at Tier0 for free unlocks
+            // Production tiers: Turret Systems = Tier13 (XRAY), Advanced Defense = Tier15 (XRAY)
+            ConfigureUnlock(TurretUnlock, GatlingTurretMachine, TechTreeState.ResearchTier.Tier0, 10);
+            ConfigureUnlock(AdvancedTurretUnlock, RailgunTurretMachine, TechTreeState.ResearchTier.Tier0, 30);
 
-            // Turret Systems: XRAY (Tier13), position 90
-            // Advanced Defense: XRAY (Tier15), position 90
-            ConfigureUnlock(TurretUnlock, "Crank Generator", TechTreeState.ResearchTier.Tier13, 90);
-            ConfigureUnlock(AdvancedTurretUnlock, "Crank Generator", TechTreeState.ResearchTier.Tier15, 90);
-
-            // Map unlocks to the Modded category (handled by TechtonicaFramework)
-            // ModdedTabModule.MapModdedUnlocks(); // Not using custom Modded category
-
-            Log.LogInfo("Configured TurretDefense unlock tiers in XRAY");
+            Log.LogInfo("TurretDefense: TESTING MODE - Unlocks at Tier0 (free)");
         }
 
         private void ConfigureUnlock(string unlockName, string spriteSource, TechTreeState.ResearchTier tier, int position)
@@ -536,7 +691,11 @@ namespace TurretDefense
                 "cthulhu_idols",          // Boss spawner structures
                 // Hazards
                 "mushroom_forest",        // Hostile flora
-                "lava_plants"             // Hazardous plants
+                "lava_plants",            // Hazardous plants
+                // UI Icons
+                "icons_ammo",             // Bullet, grenade, heavy gun icons from Navidtbt
+                "icons_skymon",           // Game-themed icons (tower, rocket, shield, etc.)
+                "icons_heathen"           // Flat UI icons
             };
             foreach (var bundleName in bundleNames)
             {
@@ -853,6 +1012,7 @@ namespace TurretDefense
         /// <summary>
         /// Fix materials on imported prefabs to be URP compatible
         /// AGGRESSIVELY replaces ALL materials with captured game shaders
+        /// Preserves albedo, normal, metallic, emission, and other texture maps
         /// </summary>
         private static void FixPrefabMaterials(GameObject obj)
         {
@@ -872,8 +1032,16 @@ namespace TurretDefense
 
                     // ALWAYS replace materials from asset bundles - they're built with Standard pipeline
                     // which doesn't work in URP regardless of whether they "look" broken
-                    Color originalColor = Color.gray;
+                    Color originalColor = Color.white;
                     Texture mainTex = null;
+                    Texture normalMap = null;
+                    Texture metallicMap = null;
+                    Texture emissionMap = null;
+                    Texture occlusionMap = null;
+                    Color emissionColor = Color.black;
+                    float metallic = 0f;
+                    float smoothness = 0.5f;
+                    float normalScale = 1f;
 
                     if (oldMat != null)
                     {
@@ -885,17 +1053,52 @@ namespace TurretDefense
                         else
                             originalColor = oldMat.color;
 
-                        // Try to preserve main texture
+                        // Try to preserve main texture (albedo)
                         if (oldMat.HasProperty("_MainTex"))
                             mainTex = oldMat.GetTexture("_MainTex");
                         else if (oldMat.HasProperty("_BaseMap"))
                             mainTex = oldMat.GetTexture("_BaseMap");
+                        else if (oldMat.HasProperty("_Albedo"))
+                            mainTex = oldMat.GetTexture("_Albedo");
+
+                        // Try to preserve normal map
+                        if (oldMat.HasProperty("_BumpMap"))
+                            normalMap = oldMat.GetTexture("_BumpMap");
+                        else if (oldMat.HasProperty("_NormalMap"))
+                            normalMap = oldMat.GetTexture("_NormalMap");
+
+                        // Get normal scale
+                        if (oldMat.HasProperty("_BumpScale"))
+                            normalScale = oldMat.GetFloat("_BumpScale");
+
+                        // Try to preserve metallic/smoothness
+                        if (oldMat.HasProperty("_MetallicGlossMap"))
+                            metallicMap = oldMat.GetTexture("_MetallicGlossMap");
+                        else if (oldMat.HasProperty("_MetallicMap"))
+                            metallicMap = oldMat.GetTexture("_MetallicMap");
+
+                        if (oldMat.HasProperty("_Metallic"))
+                            metallic = oldMat.GetFloat("_Metallic");
+                        if (oldMat.HasProperty("_Glossiness"))
+                            smoothness = oldMat.GetFloat("_Glossiness");
+                        else if (oldMat.HasProperty("_Smoothness"))
+                            smoothness = oldMat.GetFloat("_Smoothness");
+
+                        // Try to preserve emission
+                        if (oldMat.HasProperty("_EmissionMap"))
+                            emissionMap = oldMat.GetTexture("_EmissionMap");
+                        if (oldMat.HasProperty("_EmissionColor"))
+                            emissionColor = oldMat.GetColor("_EmissionColor");
+
+                        // Try to preserve occlusion map
+                        if (oldMat.HasProperty("_OcclusionMap"))
+                            occlusionMap = oldMat.GetTexture("_OcclusionMap");
                     }
 
                     // Create new material with captured game shader
                     Material newMat = GetColoredMaterial(originalColor);
 
-                    // Apply texture if we had one
+                    // Apply albedo texture
                     if (mainTex != null)
                     {
                         if (newMat.HasProperty("_MainTex"))
@@ -904,8 +1107,61 @@ namespace TurretDefense
                             newMat.SetTexture("_BaseMap", mainTex);
                     }
 
+                    // Apply normal map
+                    if (normalMap != null)
+                    {
+                        if (newMat.HasProperty("_BumpMap"))
+                        {
+                            newMat.SetTexture("_BumpMap", normalMap);
+                            newMat.SetFloat("_BumpScale", normalScale);
+                            newMat.EnableKeyword("_NORMALMAP");
+                        }
+                    }
+
+                    // Apply metallic/smoothness
+                    if (metallicMap != null)
+                    {
+                        if (newMat.HasProperty("_MetallicGlossMap"))
+                        {
+                            newMat.SetTexture("_MetallicGlossMap", metallicMap);
+                            newMat.EnableKeyword("_METALLICGLOSSMAP");
+                        }
+                    }
+                    if (newMat.HasProperty("_Metallic"))
+                        newMat.SetFloat("_Metallic", metallic);
+                    if (newMat.HasProperty("_Smoothness"))
+                        newMat.SetFloat("_Smoothness", smoothness);
+                    if (newMat.HasProperty("_Glossiness"))
+                        newMat.SetFloat("_Glossiness", smoothness);
+
+                    // Apply emission
+                    if (emissionMap != null || emissionColor != Color.black)
+                    {
+                        if (newMat.HasProperty("_EmissionMap") && emissionMap != null)
+                            newMat.SetTexture("_EmissionMap", emissionMap);
+                        if (newMat.HasProperty("_EmissionColor"))
+                        {
+                            newMat.SetColor("_EmissionColor", emissionColor);
+                            if (emissionColor != Color.black || emissionMap != null)
+                                newMat.EnableKeyword("_EMISSION");
+                        }
+                    }
+
+                    // Apply occlusion
+                    if (occlusionMap != null && newMat.HasProperty("_OcclusionMap"))
+                    {
+                        newMat.SetTexture("_OcclusionMap", occlusionMap);
+                        newMat.EnableKeyword("_OCCLUSIONMAP");
+                    }
+
                     newMaterials[i] = newMat;
                     fixedCount++;
+
+                    // Log what we preserved for debugging
+                    if (mainTex != null || normalMap != null || metallicMap != null)
+                    {
+                        LogDebug($"  Material {i}: albedo={mainTex?.name ?? "none"}, normal={normalMap?.name ?? "none"}, metallic={metallicMap?.name ?? "none"}");
+                    }
                 }
 
                 renderer.sharedMaterials = newMaterials;
@@ -1141,7 +1397,17 @@ namespace TurretDefense
 
         private static string GetPrefabNameForTurret(string turretType)
         {
-            return turretType;
+            // Map turret types to actual prefab names in the asset bundles
+            // Note: Asset bundles use specific naming conventions from Unity store assets
+            return turretType.ToLower() switch
+            {
+                "gatling" => "GatelingGun_ColorChanging_L1",  // PBRTurrets/GatelingGuns
+                "rocket" => "RocketLauncher_ColorChanging_L1", // PBRTurrets/Rockets
+                "railgun" => "RailGun_ColorChanging_L1",       // PBRTurrets/RailGuns
+                "laser" => "Laser Cannon_fbx_prefab",          // Laser Cannon pack
+                "lightning" => "LighteningGun_ColorChanging_L1", // PBRTurrets/LighteningGuns (note: typo in asset)
+                _ => turretType
+            };
         }
 
         /// <summary>
@@ -1796,6 +2062,57 @@ namespace TurretDefense
                 return bundle.GetAllAssetNames();
             }
             return new string[0];
+        }
+
+        /// <summary>
+        /// Get a sprite/texture from an icon bundle
+        /// </summary>
+        public Sprite GetSprite(string bundleName, string spriteName)
+        {
+            if (!loadedBundles.TryGetValue(bundleName, out var bundle))
+            {
+                if (!LoadBundle(bundleName))
+                    return null;
+                bundle = loadedBundles[bundleName];
+            }
+
+            // Try loading as Sprite first
+            Sprite sprite = bundle.LoadAsset<Sprite>(spriteName);
+            if (sprite != null) return sprite;
+
+            // Try with .png extension
+            sprite = bundle.LoadAsset<Sprite>(spriteName + ".png");
+            if (sprite != null) return sprite;
+
+            // Try loading as Texture2D and convert to Sprite
+            Texture2D tex = bundle.LoadAsset<Texture2D>(spriteName);
+            if (tex == null) tex = bundle.LoadAsset<Texture2D>(spriteName + ".png");
+
+            // Search for partial match
+            if (tex == null)
+            {
+                foreach (var assetName in bundle.GetAllAssetNames())
+                {
+                    if (assetName.ToLower().Contains(spriteName.ToLower()) && assetName.EndsWith(".png"))
+                    {
+                        tex = bundle.LoadAsset<Texture2D>(assetName);
+                        if (tex != null)
+                        {
+                            TurretDefensePlugin.LogDebug($"Found sprite {spriteName} as {assetName}");
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (tex != null)
+            {
+                // Convert texture to sprite
+                sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+                return sprite;
+            }
+
+            return null;
         }
     }
 

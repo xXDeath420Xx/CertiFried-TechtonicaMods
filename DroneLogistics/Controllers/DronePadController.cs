@@ -4,7 +4,8 @@ using System.Collections.Generic;
 namespace DroneLogistics
 {
     /// <summary>
-    /// Drone landing pad - spawns, charges, and manages drones
+    /// Drone landing pad / relay - spawns, charges, and manages drones
+    /// Now supports power-based charging with sci-fi models
     /// </summary>
     public class DronePadController : MonoBehaviour
     {
@@ -13,12 +14,38 @@ namespace DroneLogistics
 
         // Configuration
         public int MaxDrones => DroneLogisticsPlugin.MaxDronesPerPad.Value;
+        public DroneRelayType RelayType { get; private set; } = DroneRelayType.Standard;
+
+        // Power system
+        public bool RequiresPower { get; set; } = false;
+        public int PowerDraw { get; set; } = 50;
+        public bool IsPowered { get; private set; } = true;
+        public bool IsCharging => chargingDrones.Count > 0 && (IsPowered || !RequiresPower);
+        public float ChargeMultiplier => RelayType switch
+        {
+            DroneRelayType.FastCharge => 2f,
+            DroneRelayType.DockingBay => 1.5f,
+            _ => 1f
+        };
+        public int MaxChargingSlots => RelayType switch
+        {
+            DroneRelayType.DockingBay => 4,
+            DroneRelayType.FastCharge => 2,
+            _ => 1
+        };
 
         // Managed drones
         private List<DroneController> drones = new List<DroneController>();
+        private List<DroneController> chargingDrones = new List<DroneController>();
+        private Queue<DroneController> chargingQueue = new Queue<DroneController>();
         public IReadOnlyList<DroneController> Drones => drones;
         public int DroneCount => drones.Count;
         public int AvailableDroneCount => drones.FindAll(d => d != null && d.IsAvailable).Count;
+        public int ChargingCount => chargingDrones.Count;
+        public int QueuedForCharging => chargingQueue.Count;
+
+        // Docking positions for multi-drone bays
+        private Vector3[] dockingPositions;
 
         // Queued requests
         private Queue<DeliveryRequest> requestQueue = new Queue<DeliveryRequest>();
@@ -30,11 +57,38 @@ namespace DroneLogistics
 
         public void Initialize()
         {
-            PadId = nextPadId++;
+            Initialize(DroneRelayType.Standard);
+        }
 
+        public void Initialize(DroneRelayType type)
+        {
+            PadId = nextPadId++;
+            RelayType = type;
+
+            SetupDockingPositions();
             SetupVisuals();
 
-            DroneLogisticsPlugin.Log($"Drone Pad {PadId} initialized");
+            DroneLogisticsPlugin.Log($"Drone Relay {PadId} ({type}) initialized - {MaxChargingSlots} charging slots");
+        }
+
+        private void SetupDockingPositions()
+        {
+            // Create docking positions based on relay type
+            int slots = MaxChargingSlots;
+            dockingPositions = new Vector3[slots];
+
+            float radius = RelayType == DroneRelayType.DockingBay ? 2f : 1f;
+            float height = 0.5f;
+
+            for (int i = 0; i < slots; i++)
+            {
+                float angle = (i * 360f / slots) * Mathf.Deg2Rad;
+                dockingPositions[i] = new Vector3(
+                    Mathf.Cos(angle) * radius,
+                    height,
+                    Mathf.Sin(angle) * radius
+                );
+            }
         }
 
         private void SetupVisuals()
@@ -88,12 +142,69 @@ namespace DroneLogistics
         {
             // Clean up destroyed drones
             drones.RemoveAll(d => d == null);
+            chargingDrones.RemoveAll(d => d == null);
+
+            // Process charging
+            ProcessCharging();
 
             // Process queued requests
             ProcessQueue();
 
             // Update visuals
             UpdateVisuals();
+        }
+
+        private void ProcessCharging()
+        {
+            // Only charge if powered (or power not required)
+            if (RequiresPower && !IsPowered)
+                return;
+
+            float chargeAmount = DroneLogisticsPlugin.DroneChargeRate.Value * ChargeMultiplier * Time.deltaTime;
+            float batteryCapacity = DroneLogisticsPlugin.DroneBatteryCapacity.Value;
+
+            // Process drones currently in charging slots
+            for (int i = chargingDrones.Count - 1; i >= 0; i--)
+            {
+                var drone = chargingDrones[i];
+                if (drone == null)
+                {
+                    chargingDrones.RemoveAt(i);
+                    continue;
+                }
+
+                // Charge the drone
+                drone.AddCharge(chargeAmount / batteryCapacity);
+
+                // Check if fully charged
+                if (drone.Charge >= 1f)
+                {
+                    drone.OnChargingComplete();
+                    chargingDrones.RemoveAt(i);
+                    DroneLogisticsPlugin.Log($"Drone {drone.DroneId} fully charged at Relay {PadId}");
+                }
+            }
+
+            // Fill empty charging slots from queue
+            while (chargingDrones.Count < MaxChargingSlots && chargingQueue.Count > 0)
+            {
+                var nextDrone = chargingQueue.Dequeue();
+                if (nextDrone != null)
+                {
+                    int slotIndex = chargingDrones.Count;
+                    chargingDrones.Add(nextDrone);
+                    nextDrone.OnDockingAssigned(GetDockingPosition(slotIndex));
+                    DroneLogisticsPlugin.Log($"Drone {nextDrone.DroneId} assigned to charging slot {slotIndex} at Relay {PadId}");
+                }
+            }
+        }
+
+        public Vector3 GetDockingPosition(int slotIndex)
+        {
+            if (dockingPositions == null || slotIndex >= dockingPositions.Length)
+                return transform.position + Vector3.up * 0.5f;
+
+            return transform.position + dockingPositions[slotIndex];
         }
 
         private void ProcessQueue()
@@ -137,6 +248,80 @@ namespace DroneLogistics
                 }
             }
         }
+
+        #region Charging Management
+
+        /// <summary>
+        /// Request a charging slot for a drone. Returns true if queued/assigned.
+        /// </summary>
+        public bool RequestCharging(DroneController drone)
+        {
+            if (drone == null) return false;
+
+            // Already charging or queued?
+            if (chargingDrones.Contains(drone) || chargingQueue.Contains(drone))
+                return true;
+
+            // If slot available, assign immediately
+            if (chargingDrones.Count < MaxChargingSlots)
+            {
+                int slotIndex = chargingDrones.Count;
+                chargingDrones.Add(drone);
+                drone.OnDockingAssigned(GetDockingPosition(slotIndex));
+                DroneLogisticsPlugin.Log($"Drone {drone.DroneId} immediately assigned to charging slot {slotIndex}");
+                return true;
+            }
+
+            // Otherwise queue
+            chargingQueue.Enqueue(drone);
+            DroneLogisticsPlugin.Log($"Drone {drone.DroneId} queued for charging (queue: {chargingQueue.Count})");
+            return true;
+        }
+
+        /// <summary>
+        /// Cancel a charging request
+        /// </summary>
+        public void CancelCharging(DroneController drone)
+        {
+            if (chargingDrones.Contains(drone))
+            {
+                chargingDrones.Remove(drone);
+            }
+
+            // Remove from queue
+            var newQueue = new Queue<DroneController>();
+            while (chargingQueue.Count > 0)
+            {
+                var d = chargingQueue.Dequeue();
+                if (d != drone)
+                    newQueue.Enqueue(d);
+            }
+            chargingQueue = newQueue;
+        }
+
+        /// <summary>
+        /// Check if this relay has available charging capacity
+        /// </summary>
+        public bool HasChargingCapacity => chargingDrones.Count < MaxChargingSlots || chargingQueue.Count < 10;
+
+        /// <summary>
+        /// Get estimated wait time for charging (in seconds)
+        /// </summary>
+        public float EstimatedWaitTime
+        {
+            get
+            {
+                if (chargingDrones.Count < MaxChargingSlots)
+                    return 0f;
+
+                // Estimate based on queue position and average charge time
+                float avgChargeTime = DroneLogisticsPlugin.DroneBatteryCapacity.Value /
+                                     (DroneLogisticsPlugin.DroneChargeRate.Value * ChargeMultiplier);
+                return chargingQueue.Count * avgChargeTime / MaxChargingSlots;
+            }
+        }
+
+        #endregion
 
         #region Drone Management
 
@@ -242,10 +427,14 @@ namespace DroneLogistics
         public string GetStatusText()
         {
             int available = AvailableDroneCount;
-            int charging = drones.FindAll(d => d != null && d.Charge < 1f).Count;
-            int working = DroneCount - available - charging;
+            int working = drones.FindAll(d => d != null && d.State != DroneState.Idle && d.State != DroneState.Charging).Count;
 
-            return $"Pad {PadId}: {available}/{DroneCount} available, {working} working, {charging} charging, {QueuedRequests} queued";
+            string powerStatus = RequiresPower ? (IsPowered ? "Powered" : "No Power!") : "";
+            string chargingStatus = $"{ChargingCount}/{MaxChargingSlots} charging";
+            if (QueuedForCharging > 0)
+                chargingStatus += $" (+{QueuedForCharging} queued)";
+
+            return $"Relay {PadId} ({RelayType}): {available}/{DroneCount} available, {working} working, {chargingStatus} {powerStatus}";
         }
 
         #endregion

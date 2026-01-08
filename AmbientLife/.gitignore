@@ -1,0 +1,11 @@
+# Build outputs
+bin/
+obj/
+build/
+
+# Unity AssetBundles (too large for GitHub, distributed via Thunderstore)
+Bundles/
+
+# IDE
+.vs/
+*.user

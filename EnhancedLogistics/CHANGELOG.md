@@ -2,6 +2,16 @@
 
 All notable changes to EnhancedLogistics will be documented in this file.
 
+## [3.2.2] - 2026-01-07
+
+### Changed
+- All items now appear in unified "Modded" build menu tab
+- Updated dependency on TechtonicaFramework 1.2.0
+- Logistics improvements
+
+### Fixed
+- Build menu organization for cleaner UI
+
 ## [1.0.0] - 2025-01-04
 
 ### Added - Phase 3: Search UI System

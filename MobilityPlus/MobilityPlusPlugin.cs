@@ -11,6 +11,7 @@ using TechtonicaFramework.API;
 using TechtonicaFramework.Equipment;
 using TechtonicaFramework.Core;
 using TechtonicaFramework.TechTree;
+using TechtonicaFramework.BuildMenu;
 
 namespace MobilityPlus
 {
@@ -187,7 +188,7 @@ namespace MobilityPlus
                 description = $"Enhanced stilts that extend to {StiltsMk2Height.Value}m height. Faster extension speed and more stable.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Equipment",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 1,
                 sortPriority = 200,
@@ -222,7 +223,7 @@ namespace MobilityPlus
                 description = $"Maximum height stilts extending to {StiltsMk3Height.Value}m. Includes gyroscopic stabilization for rough terrain.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Equipment",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 1,
                 sortPriority = 201,
@@ -265,7 +266,7 @@ namespace MobilityPlus
                 description = "Motorized boots that increase base movement speed by 25%. Requires battery power.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Equipment",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 1,
                 sortPriority = 210,
@@ -306,7 +307,7 @@ namespace MobilityPlus
                 description = "Compressed air-powered jump assist. Double-tap jump for a powerful boost. Limited charges, recharges over time.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Equipment",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 1,
                 sortPriority = 220,
@@ -347,7 +348,7 @@ namespace MobilityPlus
                 description = "Enhanced grappling hook with 50% longer range and faster retraction. Improved grip for heavy loads.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Equipment",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 1,
                 sortPriority = 230,
@@ -390,7 +391,7 @@ namespace MobilityPlus
                 description = $"A placeable pad that boosts movement speed by {SpeedBoostMultiplier.Value}x when walked over. Perfect for factory floors.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Logistics",
+                headerTitle = "Modded",
                 // subHeaderTitle inherited from parent
                 maxStackCount = 20,
                 sortPriority = 240,
@@ -427,7 +428,7 @@ namespace MobilityPlus
                     description = $"A placeable pad that launches the player upward when stepped on. Great for vertical navigation.",
                     craftingMethod = CraftingMethod.Assembler,
                     craftTierRequired = 0,
-                    headerTitle = "Logistics",
+                    headerTitle = "Modded",
                     // subHeaderTitle inherited from parent
                     maxStackCount = 20,
                     sortPriority = 241,
@@ -470,7 +471,7 @@ namespace MobilityPlus
                 description = $"A personal hover vehicle for fast travel. Press V to summon, B to dismiss. Speed: {VehicleSpeed.Value}m/s.",
                 craftingMethod = CraftingMethod.Assembler,
                 craftTierRequired = 0,
-                headerTitle = "Equipment",
+                headerTitle = "Modded",
                 maxStackCount = 1,
                 sortPriority = 250,
                 unlockName = VehicleUnlock,

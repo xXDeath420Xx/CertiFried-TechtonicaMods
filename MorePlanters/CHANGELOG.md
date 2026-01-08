@@ -2,6 +2,12 @@
 
 All notable changes to MorePlanters will be documented in this file.
 
+## [3.0.9] - 2026-01-07
+
+### Fixed
+- Minor stability improvements
+- Compatibility updates
+
 ## [3.0.4] - 2026-01-03
 
 ### Fixed

@@ -1,0 +1,10 @@
+C:\Users\crawf\TechtonicaMods\NewMods\PlanterCoreClusters\obj\Debug\net472\PlanterCoreClusters.csproj.AssemblyReference.cache
+C:\Users\crawf\TechtonicaMods\NewMods\PlanterCoreClusters\obj\Debug\net472\PlanterCoreClusters.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\crawf\TechtonicaMods\NewMods\PlanterCoreClusters\obj\Debug\net472\PlanterCoreClusters.AssemblyInfoInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\PlanterCoreClusters\obj\Debug\net472\PlanterCoreClusters.AssemblyInfo.cs
+C:\Users\crawf\TechtonicaMods\NewMods\PlanterCoreClusters\obj\Debug\net472\PlanterCoreClusters.csproj.CoreCompileInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\PlanterCoreClusters\bin\Debug\net472\PlanterCoreClusters.dll
+C:\Users\crawf\TechtonicaMods\NewMods\PlanterCoreClusters\bin\Debug\net472\PlanterCoreClusters.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\PlanterCoreClusters\obj\Debug\net472\PlanterCoreClusters.dll
+C:\Users\crawf\TechtonicaMods\NewMods\PlanterCoreClusters\obj\Debug\net472\PlanterCoreClusters.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\PlanterCoreClusters\obj\Debug\net472\PlanterCoreClusters.sourcelink.json

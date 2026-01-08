@@ -14,6 +14,7 @@ containsNsfwContent = false
 
 [package.dependencies]
 BepInEx-BepInExPack = "5.4.2100"
+CertiFried-TechtonicaFramework = "1.2.0"
 
 [build]
 icon = "./icon.png"
