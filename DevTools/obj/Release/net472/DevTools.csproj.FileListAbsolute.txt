@@ -7,3 +7,4 @@ C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.Assem
 C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.csproj.CoreCompileInputs.cache
 C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.dll
 C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.sourcelink.json

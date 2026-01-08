@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -48,7 +50,10 @@ namespace ChainExplosives
             Harmony.PatchAll(typeof(ExplosiveDefinitionPatch));
             Harmony.PatchAll(typeof(ExplosiveInteractionPatch));
             Harmony.PatchAll(typeof(ExplosiveInstancePatch));
-            Harmony.PatchAll(typeof(BiggerExplosivesPatch));
+
+            // Apply BiggerExplosives patch manually with existence check
+            ApplyBiggerExplosivesPatch();
+
             Logger.LogInfo($"{PluginName} v{VersionString} loaded!");
             Logger.LogInfo($"  Chain Detonation: Interact with any explosive to detonate ALL");
             Logger.LogInfo($"  Bigger Explosives: Width={ExplosionWidth.Value}, Depth={ExplosionDepth.Value}");
@@ -59,6 +64,38 @@ namespace ChainExplosives
             if (debugMode.Value)
             {
                 Log.LogInfo($"[Debug] {message}");
+            }
+        }
+
+        private void ApplyBiggerExplosivesPatch()
+        {
+            if (!BiggerExplosivesEnabled.Value)
+            {
+                Log.LogInfo("Bigger Explosives disabled in config - skipping patch");
+                return;
+            }
+
+            try
+            {
+                // Try to patch TriggerDetonationFx which handles explosion effects
+                var targetMethod = typeof(ExplosiveDefinition).GetMethod("TriggerDetonationFx",
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+                if (targetMethod != null)
+                {
+                    var prefix = typeof(BiggerExplosivesPatch).GetMethod(nameof(BiggerExplosivesPatch.ModifyExplosionSize),
+                        BindingFlags.Public | BindingFlags.Static);
+                    Harmony.Patch(targetMethod, prefix: new HarmonyMethod(prefix));
+                    Log.LogInfo("Applied BiggerExplosives patch to TriggerDetonationFx");
+                }
+                else
+                {
+                    Log.LogWarning("TriggerDetonationFx method not found - BiggerExplosives feature disabled");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Could not apply BiggerExplosives patch: {ex.Message}");
             }
         }
     }
@@ -156,62 +193,38 @@ namespace ChainExplosives
     /// <summary>
     /// Bigger Explosives - Modifies explosion width and depth
     /// Based on Equinox-BiggerExplosives functionality
+    /// This class uses manual patching via ApplyBiggerExplosivesPatch()
     /// </summary>
-    [HarmonyPatch(typeof(ExplosiveDefinition))]
     public static class BiggerExplosivesPatch
     {
         /// <summary>
-        /// Modify explosion parameters before detonation
-        /// ExplosiveDefinition contains the blast parameters
+        /// Modify explosion parameters before TriggerDetonationFx
+        /// ExplosiveDefinition contains the blast parameters (explosionRadius, explosionDepth)
+        /// Method signature: public void TriggerDetonationFx(ref ExplosiveInstance inst)
         /// </summary>
-        [HarmonyPatch("Detonate")]
-        [HarmonyPrefix]
-        static void ModifyExplosionSize(ExplosiveDefinition __instance, ref ExplosiveInstance explosive)
+        public static void ModifyExplosionSize(ExplosiveDefinition __instance, ref ExplosiveInstance inst)
         {
             if (!ChainExplosivesPlugin.BiggerExplosivesEnabled.Value) return;
 
             try
             {
-                // ExplosiveDefinition has blast parameters we can modify
-                // blastWidth controls the width of the tunnel
-                // blastDistance controls how far the explosion digs
-
                 int configWidth = ChainExplosivesPlugin.ExplosionWidth.Value;
                 int configDepth = ChainExplosivesPlugin.ExplosionDepth.Value;
 
                 // Store original values for logging
-                int origWidth = __instance.blastWidth;
-                int origDist = __instance.blastDistance;
+                int origWidth = __instance.explosionRadius;
+                int origDist = __instance.explosionDepth;
 
                 // Apply configured values
-                __instance.blastWidth = configWidth;
-                __instance.blastDistance = configDepth;
+                __instance.explosionRadius = configWidth;
+                __instance.explosionDepth = configDepth;
 
-                ChainExplosivesPlugin.LogDebug($"Modified explosion: Width {origWidth}->{configWidth}, Depth {origDist}->{configDepth}");
+                ChainExplosivesPlugin.LogDebug($"Modified explosion: Radius {origWidth}->{configWidth}, Depth {origDist}->{configDepth}");
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 ChainExplosivesPlugin.Log.LogWarning($"Failed to modify explosion size: {ex.Message}");
             }
-        }
-
-        /// <summary>
-        /// Alternative patch for VoxelBlaster if ExplosiveDefinition.Detonate doesn't have the params
-        /// VoxelBlaster.BlastDirectional is called with width/distance parameters
-        /// </summary>
-        [HarmonyPatch(typeof(VoxelBlaster), "BlastDirectional")]
-        [HarmonyPrefix]
-        static void ModifyBlastDirectional(ref int width, ref int distance)
-        {
-            if (!ChainExplosivesPlugin.BiggerExplosivesEnabled.Value) return;
-
-            int origWidth = width;
-            int origDist = distance;
-
-            width = ChainExplosivesPlugin.ExplosionWidth.Value;
-            distance = ChainExplosivesPlugin.ExplosionDepth.Value;
-
-            ChainExplosivesPlugin.LogDebug($"BlastDirectional modified: Width {origWidth}->{width}, Distance {origDist}->{distance}");
         }
     }
 }

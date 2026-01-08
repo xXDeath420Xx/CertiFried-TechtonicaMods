@@ -13,10 +13,49 @@ namespace SeamlessWorld.Patches
     public static class MachinePatches
     {
         /// <summary>
-        /// Prevent machines from being flagged inactive when strata changes
+        /// Initialize machine patches - called from plugin Awake
         /// </summary>
-        [HarmonyPatch(typeof(GameState), "FlagForStrataChange")]
-        [HarmonyPrefix]
+        public static void ApplyManualPatches(Harmony harmony)
+        {
+            // FlagForStrataChange may not exist in all game versions
+            TryApplyPatch(harmony, typeof(GameState), "FlagForStrataChange",
+                nameof(FlagForStrataChange_Prefix), "FlagForStrataChange");
+
+            // MachineManager.UpdateAll - the actual machine update method (SimUpdate doesn't exist)
+            TryApplyPatch(harmony, typeof(MachineManager), "UpdateAll",
+                nameof(UpdateAll_Prefix), "MachineManager.UpdateAll");
+        }
+
+        private static void TryApplyPatch(Harmony harmony, Type targetType, string methodName,
+            string prefixMethodName, string patchDescription)
+        {
+            try
+            {
+                var targetMethod = targetType.GetMethod(methodName,
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+
+                if (targetMethod != null)
+                {
+                    var prefix = typeof(MachinePatches).GetMethod(prefixMethodName,
+                        BindingFlags.Public | BindingFlags.Static);
+                    harmony.Patch(targetMethod, prefix: new HarmonyMethod(prefix));
+                    SeamlessWorldPlugin.Log.LogInfo($"Applied {patchDescription} patch");
+                }
+                else
+                {
+                    SeamlessWorldPlugin.Log.LogInfo($"{patchDescription} method not found - skipping patch");
+                }
+            }
+            catch (Exception ex)
+            {
+                SeamlessWorldPlugin.Log.LogWarning($"Could not apply {patchDescription} patch: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Prevent machines from being flagged inactive when strata changes
+        /// NOTE: This patch is applied manually in ApplyManualPatches if the method exists
+        /// </summary>
         public static bool FlagForStrataChange_Prefix()
         {
             if (!SeamlessWorldPlugin.EnableSeamlessWorld.Value)
@@ -29,10 +68,10 @@ namespace SeamlessWorld.Patches
 
         /// <summary>
         /// Keep all machines updating regardless of strata
+        /// This method is called via manual patching in ApplyManualPatches
+        /// Method signature: public void UpdateAll(bool isRefresh = true, bool isIncrement = true)
         /// </summary>
-        [HarmonyPatch(typeof(MachineManager), "SimUpdate")]
-        [HarmonyPrefix]
-        public static void SimUpdate_Prefix(MachineManager __instance)
+        public static void UpdateAll_Prefix(MachineManager __instance)
         {
             if (!SeamlessWorldPlugin.EnableSeamlessWorld.Value)
                 return;

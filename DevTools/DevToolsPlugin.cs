@@ -754,21 +754,22 @@ namespace DevTools
         {
             try
             {
-                if (GameResources.instance == null)
+                if (GameDefines.instance == null)
                 {
-                    Log.LogWarning("Cannot unlock recipes - GameResources not available");
+                    Log.LogWarning("Cannot unlock recipes - GameDefines not available");
                     return;
                 }
 
                 int count = 0;
-                var unlocks = GameResources.instance.allUnlocks;
+                var unlocks = GameDefines.instance.unlocks;
                 if (unlocks != null)
                 {
                     foreach (var unlock in unlocks)
                     {
-                        if (unlock != null && !TechTreeState.instance.IsUnlockKnown(unlock.uniqueId))
+                        if (unlock != null && !TechTreeState.instance.IsUnlockActive(unlock.uniqueId))
                         {
-                            TechTreeState.instance.Unlock(unlock, false);
+                            // UnlockTech(unlockId, drawPower, useCores)
+                            TechTreeState.instance.UnlockTech(unlock.uniqueId, false, false);
                             count++;
                         }
                     }
@@ -956,88 +957,14 @@ namespace DevTools
         // Cat sounds are applied directly in Update() via ApplyCatSounds()
 
         // ============================================
-        // PROTECTION REMOVAL PATCHES (from CasperProtections)
+        // PROTECTION REMOVAL PATCHES
+        // NOTE: The original CasperProtections features used types (VoxelBlaster, CharacterMovement)
+        // that don't exist in the current game version.
+        // TODO: Reimplement using correct types:
+        //   - Dig protection: Need to find actual terrain protection system
+        //   - Prebuild protection: Need to find machine indestructibility check
+        //   - Sprint: Use PlayerFirstPersonController.maxRunSpeed
+        // These config options still exist and can be wired up when correct patches are found.
         // ============================================
-
-        /// <summary>
-        /// Disable dig protection zones - allows digging anywhere
-        /// </summary>
-        [HarmonyPatch(typeof(VoxelBlaster), "IsPositionProtected")]
-        [HarmonyPrefix]
-        private static bool DisableDigProtection(ref bool __result)
-        {
-            if (!DevToolsPlugin.DisableDigProtection.Value) return true; // Run original
-
-            __result = false; // Position is never protected
-            return false; // Skip original method
-        }
-
-        /// <summary>
-        /// Disable prebuild protection - allows dismantling pre-built objects
-        /// </summary>
-        [HarmonyPatch(typeof(SaveState), "IsMachineIndestructible")]
-        [HarmonyPrefix]
-        private static bool DisablePrebuildProtection(ref bool __result)
-        {
-            if (!DevToolsPlugin.DisablePrebuildProtection.Value) return true; // Run original
-
-            __result = false; // Machine is never indestructible
-            return false; // Skip original method
-        }
-
-        /// <summary>
-        /// Disable safe sprint - allows full sprint speed indoors
-        /// Patches the movement system to ignore indoor sprint restrictions
-        /// </summary>
-        [HarmonyPatch(typeof(CharacterMovement), "GetMaxSpeed")]
-        [HarmonyPostfix]
-        private static void DisableSafeSprint(ref float __result, CharacterMovement __instance)
-        {
-            if (!DevToolsPlugin.DisableSafeSprint.Value) return;
-
-            try
-            {
-                // If player is sprinting but speed was reduced due to being indoors,
-                // restore the full sprint speed
-                if (__instance.IsSprinting && __result < __instance.sprintSpeed)
-                {
-                    __result = __instance.sprintSpeed;
-                }
-            }
-            catch
-            {
-                // Silently ignore
-            }
-        }
-
-        /// <summary>
-        /// Hold to sprint - sprint only while holding the key (no toggle)
-        /// </summary>
-        [HarmonyPatch(typeof(CharacterMovement), "UpdateSprintState")]
-        [HarmonyPrefix]
-        private static bool HoldToSprintPatch(CharacterMovement __instance)
-        {
-            if (!DevToolsPlugin.HoldToSprint.Value) return true; // Run original
-
-            try
-            {
-                // Simple hold-to-sprint: sprint state matches key state directly
-                bool sprintKeyHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-
-                // Use reflection to set sprint state since it may be private
-                var sprintingField = typeof(CharacterMovement).GetField("isSprinting",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (sprintingField != null)
-                {
-                    sprintingField.SetValue(__instance, sprintKeyHeld);
-                }
-
-                return false; // Skip original toggle logic
-            }
-            catch
-            {
-                return true; // Run original if we fail
-            }
-        }
     }
 }

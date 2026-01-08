@@ -307,6 +307,20 @@ namespace AmbientLife
         }
 
         /// <summary>
+        /// Safely get or add a Light component to a GameObject
+        /// Prevents "component already exists" errors
+        /// </summary>
+        private static Light GetOrAddLight(GameObject obj)
+        {
+            var light = obj.GetComponent<Light>();
+            if (light == null)
+            {
+                light = obj.AddComponent<Light>();
+            }
+            return light;
+        }
+
+        /// <summary>
         /// Create a visual death effect for creature dying
         /// </summary>
         private void CreateDeathEffect(Vector3 position)
@@ -315,7 +329,7 @@ namespace AmbientLife
             var effectObj = new GameObject("DeathEffect");
             effectObj.transform.position = position;
 
-            var light = effectObj.AddComponent<Light>();
+            var light = GetOrAddLight(effectObj);
             light.type = LightType.Point;
             light.color = new Color(0.5f, 0.3f, 0.1f); // Brown/orange flash
             light.range = 5f;
@@ -634,7 +648,7 @@ namespace AmbientLife
             UnityEngine.Object.Destroy(eye.GetComponent<Collider>());
 
             // Add hovering light
-            var light = parent.AddComponent<Light>();
+            var light = GetOrAddLight(parent);
             light.type = LightType.Point;
             light.color = glowColor;
             light.intensity = 0.5f;
@@ -757,7 +771,7 @@ namespace AmbientLife
             UnityEngine.Object.Destroy(core.GetComponent<Collider>());
 
             // Trail light
-            var light = parent.AddComponent<Light>();
+            var light = GetOrAddLight(parent);
             light.type = LightType.Point;
             light.color = new Color(1f, 0.5f, 1f);
             light.intensity = 1f;
@@ -952,7 +966,7 @@ namespace AmbientLife
             UnityEngine.Object.Destroy(opening.GetComponent<Collider>());
 
             // Add pulsing light
-            var light = parent.AddComponent<Light>();
+            var light = GetOrAddLight(parent);
             light.type = LightType.Point;
             light.color = new Color(0.6f, 0.2f, 0.8f);
             light.intensity = 1.5f;
@@ -1035,7 +1049,7 @@ namespace AmbientLife
             }
 
             // Add light at tail
-            var light = parent.AddComponent<Light>();
+            var light = GetOrAddLight(parent);
             light.type = LightType.Point;
             light.color = wormColor;
             light.intensity = 0.8f;
@@ -1095,7 +1109,7 @@ namespace AmbientLife
             }
 
             // Inner glow light
-            var light = parent.AddComponent<Light>();
+            var light = GetOrAddLight(parent);
             light.type = LightType.Point;
             light.color = crystalColor;
             light.intensity = 0.6f;
@@ -1138,7 +1152,7 @@ namespace AmbientLife
             }
 
             // Ambient light
-            var light = parent.AddComponent<Light>();
+            var light = GetOrAddLight(parent);
             light.type = LightType.Point;
             light.color = sporeColor;
             light.intensity = 0.4f;
@@ -1273,8 +1287,8 @@ namespace AmbientLife
 
         private void AddGlowEffect(GameObject obj)
         {
-            // Add point light for glow
-            Light light = obj.AddComponent<Light>();
+            // Add point light for glow (safely check if already exists)
+            Light light = AmbientLifePlugin.GetOrAddLight(obj);
             light.type = LightType.Point;
             light.color = new Color(0.8f, 1f, 0.3f);
             light.intensity = 0.8f;
@@ -1575,7 +1589,8 @@ namespace AmbientLife
             var effectObj = new GameObject("NestSpawnEffect");
             effectObj.transform.position = position;
 
-            var light = effectObj.AddComponent<Light>();
+            // Safely add Light (check first to avoid duplicate component errors)
+            var light = effectObj.GetComponent<Light>() ?? effectObj.AddComponent<Light>();
             light.type = LightType.Point;
             light.color = new Color(0.6f, 0.2f, 0.8f);
             light.intensity = 3f;

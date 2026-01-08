@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NarrativeExpansion")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cbd83a8c0b095e88ada3a61676ff4b9969b3bf36")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+50dd1ad297fc13d72d6069110c9a4d74e4ddd407")]
 [assembly: System.Reflection.AssemblyProductAttribute("NarrativeExpansion")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NarrativeExpansion")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

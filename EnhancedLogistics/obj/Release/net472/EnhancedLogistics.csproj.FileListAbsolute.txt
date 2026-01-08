@@ -7,3 +7,4 @@ C:\Users\crawf\TechtonicaMods\NewMods\EnhancedLogistics\bin\Release\net472\Enhan
 C:\Users\crawf\TechtonicaMods\NewMods\EnhancedLogistics\bin\Release\net472\EnhancedLogistics.pdb
 C:\Users\crawf\TechtonicaMods\NewMods\EnhancedLogistics\obj\Release\net472\EnhancedLogistics.dll
 C:\Users\crawf\TechtonicaMods\NewMods\EnhancedLogistics\obj\Release\net472\EnhancedLogistics.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\EnhancedLogistics\obj\Release\net472\EnhancedLogistics.sourcelink.json

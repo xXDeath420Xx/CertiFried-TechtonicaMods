@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AtlantumReactor")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+28c8d0d984ccd0015b323de318ee4ba46bfa72bf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+50dd1ad297fc13d72d6069110c9a4d74e4ddd407")]
 [assembly: System.Reflection.AssemblyProductAttribute("AtlantumReactor")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AtlantumReactor")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

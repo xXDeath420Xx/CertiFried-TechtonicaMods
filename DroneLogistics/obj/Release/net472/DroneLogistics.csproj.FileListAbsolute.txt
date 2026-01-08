@@ -7,3 +7,4 @@ C:\Users\crawf\TechtonicaMods\NewMods\DroneLogistics\obj\Release\net472\DroneLog
 C:\Users\crawf\TechtonicaMods\NewMods\DroneLogistics\obj\Release\net472\DroneLogistics.csproj.CoreCompileInputs.cache
 C:\Users\crawf\TechtonicaMods\NewMods\DroneLogistics\obj\Release\net472\DroneLogistics.dll
 C:\Users\crawf\TechtonicaMods\NewMods\DroneLogistics\obj\Release\net472\DroneLogistics.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\DroneLogistics\obj\Release\net472\DroneLogistics.sourcelink.json

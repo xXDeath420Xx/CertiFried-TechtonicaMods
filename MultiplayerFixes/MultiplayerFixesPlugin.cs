@@ -58,8 +58,11 @@ namespace MultiplayerFixes
             PatchCasperMods();
             PatchOtherMods();
 
-            // Apply general network safety patches
+            // Apply general network safety patches (auto-discovered via attributes)
             Harmony.PatchAll(typeof(GeneralNetworkPatches));
+
+            // Apply manual patches for methods that may not exist in all game versions
+            GeneralNetworkPatches.ApplyManualPatches(Harmony);
 
             Logger.LogInfo($"{PluginName} loaded. Applied {patchCount} patches to {patchedMods.Count} mods: {string.Join(", ", patchedMods)}");
         }
@@ -252,10 +255,39 @@ namespace MultiplayerFixes
     internal static class GeneralNetworkPatches
     {
         /// <summary>
-        /// Catch errors in NetworkMessageRelay to prevent disconnects
+        /// Apply manual patches for methods that may not exist in all game versions
         /// </summary>
-        [HarmonyPatch(typeof(NetworkMessageRelay), "Update")]
-        [HarmonyFinalizer]
+        public static void ApplyManualPatches(Harmony harmony)
+        {
+            // NetworkMessageRelay.Update may not exist in all game versions
+            try
+            {
+                var targetMethod = typeof(NetworkMessageRelay).GetMethod("Update",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic |
+                    System.Reflection.BindingFlags.Instance);
+
+                if (targetMethod != null)
+                {
+                    var finalizer = typeof(GeneralNetworkPatches).GetMethod(nameof(CatchNetworkRelayErrors),
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+                    harmony.Patch(targetMethod, finalizer: new HarmonyMethod(finalizer));
+                    MultiplayerFixesPlugin.Log.LogInfo("Applied NetworkMessageRelay.Update patch");
+                }
+                else
+                {
+                    MultiplayerFixesPlugin.Log.LogInfo("NetworkMessageRelay.Update not found - skipping patch (game version may not need it)");
+                }
+            }
+            catch (Exception ex)
+            {
+                MultiplayerFixesPlugin.Log.LogWarning($"Could not apply NetworkMessageRelay patch: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Catch errors in NetworkMessageRelay to prevent disconnects
+        /// NOTE: Applied manually via ApplyManualPatches if method exists
+        /// </summary>
         private static Exception CatchNetworkRelayErrors(Exception __exception)
         {
             if (__exception != null)
@@ -290,8 +322,9 @@ namespace MultiplayerFixes
 
         /// <summary>
         /// Ensure AddResources doesn't crash on invalid IDs
+        /// Actual signature: AddResources(int resId, int count = 1, bool autoEquip = true)
         /// </summary>
-        [HarmonyPatch(typeof(Inventory), nameof(Inventory.AddResources), typeof(int), typeof(int))]
+        [HarmonyPatch(typeof(Inventory), nameof(Inventory.AddResources), typeof(int), typeof(int), typeof(bool))]
         [HarmonyPrefix]
         private static bool SafeInventoryAdd(int resId)
         {

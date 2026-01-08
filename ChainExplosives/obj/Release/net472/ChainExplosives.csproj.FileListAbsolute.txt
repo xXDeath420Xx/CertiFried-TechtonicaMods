@@ -7,3 +7,4 @@ C:\Users\crawf\TechtonicaMods\NewMods\ChainExplosives\bin\Release\net472\ChainEx
 C:\Users\crawf\TechtonicaMods\NewMods\ChainExplosives\bin\Release\net472\ChainExplosives.pdb
 C:\Users\crawf\TechtonicaMods\NewMods\ChainExplosives\obj\Release\net472\ChainExplosives.dll
 C:\Users\crawf\TechtonicaMods\NewMods\ChainExplosives\obj\Release\net472\ChainExplosives.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\ChainExplosives\obj\Release\net472\ChainExplosives.sourcelink.json

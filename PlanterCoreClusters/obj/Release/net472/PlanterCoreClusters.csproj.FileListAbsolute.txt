@@ -7,3 +7,4 @@ C:\Users\crawf\TechtonicaMods\NewMods\PlanterCoreClusters\obj\Release\net472\Pla
 C:\Users\crawf\TechtonicaMods\NewMods\PlanterCoreClusters\obj\Release\net472\PlanterCoreClusters.csproj.CoreCompileInputs.cache
 C:\Users\crawf\TechtonicaMods\NewMods\PlanterCoreClusters\obj\Release\net472\PlanterCoreClusters.dll
 C:\Users\crawf\TechtonicaMods\NewMods\PlanterCoreClusters\obj\Release\net472\PlanterCoreClusters.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\PlanterCoreClusters\obj\Release\net472\PlanterCoreClusters.sourcelink.json

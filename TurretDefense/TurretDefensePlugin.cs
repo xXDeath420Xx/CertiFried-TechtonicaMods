@@ -311,35 +311,87 @@ namespace TurretDefense
         /// </summary>
         private void ApplyCustomIcons()
         {
-            // Get the rawSprite field via reflection since 'sprite' is a read-only property
-            var spriteField = typeof(ResourceInfo).GetField("rawSprite", BindingFlags.Public | BindingFlags.Instance);
+            // Try multiple possible field names for sprites
+            var possibleFields = new[] { "rawSprite", "_sprite", "sprite", "<sprite>k__BackingField" };
+            FieldInfo spriteField = null;
+
+            foreach (var fieldName in possibleFields)
+            {
+                spriteField = typeof(ResourceInfo).GetField(fieldName,
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                if (spriteField != null)
+                {
+                    LogDebug($"Found sprite field: {fieldName}");
+                    break;
+                }
+            }
+
+            // Fallback sprites from existing game resources
+            var fallbackSprites = new Dictionary<string, string>
+            {
+                { "Gatling Turret", "Sentry" },
+                { "Rocket Turret", "Mining Charge" },
+                { "Laser Turret", "High Voltage Cable" },
+                { "Railgun Turret", "Railrunner" },
+                { "Lightning Turret", "Shiverthorn Coolant" },
+                { TurretAmmo, "Iron Ingot" },
+                { TurretUpgradeKit, "Iron Components" },
+                { AlienCoreName, "Research Core (Blue)" },
+                { AlienAlloyName, "Steel Ingot" }
+            };
 
             foreach (var kvp in customIcons)
             {
-                if (kvp.Value == null) continue;
-
                 var resourceInfo = EMU.Resources.GetResourceInfoByName(kvp.Key);
-                if (resourceInfo != null)
+                if (resourceInfo == null) continue;
+
+                Sprite spriteToApply = kvp.Value;
+
+                // If custom icon is null, try to clone from a game resource
+                if (spriteToApply == null && fallbackSprites.TryGetValue(kvp.Key, out string fallbackName))
                 {
-                    // Try reflection to set the sprite field
-                    if (spriteField != null)
+                    var fallbackResource = EMU.Resources.GetResourceInfoByName(fallbackName);
+                    if (fallbackResource != null && fallbackResource.sprite != null)
                     {
-                        spriteField.SetValue(resourceInfo, kvp.Value);
+                        spriteToApply = fallbackResource.sprite;
+                        Log.LogInfo($"Using fallback sprite from {fallbackName} for {kvp.Key}");
+                    }
+                }
+
+                if (spriteToApply == null) continue;
+
+                // Try to set the sprite field
+                if (spriteField != null)
+                {
+                    try
+                    {
+                        spriteField.SetValue(resourceInfo, spriteToApply);
                         LogDebug($"Applied custom icon to {kvp.Key}");
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        // Fallback: try to find any Sprite property/field
-                        var members = typeof(ResourceInfo).GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                        foreach (var member in members)
-                        {
-                            if (member.Name.ToLower().Contains("sprite"))
-                            {
-                                LogDebug($"Found sprite member: {member.Name} ({member.MemberType})");
-                            }
-                        }
-                        Log.LogWarning($"Could not find sprite field on ResourceInfo for {kvp.Key}");
+                        Log.LogWarning($"Failed to set sprite for {kvp.Key}: {ex.Message}");
                     }
+                }
+            }
+
+            // Also apply fallback sprites for resources that didn't have custom icons registered
+            foreach (var kvp in fallbackSprites)
+            {
+                if (customIcons.ContainsKey(kvp.Key) && customIcons[kvp.Key] != null) continue;
+
+                var resourceInfo = EMU.Resources.GetResourceInfoByName(kvp.Key);
+                if (resourceInfo == null || resourceInfo.sprite != null) continue;
+
+                var fallbackResource = EMU.Resources.GetResourceInfoByName(kvp.Value);
+                if (fallbackResource?.sprite != null && spriteField != null)
+                {
+                    try
+                    {
+                        spriteField.SetValue(resourceInfo, fallbackResource.sprite);
+                        Log.LogInfo($"Applied fallback sprite from {kvp.Value} to {kvp.Key}");
+                    }
+                    catch { }
                 }
             }
         }
@@ -620,8 +672,30 @@ namespace TurretDefense
                 unlock.treePosition = position;
                 if (unlock.sprite == null)
                 {
+                    // Try the specified sprite source first
                     var sourceRes = EMU.Resources.GetResourceInfoByName(spriteSource);
-                    if (sourceRes?.sprite != null) unlock.sprite = sourceRes.sprite;
+                    if (sourceRes?.sprite != null)
+                    {
+                        unlock.sprite = sourceRes.sprite;
+                    }
+                    else
+                    {
+                        // Fallback to reliable game resources based on unlock type
+                        string[] fallbackSources = unlockName == TurretUnlock
+                            ? new[] { "Sentry", "Mining Charge", "Iron Frame", "Steel Frame" }
+                            : new[] { "High Voltage Cable", "Railrunner", "Processor Unit", "Steel Frame" };
+
+                        foreach (var fallback in fallbackSources)
+                        {
+                            var fallbackRes = EMU.Resources.GetResourceInfoByName(fallback);
+                            if (fallbackRes?.sprite != null)
+                            {
+                                unlock.sprite = fallbackRes.sprite;
+                                Log.LogInfo($"Applied fallback sprite from {fallback} to unlock {unlockName}");
+                                break;
+                            }
+                        }
+                    }
                 }
             }
             catch (Exception ex)

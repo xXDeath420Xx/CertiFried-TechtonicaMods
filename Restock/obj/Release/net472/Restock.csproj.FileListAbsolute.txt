@@ -7,3 +7,4 @@ C:\Users\crawf\TechtonicaMods\NewMods\Restock\obj\Release\net472\Restock.Assembl
 C:\Users\crawf\TechtonicaMods\NewMods\Restock\obj\Release\net472\Restock.csproj.CoreCompileInputs.cache
 C:\Users\crawf\TechtonicaMods\NewMods\Restock\obj\Release\net472\Restock.dll
 C:\Users\crawf\TechtonicaMods\NewMods\Restock\obj\Release\net472\Restock.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\Restock\obj\Release\net472\Restock.sourcelink.json

@@ -7,3 +7,4 @@ C:\Users\crawf\TechtonicaMods\NewMods\TurretDefense\obj\Release\net472\TurretDef
 C:\Users\crawf\TechtonicaMods\NewMods\TurretDefense\obj\Release\net472\TurretDefense.csproj.CoreCompileInputs.cache
 C:\Users\crawf\TechtonicaMods\NewMods\TurretDefense\obj\Release\net472\TurretDefense.dll
 C:\Users\crawf\TechtonicaMods\NewMods\TurretDefense\obj\Release\net472\TurretDefense.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\TurretDefense\obj\Release\net472\TurretDefense.sourcelink.json

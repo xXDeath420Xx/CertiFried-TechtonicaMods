@@ -7,3 +7,4 @@ C:\Users\crawf\TechtonicaMods\NewMods\BeltImmunity\bin\Release\net472\BeltImmuni
 C:\Users\crawf\TechtonicaMods\NewMods\BeltImmunity\bin\Release\net472\BeltImmunity.pdb
 C:\Users\crawf\TechtonicaMods\NewMods\BeltImmunity\obj\Release\net472\BeltImmunity.dll
 C:\Users\crawf\TechtonicaMods\NewMods\BeltImmunity\obj\Release\net472\BeltImmunity.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\BeltImmunity\obj\Release\net472\BeltImmunity.sourcelink.json

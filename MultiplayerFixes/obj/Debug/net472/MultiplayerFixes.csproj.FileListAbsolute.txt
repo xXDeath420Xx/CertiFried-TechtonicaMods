@@ -1,9 +1,0 @@
-C:\Users\crawf\TechtonicaMods\NewMods\MultiplayerFixes\bin\Debug\net472\MultiplayerFixes.dll
-C:\Users\crawf\TechtonicaMods\NewMods\MultiplayerFixes\bin\Debug\net472\MultiplayerFixes.pdb
-C:\Users\crawf\TechtonicaMods\NewMods\MultiplayerFixes\obj\Debug\net472\MultiplayerFixes.csproj.AssemblyReference.cache
-C:\Users\crawf\TechtonicaMods\NewMods\MultiplayerFixes\obj\Debug\net472\MultiplayerFixes.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\crawf\TechtonicaMods\NewMods\MultiplayerFixes\obj\Debug\net472\MultiplayerFixes.AssemblyInfoInputs.cache
-C:\Users\crawf\TechtonicaMods\NewMods\MultiplayerFixes\obj\Debug\net472\MultiplayerFixes.AssemblyInfo.cs
-C:\Users\crawf\TechtonicaMods\NewMods\MultiplayerFixes\obj\Debug\net472\MultiplayerFixes.csproj.CoreCompileInputs.cache
-C:\Users\crawf\TechtonicaMods\NewMods\MultiplayerFixes\obj\Debug\net472\MultiplayerFixes.dll
-C:\Users\crawf\TechtonicaMods\NewMods\MultiplayerFixes\obj\Debug\net472\MultiplayerFixes.pdb

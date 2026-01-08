@@ -53,6 +53,9 @@ namespace SeamlessWorld
             // Apply Harmony patches
             Harmony.PatchAll();
 
+            // Apply manual patches for methods that may not exist in all game versions
+            SeamlessWorld.Patches.MachinePatches.ApplyManualPatches(Harmony);
+
             // Register for game events
             EMU.Events.GameDefinesLoaded += OnGameDefinesLoaded;
 

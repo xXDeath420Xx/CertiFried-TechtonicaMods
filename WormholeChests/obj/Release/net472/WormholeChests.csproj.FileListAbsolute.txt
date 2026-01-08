@@ -7,3 +7,4 @@ C:\Users\crawf\TechtonicaMods\NewMods\WormholeChests\obj\Release\net472\Wormhole
 C:\Users\crawf\TechtonicaMods\NewMods\WormholeChests\obj\Release\net472\WormholeChests.csproj.CoreCompileInputs.cache
 C:\Users\crawf\TechtonicaMods\NewMods\WormholeChests\obj\Release\net472\WormholeChests.dll
 C:\Users\crawf\TechtonicaMods\NewMods\WormholeChests\obj\Release\net472\WormholeChests.pdb
+C:\Users\crawf\TechtonicaMods\NewMods\WormholeChests\obj\Release\net472\WormholeChests.sourcelink.json

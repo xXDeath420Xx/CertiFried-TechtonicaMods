@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AdvancedMachines")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f49145fbf9f44c78c3aba4e59c2566758d964b82")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+50dd1ad297fc13d72d6069110c9a4d74e4ddd407")]
 [assembly: System.Reflection.AssemblyProductAttribute("AdvancedMachines")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AdvancedMachines")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
