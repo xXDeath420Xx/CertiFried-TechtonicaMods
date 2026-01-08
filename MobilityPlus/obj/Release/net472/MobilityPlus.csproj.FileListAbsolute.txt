@@ -5,6 +5,6 @@ C:\Users\crawf\TechtonicaMods\NewMods\MobilityPlus\obj\Release\net472\MobilityPl
 C:\Users\crawf\TechtonicaMods\NewMods\MobilityPlus\obj\Release\net472\MobilityPlus.AssemblyInfoInputs.cache
 C:\Users\crawf\TechtonicaMods\NewMods\MobilityPlus\obj\Release\net472\MobilityPlus.AssemblyInfo.cs
 C:\Users\crawf\TechtonicaMods\NewMods\MobilityPlus\obj\Release\net472\MobilityPlus.csproj.CoreCompileInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\MobilityPlus\obj\Release\net472\MobilityPlus.sourcelink.json
 C:\Users\crawf\TechtonicaMods\NewMods\MobilityPlus\obj\Release\net472\MobilityPlus.dll
 C:\Users\crawf\TechtonicaMods\NewMods\MobilityPlus\obj\Release\net472\MobilityPlus.pdb
-C:\Users\crawf\TechtonicaMods\NewMods\MobilityPlus\obj\Release\net472\MobilityPlus.sourcelink.json

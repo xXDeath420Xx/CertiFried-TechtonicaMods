@@ -1,9 +1,0 @@
-C:\Users\crawf\TechtonicaMods\NewMods\TurretDefense\bin\Debug\net472\TurretDefense.dll
-C:\Users\crawf\TechtonicaMods\NewMods\TurretDefense\bin\Debug\net472\TurretDefense.pdb
-C:\Users\crawf\TechtonicaMods\NewMods\TurretDefense\obj\Debug\net472\TurretDefense.csproj.AssemblyReference.cache
-C:\Users\crawf\TechtonicaMods\NewMods\TurretDefense\obj\Debug\net472\TurretDefense.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\crawf\TechtonicaMods\NewMods\TurretDefense\obj\Debug\net472\TurretDefense.AssemblyInfoInputs.cache
-C:\Users\crawf\TechtonicaMods\NewMods\TurretDefense\obj\Debug\net472\TurretDefense.AssemblyInfo.cs
-C:\Users\crawf\TechtonicaMods\NewMods\TurretDefense\obj\Debug\net472\TurretDefense.csproj.CoreCompileInputs.cache
-C:\Users\crawf\TechtonicaMods\NewMods\TurretDefense\obj\Debug\net472\TurretDefense.dll
-C:\Users\crawf\TechtonicaMods\NewMods\TurretDefense\obj\Debug\net472\TurretDefense.pdb

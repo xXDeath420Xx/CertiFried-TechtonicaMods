@@ -5,6 +5,6 @@ C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.Gener
 C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.AssemblyInfoInputs.cache
 C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.AssemblyInfo.cs
 C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.csproj.CoreCompileInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.sourcelink.json
 C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.dll
 C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.pdb
-C:\Users\crawf\TechtonicaMods\NewMods\DevTools\obj\Release\net472\DevTools.sourcelink.json

@@ -5,6 +5,6 @@ C:\Users\crawf\TechtonicaMods\NewMods\Restock\obj\Release\net472\Restock.Generat
 C:\Users\crawf\TechtonicaMods\NewMods\Restock\obj\Release\net472\Restock.AssemblyInfoInputs.cache
 C:\Users\crawf\TechtonicaMods\NewMods\Restock\obj\Release\net472\Restock.AssemblyInfo.cs
 C:\Users\crawf\TechtonicaMods\NewMods\Restock\obj\Release\net472\Restock.csproj.CoreCompileInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\Restock\obj\Release\net472\Restock.sourcelink.json
 C:\Users\crawf\TechtonicaMods\NewMods\Restock\obj\Release\net472\Restock.dll
 C:\Users\crawf\TechtonicaMods\NewMods\Restock\obj\Release\net472\Restock.pdb
-C:\Users\crawf\TechtonicaMods\NewMods\Restock\obj\Release\net472\Restock.sourcelink.json

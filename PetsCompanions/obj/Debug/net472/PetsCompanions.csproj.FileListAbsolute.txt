@@ -1,9 +1,0 @@
-C:\Users\crawf\TechtonicaMods\NewMods\PetsCompanions\obj\Debug\net472\PetsCompanions.csproj.AssemblyReference.cache
-C:\Users\crawf\TechtonicaMods\NewMods\PetsCompanions\obj\Debug\net472\PetsCompanions.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\crawf\TechtonicaMods\NewMods\PetsCompanions\obj\Debug\net472\PetsCompanions.AssemblyInfoInputs.cache
-C:\Users\crawf\TechtonicaMods\NewMods\PetsCompanions\obj\Debug\net472\PetsCompanions.AssemblyInfo.cs
-C:\Users\crawf\TechtonicaMods\NewMods\PetsCompanions\obj\Debug\net472\PetsCompanions.csproj.CoreCompileInputs.cache
-C:\Users\crawf\TechtonicaMods\NewMods\PetsCompanions\bin\Debug\net472\PetsCompanions.dll
-C:\Users\crawf\TechtonicaMods\NewMods\PetsCompanions\bin\Debug\net472\PetsCompanions.pdb
-C:\Users\crawf\TechtonicaMods\NewMods\PetsCompanions\obj\Debug\net472\PetsCompanions.dll
-C:\Users\crawf\TechtonicaMods\NewMods\PetsCompanions\obj\Debug\net472\PetsCompanions.pdb

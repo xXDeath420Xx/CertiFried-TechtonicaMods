@@ -70,7 +70,7 @@
       <Private>false</Private>
     </Reference>
     <Reference Include="TechtonicaFramework">
-      <HintPath>..\TechtonicaFramework\bin\Debug\net472\TechtonicaFramework.dll</HintPath>
+      <HintPath>..\TechtonicaFramework\bin\Release\net472\TechtonicaFramework.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Unity.TextMeshPro">

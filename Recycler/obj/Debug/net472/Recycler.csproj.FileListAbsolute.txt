@@ -1,9 +1,0 @@
-C:\Users\crawf\TechtonicaMods\NewMods\Recycler\obj\Debug\net472\Recycler.csproj.AssemblyReference.cache
-C:\Users\crawf\TechtonicaMods\NewMods\Recycler\obj\Debug\net472\Recycler.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\crawf\TechtonicaMods\NewMods\Recycler\obj\Debug\net472\Recycler.AssemblyInfoInputs.cache
-C:\Users\crawf\TechtonicaMods\NewMods\Recycler\obj\Debug\net472\Recycler.AssemblyInfo.cs
-C:\Users\crawf\TechtonicaMods\NewMods\Recycler\obj\Debug\net472\Recycler.csproj.CoreCompileInputs.cache
-C:\Users\crawf\TechtonicaMods\NewMods\Recycler\bin\Debug\net472\Recycler.dll
-C:\Users\crawf\TechtonicaMods\NewMods\Recycler\bin\Debug\net472\Recycler.pdb
-C:\Users\crawf\TechtonicaMods\NewMods\Recycler\obj\Debug\net472\Recycler.dll
-C:\Users\crawf\TechtonicaMods\NewMods\Recycler\obj\Debug\net472\Recycler.pdb

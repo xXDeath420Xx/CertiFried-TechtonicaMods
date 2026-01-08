@@ -1,10 +1,10 @@
+C:\Users\crawf\TechtonicaMods\NewMods\OmniseekerPlus\bin\Release\net472\OmniseekerPlus.dll
+C:\Users\crawf\TechtonicaMods\NewMods\OmniseekerPlus\bin\Release\net472\OmniseekerPlus.pdb
 C:\Users\crawf\TechtonicaMods\NewMods\OmniseekerPlus\obj\Release\net472\OmniseekerPlus.csproj.AssemblyReference.cache
 C:\Users\crawf\TechtonicaMods\NewMods\OmniseekerPlus\obj\Release\net472\OmniseekerPlus.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\crawf\TechtonicaMods\NewMods\OmniseekerPlus\obj\Release\net472\OmniseekerPlus.AssemblyInfoInputs.cache
 C:\Users\crawf\TechtonicaMods\NewMods\OmniseekerPlus\obj\Release\net472\OmniseekerPlus.AssemblyInfo.cs
 C:\Users\crawf\TechtonicaMods\NewMods\OmniseekerPlus\obj\Release\net472\OmniseekerPlus.csproj.CoreCompileInputs.cache
-C:\Users\crawf\TechtonicaMods\NewMods\OmniseekerPlus\bin\Release\net472\OmniseekerPlus.dll
-C:\Users\crawf\TechtonicaMods\NewMods\OmniseekerPlus\bin\Release\net472\OmniseekerPlus.pdb
 C:\Users\crawf\TechtonicaMods\NewMods\OmniseekerPlus\obj\Release\net472\OmniseekerPlus.sourcelink.json
 C:\Users\crawf\TechtonicaMods\NewMods\OmniseekerPlus\obj\Release\net472\OmniseekerPlus.dll
 C:\Users\crawf\TechtonicaMods\NewMods\OmniseekerPlus\obj\Release\net472\OmniseekerPlus.pdb

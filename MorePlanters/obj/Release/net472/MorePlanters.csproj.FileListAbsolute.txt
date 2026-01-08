@@ -5,6 +5,6 @@ C:\Users\crawf\TechtonicaMods\NewMods\MorePlanters\obj\Release\net472\MorePlante
 C:\Users\crawf\TechtonicaMods\NewMods\MorePlanters\obj\Release\net472\MorePlanters.AssemblyInfoInputs.cache
 C:\Users\crawf\TechtonicaMods\NewMods\MorePlanters\obj\Release\net472\MorePlanters.AssemblyInfo.cs
 C:\Users\crawf\TechtonicaMods\NewMods\MorePlanters\obj\Release\net472\MorePlanters.csproj.CoreCompileInputs.cache
+C:\Users\crawf\TechtonicaMods\NewMods\MorePlanters\obj\Release\net472\MorePlanters.sourcelink.json
 C:\Users\crawf\TechtonicaMods\NewMods\MorePlanters\obj\Release\net472\MorePlanters.dll
 C:\Users\crawf\TechtonicaMods\NewMods\MorePlanters\obj\Release\net472\MorePlanters.pdb
-C:\Users\crawf\TechtonicaMods\NewMods\MorePlanters\obj\Release\net472\MorePlanters.sourcelink.json
