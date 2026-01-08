@@ -53,9 +53,14 @@ CERTIFRIED_MODS = {
     "WormholeChests": "CertiFried-WormholeChests_Updated",
 }
 
-# Mods to remove (old duplicates)
+# Mods to remove (conflicting with CertiFried versions)
 MODS_TO_REMOVE = [
+    # Direct conflicts - Equinox originals replaced by CertiFried updates
     "Equinox-AtlantumReactor",
+    "Equinox-MorePlanters",
+    "Equinox-PlanterCoreClusters",
+    "Equinox-WormholeChests",
+    "Equinox-EarlyBaseBuilding",  # conflicts with CertiFried-BaseBuilding
 ]
 
 def get_image_base64(image_path):
@@ -148,10 +153,15 @@ def main():
             keep = False
             removed_count += 1
 
-        # Remove specific duplicates
+        # Remove specific duplicates/conflicts
         if name in MODS_TO_REMOVE:
             keep = False
             removed_count += 1
+            # Also remove the plugin folder
+            plugin_folder = PROFILE_PATH / "BepInEx" / "plugins" / name
+            if plugin_folder.exists():
+                shutil.rmtree(plugin_folder)
+                print(f"  [REMOVED PLUGIN] {name}")
 
         if keep:
             filtered_mods.append(mod)
