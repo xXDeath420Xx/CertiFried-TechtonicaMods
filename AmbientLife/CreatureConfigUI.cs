@@ -21,8 +21,8 @@ namespace AmbientLife
         private GUIStyle buttonStyle;
         private bool stylesInitialized = false;
 
-        // Keybind
-        private KeyCode toggleKey = KeyCode.F8;
+        // Keybind (F7 to avoid conflict with DevTools which uses F8)
+        private KeyCode toggleKey = KeyCode.F7;
 
         private void Update()
         {

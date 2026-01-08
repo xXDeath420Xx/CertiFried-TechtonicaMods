@@ -1,0 +1,10 @@
+{
+  "name": "MobilityPlus",
+  "version_number": "1.7.0",
+  "website_url": "https://github.com/CertiFried-Mods/TTMod-MobilityPlus",
+  "description": "Enhanced movement options including improved jetpacks, grappling hooks, and mobility tools",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100",
+    "Equinox-EquinoxsModUtils-6.1.1"
+  ]
+}

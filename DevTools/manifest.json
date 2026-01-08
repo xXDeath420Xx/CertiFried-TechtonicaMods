@@ -1,0 +1,9 @@
+{
+  "name": "DevTools",
+  "version_number": "2.2.0",
+  "website_url": "https://github.com/CertiFried-Mods/TTMod-DevTools",
+  "description": "Developer tools and utilities for testing and debugging mods",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100"
+  ]
+}

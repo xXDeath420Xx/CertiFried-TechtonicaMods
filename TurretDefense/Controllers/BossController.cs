@@ -82,6 +82,14 @@ namespace TurretDefense
         private Transform head;
         private Transform[] weapons;
         private List<GameObject> activeMinions = new List<GameObject>();
+        private Animator bossAnimator;
+
+        // ========== TORTOISE BOSS EFFECTS ==========
+        private static readonly string[] TortoiseBossColors = { "Tortoise_Boss_Standard", "Tortoise_Boss_Blue", "Tortoise_Boss_Violet" };
+        private GameObject loadedBossModel;
+        private ParticleSystem attackParticles;
+        private ParticleSystem groundShakeParticles;
+        private ParticleSystem acidSplashParticles;
 
         // ========== LOOT ==========
         private static readonly Dictionary<BossType, LootDrop[]> BossLootTables = new Dictionary<BossType, LootDrop[]>
@@ -293,7 +301,41 @@ namespace TurretDefense
 
         private void CreateBehemothModel()
         {
-            // Main body - massive walker
+            // Try to load actual Tortoise Boss model from bundle
+            string colorVariant = TortoiseBossColors[0]; // Standard (red/orange)
+            GameObject prefab = TurretDefensePlugin.AssetLoader?.GetPrefab("creatures_tortoise", colorVariant);
+
+            if (prefab != null)
+            {
+                loadedBossModel = UnityEngine.Object.Instantiate(prefab, transform);
+                loadedBossModel.transform.localPosition = Vector3.zero;
+                loadedBossModel.transform.localRotation = Quaternion.identity;
+                loadedBossModel.transform.localScale = Vector3.one;
+                TurretDefensePlugin.FixPrefabMaterials(loadedBossModel);
+
+                // Get animator if available
+                bossAnimator = loadedBossModel.GetComponent<Animator>() ?? loadedBossModel.GetComponentInChildren<Animator>();
+
+                // Find head transform for targeting
+                var headTransform = loadedBossModel.transform.Find("Head") ?? loadedBossModel.transform.Find("head");
+                if (headTransform != null) head = headTransform;
+                else head = loadedBossModel.transform;
+
+                // Load particle effects from bundle
+                LoadTortoiseBossParticles();
+
+                TurretDefensePlugin.Log.LogInfo("Loaded Tortoise Boss model from bundle!");
+            }
+            else
+            {
+                // Fallback to primitives if bundle not available
+                CreateBehemothFallbackModel();
+            }
+        }
+
+        private void CreateBehemothFallbackModel()
+        {
+            // Main body - massive walker (primitive fallback)
             var body = GameObject.CreatePrimitive(PrimitiveType.Cube);
             body.transform.SetParent(transform);
             body.transform.localPosition = Vector3.up * 0.3f;
@@ -328,6 +370,41 @@ namespace TurretDefense
             mainGun.transform.localRotation = Quaternion.Euler(90, 0, 0);
             mainGun.transform.localScale = new Vector3(0.2f, 0.6f, 0.2f);
             mainGun.GetComponent<Renderer>().material = TurretDefensePlugin.GetColoredMaterial(new Color(0.2f, 0.2f, 0.2f));
+        }
+
+        private void LoadTortoiseBossParticles()
+        {
+            // Try to load particle effects from the creatures_tortoise bundle
+            // Available particles: Attack_Effect_*, Smoke_Effect_*, Ground_Shake_Effect_*, Acid_Splash_Effect_*
+
+            GameObject attackPrefab = TurretDefensePlugin.AssetLoader?.GetPrefab("creatures_tortoise", "Attack_Effect_01");
+            if (attackPrefab != null)
+            {
+                var attackObj = UnityEngine.Object.Instantiate(attackPrefab, transform);
+                attackObj.transform.localPosition = Vector3.forward * 2f;
+                attackParticles = attackObj.GetComponent<ParticleSystem>();
+                if (attackParticles != null) attackParticles.Stop();
+            }
+
+            GameObject shakePrefab = TurretDefensePlugin.AssetLoader?.GetPrefab("creatures_tortoise", "Ground_Shake_Effect_01");
+            if (shakePrefab != null)
+            {
+                var shakeObj = UnityEngine.Object.Instantiate(shakePrefab, transform);
+                shakeObj.transform.localPosition = Vector3.down * 1f;
+                groundShakeParticles = shakeObj.GetComponent<ParticleSystem>();
+                if (groundShakeParticles != null) groundShakeParticles.Stop();
+            }
+
+            GameObject acidPrefab = TurretDefensePlugin.AssetLoader?.GetPrefab("creatures_tortoise", "Acid_Splash_Effect_01");
+            if (acidPrefab != null)
+            {
+                var acidObj = UnityEngine.Object.Instantiate(acidPrefab, transform);
+                acidObj.transform.localPosition = Vector3.forward * 3f;
+                acidSplashParticles = acidObj.GetComponent<ParticleSystem>();
+                if (acidSplashParticles != null) acidSplashParticles.Stop();
+            }
+
+            TurretDefensePlugin.LogDebug($"Tortoise Boss particles loaded: Attack={attackParticles != null}, Shake={groundShakeParticles != null}, Acid={acidSplashParticles != null}");
         }
 
         private void CreateHivemindModel()
@@ -827,6 +904,22 @@ namespace TurretDefense
 
         private void BehemothBasicAttack()
         {
+            // Use loaded particle effects if available
+            if (groundShakeParticles != null)
+            {
+                groundShakeParticles.Play();
+            }
+            if (attackParticles != null)
+            {
+                attackParticles.Play();
+            }
+
+            // Trigger animation if available
+            if (bossAnimator != null)
+            {
+                bossAnimator.SetTrigger("Attack");
+            }
+
             // Ground stomp with shockwave
             StartCoroutine(GroundStomp());
             TurretDefensePlugin.DamagePlayer(AttackDamage, $"{BossName} ground stomp");

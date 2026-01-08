@@ -1,0 +1,9 @@
+{
+  "name": "MultiplayerFixes",
+  "version_number": "2.0.0",
+  "website_url": "https://github.com/CertiFried-Mods/TTMod-MultiplayerFixes",
+  "description": "Bug fixes and improvements for multiplayer gameplay stability",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100"
+  ]
+}

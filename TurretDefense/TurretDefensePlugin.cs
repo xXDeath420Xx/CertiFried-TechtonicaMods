@@ -683,7 +683,9 @@ namespace TurretDefense
                 "turrets_gatling", "turrets_rocket", "turrets_railgun", "turrets_lightning",
                 // Enemies
                 "drones_scifi",           // Robot enemies from Sci_fi_Drones pack (may be loaded by EnhancedLogistics)
+                "enemy_robots",           // MachineGunRobot, CannonMachine from Enemy Robots pack
                 "creatures_gamekit",      // Chomper, Spitter, Grenadier, Gunner from 3D Game Kit
+                "creatures_tortoise",     // Tortoise Boss models + particles + audio (3 color variants)
                 "creature_mimic",         // Mimic ambush enemy
                 "creature_arachnid",      // Arachnid alien spider
                 // Hive structures
@@ -961,6 +963,33 @@ namespace TurretDefense
             return basePos;
         }
 
+        public static Vector3 GetGroundSpawnPosition(int index)
+        {
+            var player = Player.instance;
+            if (player == null) return Vector3.zero;
+
+            // Spawn ground enemies in a ring around the player at ground level
+            float distance = UnityEngine.Random.Range(40f, 70f);
+            float angle = (index * 37f) + UnityEngine.Random.Range(-15f, 15f); // Golden angle spread
+            angle *= Mathf.Deg2Rad;
+
+            Vector3 offset = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle));
+            Vector3 basePos = player.transform.position + offset * distance;
+
+            // Raycast down to find ground level
+            if (Physics.Raycast(basePos + Vector3.up * 50f, Vector3.down, out RaycastHit hit, 100f))
+            {
+                basePos = hit.point + Vector3.up * 0.5f; // Slightly above ground
+            }
+            else
+            {
+                // Fallback to player's Y position
+                basePos.y = player.transform.position.y;
+            }
+
+            return basePos;
+        }
+
         public static GameObject SpawnAlien(string alienType, Vector3 position, int waveNumber)
         {
             // Determine which bundle to load from based on alien type
@@ -1014,7 +1043,7 @@ namespace TurretDefense
         /// AGGRESSIVELY replaces ALL materials with captured game shaders
         /// Preserves albedo, normal, metallic, emission, and other texture maps
         /// </summary>
-        private static void FixPrefabMaterials(GameObject obj)
+        public static void FixPrefabMaterials(GameObject obj)
         {
             var renderers = obj.GetComponentsInChildren<Renderer>(true); // Include inactive
             int fixedCount = 0;
@@ -1386,11 +1415,32 @@ namespace TurretDefense
         {
             return turretType.ToLower() switch
             {
+                // PBR Turrets (high quality models)
                 "gatling" => "turrets_gatling",
                 "rocket" => "turrets_rocket",
                 "railgun" => "turrets_railgun",
                 "laser" => "laser_cannon",
                 "lightning" => "turrets_lightning",
+                "nuke" => "turrets_nuke",
+                "flamethrower" => "turrets_flamethrower",
+                // TDTK Turrets (cartoon style but functional - 12 total)
+                "cannon" => "turrets_tdtk",
+                "cannon2" => "turrets_tdtk",
+                "mg" => "turrets_tdtk",
+                "mg2" => "turrets_tdtk",
+                "missile" => "turrets_tdtk",
+                "missile2" => "turrets_tdtk",
+                "beamlaser" => "turrets_tdtk",
+                "beamlaser2" => "turrets_tdtk",
+                "aoe" => "turrets_tdtk",
+                "aoe2" => "turrets_tdtk",
+                "support" => "turrets_tdtk",
+                "support2" => "turrets_tdtk",
+                // SciFi Turrets (simple models)
+                "scifi1" => "turrets_scifi",
+                "scifi2" => "turrets_scifi",
+                "scifi3" => "turrets_scifi",
+                "scifi4" => "turrets_scifi",
                 _ => "turrets_gatling"
             };
         }
@@ -1398,14 +1448,34 @@ namespace TurretDefense
         private static string GetPrefabNameForTurret(string turretType)
         {
             // Map turret types to actual prefab names in the asset bundles
-            // Note: Asset bundles use specific naming conventions from Unity store assets
             return turretType.ToLower() switch
             {
-                "gatling" => "GatelingGun_ColorChanging_L1",  // PBRTurrets/GatelingGuns
-                "rocket" => "RocketLauncher_ColorChanging_L1", // PBRTurrets/Rockets
-                "railgun" => "RailGun_ColorChanging_L1",       // PBRTurrets/RailGuns
-                "laser" => "Laser Cannon_fbx_prefab",          // Laser Cannon pack
-                "lightning" => "LighteningGun_ColorChanging_L1", // PBRTurrets/LighteningGuns (note: typo in asset)
+                // PBR Turrets (ColorChanging variants for customization)
+                "gatling" => "GatelingGun_ColorChanging_L1",
+                "rocket" => "RocketLauncher_ColorChanging_L1",
+                "railgun" => "RailGun_ColorChanging_L1",
+                "laser" => "Laser Cannon_fbx_prefab",
+                "lightning" => "LighteningGun_ColorChanging_L1",
+                "nuke" => "Nuke_Base_ColorChanging",
+                "flamethrower" => "Flamethrower_ColorChanging_L1",
+                // TDTK Turrets (12 types available)
+                "cannon" => "TowerCanon",
+                "cannon2" => "TowerCanon2",
+                "mg" => "TowerMG",
+                "mg2" => "TowerMG2",
+                "missile" => "TowerMissile",
+                "missile2" => "TowerMissile2",
+                "beamlaser" => "TowerBeamLaser",
+                "beamlaser2" => "TowerBeamLaser2",
+                "aoe" => "TowerAOE",
+                "aoe2" => "TowerAOE2",
+                "support" => "TowerSupport",
+                "support2" => "TowerSupport2",
+                // SciFi Turrets (4 variants)
+                "scifi1" => "Turret 1a",
+                "scifi2" => "Turret 1b",
+                "scifi3" => "Turret 1c",
+                "scifi4" => "Turret 1d",
                 _ => turretType
             };
         }
@@ -1451,6 +1521,7 @@ namespace TurretDefense
                 case "Light": return "cannon_small";
                 case "Medium": return "cannon_medium";
                 case "Heavy": return "cannon_large";
+                case "Multi": return "cannon_set";  // Multi-barrel artillery
                 case "Auto": return "AutoCannon";
                 default: return "cannon_medium";
             }
@@ -1658,6 +1729,14 @@ namespace TurretDefense
                     bundleName = "creature_arachnid";
                     prefabName = "SKM_ArachnidAlienHead_Lite";
                     break;
+                case GroundEnemyType.MachineGunRobot:
+                    bundleName = "enemy_robots";
+                    prefabName = "MachineGunRobot";
+                    break;
+                case GroundEnemyType.CannonMachine:
+                    bundleName = "enemy_robots";
+                    prefabName = "CannonMachine";
+                    break;
                 default:
                     bundleName = "creatures_gamekit";
                     prefabName = "Chomper";
@@ -1670,7 +1749,14 @@ namespace TurretDefense
             if (prefab != null)
             {
                 instance = UnityEngine.Object.Instantiate(prefab, position, Quaternion.identity);
-                float scale = type == GroundEnemyType.Arachnid ? 1.5f : 2f;
+                // Scale based on enemy type
+                float scale = type switch
+                {
+                    GroundEnemyType.Arachnid => 1.5f,
+                    GroundEnemyType.MachineGunRobot => 3f,  // Heavy mech
+                    GroundEnemyType.CannonMachine => 4f,    // Artillery mech (bigger)
+                    _ => 2f
+                };
                 instance.transform.localScale = Vector3.one * scale;
                 FixPrefabMaterials(instance);
             }
@@ -1716,6 +1802,12 @@ namespace TurretDefense
                 case GroundEnemyType.Arachnid:
                     bodyColor = new Color(0.2f, 0.2f, 0.3f);
                     break;
+                case GroundEnemyType.MachineGunRobot:
+                    bodyColor = new Color(0.4f, 0.4f, 0.45f); // Metallic gray
+                    break;
+                case GroundEnemyType.CannonMachine:
+                    bodyColor = new Color(0.3f, 0.35f, 0.4f); // Dark steel
+                    break;
                 default:
                     bodyColor = new Color(0.5f, 0.3f, 0.3f);
                     break;
@@ -1736,30 +1828,45 @@ namespace TurretDefense
         /// </summary>
         public static GameObject SpawnHive(HiveType type, Vector3 position, int threatLevel)
         {
-            string bundleName = "alien_buildings";
+            string bundleName;
             string prefabName;
+            float scale = 3f;
 
             switch (type)
             {
                 case HiveType.Birther:
+                    bundleName = "alien_buildings";
                     prefabName = "birther";
                     break;
                 case HiveType.Brain:
+                    bundleName = "alien_buildings";
                     prefabName = "brain";
                     break;
                 case HiveType.Stomach:
+                    bundleName = "alien_buildings";
                     prefabName = "stomach";
                     break;
                 case HiveType.Terraformer:
+                    bundleName = "alien_buildings";
                     prefabName = "terraformer";
                     break;
                 case HiveType.Claw:
+                    bundleName = "alien_buildings";
                     prefabName = "claw";
                     break;
                 case HiveType.Crystal:
+                    bundleName = "alien_buildings";
                     prefabName = "Crystals";
                     break;
+                case HiveType.Idol:
+                    // Boss spawner uses Cthulhu Idol visuals
+                    bundleName = "cthulhu_idols";
+                    // Alternate between the two idol variants based on threat level
+                    prefabName = threatLevel % 2 == 0 ? "CthulhuIdolPBR_V1" : "CthulhuIdolPBR_V2";
+                    scale = 5f; // Larger for boss spawner
+                    break;
                 default:
+                    bundleName = "alien_buildings";
                     prefabName = "birther";
                     break;
             }
@@ -1770,7 +1877,7 @@ namespace TurretDefense
             if (prefab != null)
             {
                 instance = UnityEngine.Object.Instantiate(prefab, position, Quaternion.identity);
-                instance.transform.localScale = Vector3.one * 3f;
+                instance.transform.localScale = Vector3.one * scale;
                 FixPrefabMaterials(instance);
             }
             else
@@ -1848,17 +1955,56 @@ namespace TurretDefense
                 case HiveType.Crystal:
                     hiveColor = new Color(0.3f, 0.5f, 0.9f);
                     break;
+                case HiveType.Idol:
+                    hiveColor = new Color(0.1f, 0.5f, 0.4f); // Eldritch teal
+                    break;
                 default:
                     hiveColor = new Color(0.5f, 0.3f, 0.5f);
                     break;
             }
 
-            // Large organic-looking structure
-            var body = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            body.transform.SetParent(hive.transform);
-            body.transform.localPosition = Vector3.up * 2f;
-            body.transform.localScale = new Vector3(3f, 4f, 3f);
-            body.GetComponent<Renderer>().material = GetColoredMaterial(hiveColor);
+            // Create visual based on type
+            if (type == HiveType.Idol)
+            {
+                // Idol structure - tall pillar with tentacle-like protrusions
+                var pillar = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                pillar.transform.SetParent(hive.transform);
+                pillar.transform.localPosition = Vector3.up * 3f;
+                pillar.transform.localScale = new Vector3(1.5f, 6f, 1.5f);
+                pillar.GetComponent<Renderer>().material = GetColoredMaterial(hiveColor);
+
+                // Add tentacle-like protrusions
+                for (int i = 0; i < 4; i++)
+                {
+                    var tentacle = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                    tentacle.transform.SetParent(hive.transform);
+                    float angle = i * 90f * Mathf.Deg2Rad;
+                    tentacle.transform.localPosition = new Vector3(Mathf.Cos(angle) * 2f, 4f, Mathf.Sin(angle) * 2f);
+                    tentacle.transform.localRotation = Quaternion.Euler(30f, i * 90f, 0);
+                    tentacle.transform.localScale = new Vector3(0.5f, 2f, 0.5f);
+                    tentacle.GetComponent<Renderer>().material = GetColoredMaterial(hiveColor * 0.8f);
+                }
+
+                // Add glowing eye/orb at top
+                var eye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                eye.transform.SetParent(hive.transform);
+                eye.transform.localPosition = Vector3.up * 7f;
+                eye.transform.localScale = Vector3.one * 1.2f;
+                var eyeMat = GetColoredMaterial(new Color(0.3f, 1f, 0.8f));
+                eyeMat.SetFloat("_Metallic", 0);
+                eyeMat.EnableKeyword("_EMISSION");
+                eyeMat.SetColor("_EmissionColor", new Color(0.3f, 1f, 0.8f) * 2f);
+                eye.GetComponent<Renderer>().material = eyeMat;
+            }
+            else
+            {
+                // Standard organic-looking structure
+                var body = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                body.transform.SetParent(hive.transform);
+                body.transform.localPosition = Vector3.up * 2f;
+                body.transform.localScale = new Vector3(3f, 4f, 3f);
+                body.GetComponent<Renderer>().material = GetColoredMaterial(hiveColor);
+            }
 
             return hive;
         }

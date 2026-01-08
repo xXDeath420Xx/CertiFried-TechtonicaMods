@@ -1,0 +1,11 @@
+{
+  "name": "AtlantumEnrichment",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/CertiFried-Mods/TTMod-AtlantumEnrichment",
+  "description": "Adds Atlantum enrichment processing facilities with risk management and radiation systems",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100",
+    "Equinox-EquinoxsModUtils-6.1.1",
+    "Equinox-EMUAdditions-2.1.1"
+  ]
+}

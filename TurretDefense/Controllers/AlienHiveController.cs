@@ -15,7 +15,8 @@ namespace TurretDefense
         Stomach,     // Resource processor - heals enemies
         Terraformer, // Spreads corruption/hazards
         Claw,        // Defensive turret
-        Crystal      // Power source - increases spawn rates
+        Crystal,     // Power source - increases spawn rates
+        Idol         // Boss spawner - summons epic bosses (Cthulhu Idol visuals)
     }
 
     /// <summary>
@@ -128,6 +129,16 @@ namespace TurretDefense
                     EffectRadius = 60f; // Large power radius
                     ScoreValue = 450;
                     break;
+
+                case HiveType.Idol:
+                    // Boss spawner - extremely tough, spawns epic bosses
+                    MaxHealth = 3000f * threatMultiplier;
+                    Armor = 30f;
+                    SpawnInterval = 60f / threatMultiplier; // Slow boss spawn rate
+                    MaxSpawns = ThreatLevel; // Spawns bosses based on threat level
+                    EffectRadius = 80f; // Large influence
+                    ScoreValue = 2000;
+                    break;
             }
 
             Health = MaxHealth;
@@ -163,6 +174,10 @@ namespace TurretDefense
                     break;
                 case HiveType.Crystal:
                     hiveLight.color = new Color(0.3f, 0.5f, 1f); // Blue
+                    break;
+                case HiveType.Idol:
+                    hiveLight.color = new Color(0.1f, 0.6f, 0.4f); // Eerie teal/eldritch green
+                    hiveLight.intensity = 4f; // Extra bright for boss spawner
                     break;
             }
 
@@ -298,6 +313,18 @@ namespace TurretDefense
             // Spawn effect
             StartCoroutine(SpawnEffect());
 
+            // Spawn position around hive
+            Vector3 spawnOffset = UnityEngine.Random.insideUnitSphere * 5f;
+            spawnOffset.y = 0;
+            Vector3 spawnPos = transform.position + spawnOffset;
+
+            // Idol type spawns bosses instead of regular enemies
+            if (Type == HiveType.Idol)
+            {
+                SpawnBoss(spawnPos);
+                return;
+            }
+
             // Determine what to spawn based on threat level
             GroundEnemyType[] possibleTypes;
 
@@ -307,7 +334,8 @@ namespace TurretDefense
                     GroundEnemyType.Chomper,
                     GroundEnemyType.Spitter,
                     GroundEnemyType.Arachnid,
-                    GroundEnemyType.Mimic
+                    GroundEnemyType.Mimic,
+                    GroundEnemyType.MachineGunRobot
                 };
             }
             else if (ThreatLevel >= 2)
@@ -315,7 +343,8 @@ namespace TurretDefense
                 possibleTypes = new[] {
                     GroundEnemyType.Chomper,
                     GroundEnemyType.Spitter,
-                    GroundEnemyType.Arachnid
+                    GroundEnemyType.Arachnid,
+                    GroundEnemyType.MachineGunRobot
                 };
             }
             else
@@ -328,17 +357,55 @@ namespace TurretDefense
 
             var enemyType = possibleTypes[UnityEngine.Random.Range(0, possibleTypes.Length)];
 
-            // Spawn position around hive
-            Vector3 spawnOffset = UnityEngine.Random.insideUnitSphere * 5f;
-            spawnOffset.y = 0;
-            Vector3 spawnPos = transform.position + spawnOffset;
-
             // Actually spawn the enemy
             var enemy = TurretDefensePlugin.SpawnGroundEnemy(enemyType, spawnPos, ThreatLevel);
             if (enemy != null)
             {
                 spawnedEnemies.Add(enemy);
             }
+        }
+
+        private void SpawnBoss(Vector3 spawnPos)
+        {
+            // Determine boss type based on threat level
+            BossType[] possibleBosses;
+
+            if (ThreatLevel >= 4)
+            {
+                possibleBosses = new[] {
+                    BossType.Overlord,
+                    BossType.Behemoth,
+                    BossType.Dreadnought,
+                    BossType.Hivemind
+                };
+            }
+            else if (ThreatLevel >= 3)
+            {
+                possibleBosses = new[] {
+                    BossType.Overlord,
+                    BossType.Behemoth,
+                    BossType.Dreadnought
+                };
+            }
+            else if (ThreatLevel >= 2)
+            {
+                possibleBosses = new[] {
+                    BossType.Overlord,
+                    BossType.Behemoth
+                };
+            }
+            else
+            {
+                possibleBosses = new[] { BossType.Overlord };
+            }
+
+            var bossType = possibleBosses[UnityEngine.Random.Range(0, possibleBosses.Length)];
+
+            // Spawn boss above the idol
+            Vector3 bossSpawnPos = spawnPos + Vector3.up * 20f;
+            TurretDefensePlugin.SpawnBoss(bossType, bossSpawnPos, ThreatLevel);
+
+            TurretDefensePlugin.Log.LogError($"=== IDOL SPAWNED BOSS: {bossType} (Threat {ThreatLevel}) ===");
         }
 
         private IEnumerator SpawnEffect()

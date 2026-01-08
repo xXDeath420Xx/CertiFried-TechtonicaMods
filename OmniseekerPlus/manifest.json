@@ -1,0 +1,10 @@
+{
+  "name": "OmniseekerPlus",
+  "version_number": "1.0.7",
+  "website_url": "https://github.com/CertiFried-Mods/TTMod-OmniseekerPlus",
+  "description": "Enhanced Omniseeker features with improved scanning and resource detection",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100",
+    "Equinox-EquinoxsModUtils-6.1.1"
+  ]
+}

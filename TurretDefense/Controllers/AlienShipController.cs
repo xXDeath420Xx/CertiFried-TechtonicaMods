@@ -63,6 +63,20 @@ namespace TurretDefense
         private float engineGlowIntensity = 1f;
         private Vector3 basePosition;
 
+        // Animator support for prefabs with animation
+        private Animator animator;
+        private static readonly int AnimIsMoving = Animator.StringToHash("IsMoving");
+        private static readonly int AnimMoveSpeed = Animator.StringToHash("MoveSpeed");
+        private static readonly int AnimIsAttacking = Animator.StringToHash("IsAttacking");
+        private static readonly int AnimIsHurt = Animator.StringToHash("IsHurt");
+        private static readonly int AnimIsDying = Animator.StringToHash("IsDying");
+        private static readonly int AnimTriggerAttack = Animator.StringToHash("Attack");
+        private static readonly int AnimTriggerHurt = Animator.StringToHash("Hurt");
+        private static readonly int AnimTriggerDeath = Animator.StringToHash("Death");
+        private static readonly int AnimTriggerSpawn = Animator.StringToHash("Spawn");
+        private static readonly int AnimTriggerBoost = Animator.StringToHash("Boost");
+        private static readonly int AnimBankAngle = Animator.StringToHash("BankAngle");
+
         // ========== REFERENCES ==========
         private Transform playerTransform;
         private Renderer[] renderers;
@@ -249,11 +263,70 @@ namespace TurretDefense
         {
             playerTransform = Player.instance?.transform;
             renderers = GetComponentsInChildren<Renderer>();
+            animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>();
 
             if (renderers.Length > 0 && renderers[0].material != null)
             {
                 originalColor = renderers[0].material.color;
             }
+
+            // Initialize animator if present
+            if (animator != null)
+            {
+                InitializeAnimatorParameters();
+                TriggerAnimation(AnimTriggerSpawn);
+            }
+        }
+
+        private void InitializeAnimatorParameters()
+        {
+            if (animator == null) return;
+
+            TrySetAnimatorBool(AnimIsMoving, false);
+            TrySetAnimatorFloat(AnimMoveSpeed, 0f);
+            TrySetAnimatorBool(AnimIsAttacking, false);
+            TrySetAnimatorBool(AnimIsHurt, false);
+            TrySetAnimatorBool(AnimIsDying, false);
+            TrySetAnimatorFloat(AnimBankAngle, 0f);
+        }
+
+        private void TrySetAnimatorBool(int paramHash, bool value)
+        {
+            try { animator.SetBool(paramHash, value); }
+            catch { /* Parameter doesn't exist in this animator */ }
+        }
+
+        private void TrySetAnimatorFloat(int paramHash, float value)
+        {
+            try { animator.SetFloat(paramHash, value); }
+            catch { /* Parameter doesn't exist in this animator */ }
+        }
+
+        private void TriggerAnimation(int triggerHash)
+        {
+            if (animator == null) return;
+            try { animator.SetTrigger(triggerHash); }
+            catch { /* Trigger doesn't exist in this animator */ }
+        }
+
+        private void UpdateAnimatorState()
+        {
+            if (animator == null) return;
+
+            // Update movement state
+            float speed = Velocity.magnitude / MoveSpeed;
+            TrySetAnimatorFloat(AnimMoveSpeed, speed);
+            TrySetAnimatorBool(AnimIsMoving, speed > 0.1f);
+
+            // Update bank angle for strafing
+            TrySetAnimatorFloat(AnimBankAngle, bankAngle / 30f); // Normalize to -1 to 1
+
+            // Update attacking state
+            bool isAttacking = currentState == AIState.Attacking && Time.time - lastAttackTime < AttackCooldown * 0.3f;
+            TrySetAnimatorBool(AnimIsAttacking, isAttacking);
+
+            // Update dying state
+            TrySetAnimatorBool(AnimIsDying, currentState == AIState.Dying);
         }
 
         private void SetupEffects()
@@ -623,7 +696,7 @@ namespace TurretDefense
 
         private void UpdateAnimation()
         {
-            // Hover bobbing
+            // Hover bobbing (procedural animation)
             if (bobAmount > 0)
             {
                 bobOffset += Time.deltaTime * bobSpeed;
@@ -631,10 +704,13 @@ namespace TurretDefense
                 // Apply bob offset relative to base movement
             }
 
-            // Banking
+            // Banking (procedural animation)
             Vector3 currentRot = transform.eulerAngles;
             currentRot.z = bankAngle;
             transform.eulerAngles = currentRot;
+
+            // Update animator state for prefabs with animation
+            UpdateAnimatorState();
         }
 
         private void UpdateEffects()
@@ -661,6 +737,11 @@ namespace TurretDefense
             Health -= effectiveDamage;
 
             TurretDefensePlugin.LogDebug($"{ShipType} took {effectiveDamage:F0} damage (armor blocked {Armor}), HP: {Health:F0}/{MaxHealth}");
+
+            // Trigger hurt animation
+            TriggerAnimation(AnimTriggerHurt);
+            TrySetAnimatorBool(AnimIsHurt, true);
+            StartCoroutine(ResetHurtState());
 
             // Damage flash
             StartCoroutine(DamageFlash());
@@ -693,6 +774,12 @@ namespace TurretDefense
             }
         }
 
+        private IEnumerator ResetHurtState()
+        {
+            yield return new WaitForSeconds(0.3f);
+            TrySetAnimatorBool(AnimIsHurt, false);
+        }
+
         private IEnumerator DamageFlash()
         {
             foreach (var r in renderers)
@@ -713,6 +800,10 @@ namespace TurretDefense
         private void Die()
         {
             currentState = AIState.Dying;
+
+            // Trigger death animation
+            TrySetAnimatorBool(AnimIsDying, true);
+            TriggerAnimation(AnimTriggerDeath);
 
             TurretDefensePlugin.Log.LogInfo($"{ShipType} destroyed!");
             TurretDefensePlugin.OnAlienKilled(this);

@@ -99,6 +99,121 @@ namespace TurretDefense
                     RotationSpeed = 8f;
                     ChainCount = 3;
                     break;
+
+                // ========== TDTK Turrets ==========
+                case "cannon":
+                case "Cannon":
+                    Damage = baseDamage * 3f;
+                    Range = baseRange * 1.1f;
+                    FireRate = 0.8f;
+                    RotationSpeed = 6f;
+                    break;
+                case "cannon2":
+                case "Cannon2":
+                    Damage = baseDamage * 4f;
+                    Range = baseRange * 1.3f;
+                    FireRate = 0.6f;
+                    RotationSpeed = 5f;
+                    CritChance = 0.12f;
+                    break;
+                case "mg":
+                case "MG":
+                    Damage = baseDamage * 0.5f;
+                    Range = baseRange * 0.85f;
+                    FireRate = 15f;
+                    RotationSpeed = 12f;
+                    break;
+                case "mg2":
+                case "MG2":
+                    Damage = baseDamage * 0.6f;
+                    Range = baseRange * 0.95f;
+                    FireRate = 18f;
+                    RotationSpeed = 14f;
+                    break;
+                case "missile":
+                case "Missile":
+                    Damage = baseDamage * 5f;
+                    Range = baseRange * 1.4f;
+                    FireRate = 0.4f;
+                    RotationSpeed = 4f;
+                    CritChance = 0.18f;
+                    break;
+                case "missile2":
+                case "Missile2":
+                    Damage = baseDamage * 6f;
+                    Range = baseRange * 1.6f;
+                    FireRate = 0.35f;
+                    RotationSpeed = 3.5f;
+                    CritChance = 0.2f;
+                    break;
+                case "beamlaser":
+                case "BeamLaser":
+                    Damage = baseDamage * 0.4f;
+                    Range = baseRange * 1.2f;
+                    FireRate = 20f; // Continuous beam
+                    RotationSpeed = 10f;
+                    break;
+                case "beamlaser2":
+                case "BeamLaser2":
+                    Damage = baseDamage * 0.5f;
+                    Range = baseRange * 1.4f;
+                    FireRate = 22f;
+                    RotationSpeed = 11f;
+                    break;
+                case "aoe":
+                case "AOE":
+                    Damage = baseDamage * 2f;
+                    Range = baseRange * 0.7f;
+                    FireRate = 0.5f;
+                    RotationSpeed = 8f;
+                    break;
+                case "aoe2":
+                case "AOE2":
+                    Damage = baseDamage * 2.5f;
+                    Range = baseRange * 0.85f;
+                    FireRate = 0.45f;
+                    RotationSpeed = 8f;
+                    break;
+                case "support":
+                case "Support":
+                    Damage = 0f; // Support doesn't deal damage, buffs allies
+                    Range = baseRange * 1.5f;
+                    FireRate = 0f;
+                    RotationSpeed = 6f;
+                    break;
+                case "support2":
+                case "Support2":
+                    Damage = 0f;
+                    Range = baseRange * 2f;
+                    FireRate = 0f;
+                    RotationSpeed = 6f;
+                    break;
+
+                // ========== Special Turrets ==========
+                case "nuke":
+                case "Nuke":
+                    Damage = baseDamage * 25f;
+                    Range = baseRange * 2.5f;
+                    FireRate = 0.1f;
+                    RotationSpeed = 2f;
+                    CritChance = 0.3f;
+                    CritMultiplier = 4f;
+                    break;
+                case "flamethrower":
+                case "Flamethrower":
+                    Damage = baseDamage * 0.8f;
+                    Range = baseRange * 0.5f;
+                    FireRate = 25f; // Continuous fire damage
+                    RotationSpeed = 15f;
+                    break;
+
+                // Default fallback
+                default:
+                    Damage = baseDamage;
+                    Range = baseRange;
+                    FireRate = 2f;
+                    RotationSpeed = 8f;
+                    break;
             }
         }
 

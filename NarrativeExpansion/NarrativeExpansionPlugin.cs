@@ -108,8 +108,8 @@ namespace NarrativeExpansion
             NPCInteractionRange = Config.Bind("NPCs", "Interaction Range", 5f,
                 "Distance at which NPCs can be interacted with");
 
-            NPCInteractKey = Config.Bind("NPCs", "Interact Key", KeyCode.E,
-                "Key to interact with NPCs");
+            NPCInteractKey = Config.Bind("NPCs", "Interact Key", KeyCode.K,
+                "Key to interact with NPCs (K for 'talk' - E is used by game for machine interaction)");
 
             DebugMode = Config.Bind("General", "Debug Mode", false, "Enable debug logging");
         }

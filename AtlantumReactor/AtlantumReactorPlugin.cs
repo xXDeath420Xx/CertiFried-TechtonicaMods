@@ -140,28 +140,17 @@ namespace AtlantumReactor
 
         private void OnTechTreeStateLoaded()
         {
-            // Load nuclear/radiation icon
-            Sprite nuclearSprite = LoadEmbeddedSprite("radiation.png");
+            // Clone sprite from Crank Generator MKII (power generator theme)
+            Sprite reactorSprite = CloneGameSprite("Crank Generator MKII");
 
             // Configure unlock sprite and position
             Unlock reactorUnlock = EMU.Unlocks.GetUnlockByName(ReactorName);
             if (reactorUnlock != null)
             {
-                // Use nuclear icon if loaded, otherwise fall back to Crank Generator
-                if (nuclearSprite != null)
+                if (reactorSprite != null)
                 {
-                    reactorUnlock.sprite = nuclearSprite;
-                    Log.LogInfo($"Set {ReactorName} unlock sprite to nuclear/radiation icon");
-                }
-                else
-                {
-                    // Fallback: Copy sprite from Crank Generator MKII
-                    ResourceInfo crankGen = EMU.Resources.GetResourceInfoByName("Crank Generator MKII");
-                    if (crankGen != null && crankGen.sprite != null && reactorUnlock.sprite == null)
-                    {
-                        reactorUnlock.sprite = crankGen.sprite;
-                        Log.LogInfo($"Set {ReactorName} unlock sprite from Crank Generator MKII (fallback)");
-                    }
+                    reactorUnlock.sprite = reactorSprite;
+                    Log.LogInfo($"Set {ReactorName} unlock sprite from Crank Generator MKII");
                 }
 
                 // Ensure correct tier and position
@@ -174,18 +163,39 @@ namespace AtlantumReactor
                 Log.LogWarning($"Could not find unlock: {ReactorName}");
             }
 
-            // Also apply nuclear icon to the reactor resource itself
+            // Also apply cloned sprite to the reactor resource itself
             ResourceInfo reactorInfo = EMU.Resources.GetResourceInfoByName(ReactorName);
-            if (reactorInfo != null && nuclearSprite != null)
+            if (reactorInfo != null && reactorSprite != null)
             {
                 // Use reflection to set the rawSprite field
                 var spriteField = typeof(ResourceInfo).GetField("rawSprite", BindingFlags.Public | BindingFlags.Instance);
                 if (spriteField != null)
                 {
-                    spriteField.SetValue(reactorInfo, nuclearSprite);
-                    Log.LogInfo($"Applied nuclear icon to {ReactorName} resource");
+                    spriteField.SetValue(reactorInfo, reactorSprite);
+                    Log.LogInfo($"Applied cloned sprite to {ReactorName} resource");
                 }
             }
+        }
+
+        /// <summary>
+        /// Clone a sprite from an existing game resource to match Techtonica's icon style
+        /// </summary>
+        private static Sprite CloneGameSprite(string sourceResourceName)
+        {
+            try
+            {
+                ResourceInfo sourceResource = EMU.Resources.GetResourceInfoByName(sourceResourceName);
+                if (sourceResource != null && sourceResource.sprite != null)
+                {
+                    Log.LogInfo($"Cloned sprite from {sourceResourceName}");
+                    return sourceResource.sprite;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to clone sprite from {sourceResourceName}: {ex.Message}");
+            }
+            return null;
         }
 
         private void RegisterFuelResources()
@@ -227,71 +237,6 @@ namespace AtlantumReactor
             {
                 Log.LogInfo($"[DEBUG] {message}");
             }
-        }
-
-        /// <summary>
-        /// Load sprite from embedded resource PNG file
-        /// </summary>
-        public static Sprite LoadEmbeddedSprite(string resourceName, int width = 256, int height = 256)
-        {
-            try
-            {
-                var assembly = Assembly.GetExecutingAssembly();
-                string fullName = assembly.GetManifestResourceNames()
-                    .FirstOrDefault(n => n.EndsWith(resourceName));
-
-                if (string.IsNullOrEmpty(fullName))
-                {
-                    LogDebug($"Embedded resource not found: {resourceName}");
-                    return null;
-                }
-
-                using (var stream = assembly.GetManifestResourceStream(fullName))
-                {
-                    if (stream == null) return null;
-
-                    byte[] data = new byte[stream.Length];
-                    stream.Read(data, 0, data.Length);
-
-                    Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
-                    tex.filterMode = FilterMode.Bilinear;
-
-                    if (tex.LoadImage(data))
-                    {
-                        // Tint white icon to radioactive green
-                        TintTexture(tex, new Color(0.2f, 1f, 0.3f));
-                        tex.Apply();
-                        Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
-                        Log.LogInfo($"Loaded embedded sprite: {resourceName} ({tex.width}x{tex.height}) - tinted green");
-                        return sprite;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"Failed to load embedded sprite {resourceName}: {ex.Message}");
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Tint a texture by multiplying each pixel's color with a tint color
-        /// </summary>
-        private static void TintTexture(Texture2D tex, Color tint)
-        {
-            Color[] pixels = tex.GetPixels();
-            for (int i = 0; i < pixels.Length; i++)
-            {
-                // Preserve alpha, tint RGB based on original brightness
-                float brightness = (pixels[i].r + pixels[i].g + pixels[i].b) / 3f;
-                pixels[i] = new Color(
-                    tint.r * brightness,
-                    tint.g * brightness,
-                    tint.b * brightness,
-                    pixels[i].a
-                );
-            }
-            tex.SetPixels(pixels);
         }
     }
 

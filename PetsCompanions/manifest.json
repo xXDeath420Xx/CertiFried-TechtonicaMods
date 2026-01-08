@@ -1,0 +1,10 @@
+{
+  "name": "PetsCompanions",
+  "version_number": "1.4.0",
+  "website_url": "https://github.com/CertiFried-Mods/TTMod-PetsCompanions",
+  "description": "Adds pet companions that follow you and provide various benefits",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100",
+    "Equinox-EquinoxsModUtils-6.1.1"
+  ]
+}

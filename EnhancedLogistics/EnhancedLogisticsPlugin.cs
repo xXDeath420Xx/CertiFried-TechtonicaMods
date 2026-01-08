@@ -118,8 +118,8 @@ namespace EnhancedLogistics
             Log.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loading...");
 
             // Search UI Settings
-            SearchToggleKey = Config.Bind("Search UI", "Toggle Key", KeyCode.F,
-                "Key to toggle the search UI (when not in text input)");
+            SearchToggleKey = Config.Bind("Search UI", "Toggle Key", KeyCode.L,
+                "Key to toggle the search UI (Ctrl+L for 'locate' - F is game's flashlight)");
             EnableSearchUI = Config.Bind("Search UI", "Enable Search UI", true,
                 "Enable the search functionality");
             SearchInventory = Config.Bind("Search UI", "Search Inventory", true,

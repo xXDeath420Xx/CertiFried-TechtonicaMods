@@ -1,18 +1,23 @@
 # Build outputs
-bin/
-obj/
-*.dll
-*.pdb
-*.zip
-build/
-thunderstore_build/
+*/bin/
+*/obj/
+*/build/*.zip
 
-# IDE
+# IDE files
 .vs/
-.idea/
 *.user
 *.suo
 
-# OS
+# Unity meta files in Bundles (not needed)
+*.meta
+
+# Unity asset bundles (too large for GitHub, store separately)
+*/Bundles/
+
+# Backup files
+*.bak
+*.backup
+
+# OS files
 .DS_Store
 Thumbs.db

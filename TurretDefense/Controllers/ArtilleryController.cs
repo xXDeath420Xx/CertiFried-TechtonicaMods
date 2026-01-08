@@ -113,6 +113,17 @@ namespace TurretDefense
                     rotationSpeed = 60f;
                     break;
 
+                case "Multi":
+                    // Multi-barrel cannon set - balanced sustained fire
+                    Damage = 250f;
+                    Range = 100f;
+                    FireRate = 1.5f;  // Multiple barrels fire in sequence
+                    BlastRadius = 4f;
+                    ArmorPenetration = 0.6f;
+                    MaxAmmo = 80;
+                    rotationSpeed = 25f;
+                    break;
+
                 default:
                     Damage = 200f;
                     Range = 100f;

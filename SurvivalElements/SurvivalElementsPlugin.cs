@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -86,6 +88,9 @@ namespace SurvivalElements
         private static Vector3 elevatorRespawnPosition = Vector3.zero;
         private static bool hasFoundElevator = false;
 
+        // Custom sprites cache
+        private static Dictionary<string, Sprite> customSprites = new Dictionary<string, Sprite>();
+
         private void Awake()
         {
             Instance = this;
@@ -94,6 +99,9 @@ namespace SurvivalElements
 
             InitializeConfig();
             Harmony.PatchAll();
+
+            // Load custom icons before registering items
+            LoadCustomIcons();
 
             // Register repair tool with EMUAdditions
             RegisterRepairTool();
@@ -494,6 +502,9 @@ namespace SurvivalElements
                 repairToolInfo.unlock = EMU.Unlocks.GetUnlockByName(RepairToolUnlock);
                 LogDebug($"Repair Tool linked to unlock");
             }
+
+            // Apply custom sprites to resources
+            ApplyCustomSprites();
         }
 
         private void OnTechTreeStateLoaded()
@@ -950,6 +961,133 @@ namespace SurvivalElements
                     visualToMachineId.Remove(visual);
                 }
                 machineVisuals.Remove(machineId);
+            }
+        }
+
+        /// <summary>
+        /// Clone a sprite from an existing game resource to match Techtonica's icon style
+        /// </summary>
+        private static Sprite CloneGameSprite(string sourceResourceName)
+        {
+            try
+            {
+                ResourceInfo sourceResource = EMU.Resources.GetResourceInfoByName(sourceResourceName);
+                if (sourceResource != null && sourceResource.sprite != null)
+                {
+                    Log.LogInfo($"Cloned sprite from {sourceResourceName}");
+                    return sourceResource.sprite;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to clone sprite from {sourceResourceName}: {ex.Message}");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Load all custom icons by cloning from existing game resources
+        /// </summary>
+        private void LoadCustomIcons()
+        {
+            Log.LogInfo("Loading custom icons from game assets...");
+
+            // Repair Tool - use Scanner sprite (tool-like)
+            customSprites[RepairToolName] = CloneGameSprite("Scanner");
+
+            // Food items - use appropriate plant/organic sprites
+            customSprites[CookedMeatName] = CloneGameSprite("Kindlevine Extract");
+            customSprites[PlantStewName] = CloneGameSprite("Plantmatter");
+            customSprites[EnergyBarName] = CloneGameSprite("Plantmatter Fiber");
+            customSprites[NutrientPasteName] = CloneGameSprite("Biobrick");
+            customSprites[RawMeatName] = CloneGameSprite("Plantmatter");
+
+            int loaded = customSprites.Values.Count(s => s != null);
+            Log.LogInfo($"Cloned {loaded}/{customSprites.Count} sprites from game assets");
+        }
+
+        /// <summary>
+        /// Apply custom sprites to resources by name
+        /// </summary>
+        private void ApplyCustomSprites()
+        {
+            Log.LogInfo("Applying custom sprites to resources...");
+
+            foreach (var kvp in customSprites)
+            {
+                string resourceName = kvp.Key;
+                Sprite sprite = kvp.Value;
+
+                ResourceInfo resourceInfo = EMU.Resources.GetResourceInfoByName(resourceName);
+                if (resourceInfo != null)
+                {
+                    // Use reflection to set the sprite (property is read-only)
+                    bool spriteSet = false;
+
+                    // Try rawSprite field first
+                    var rawSpriteField = typeof(ResourceInfo).GetField("rawSprite", BindingFlags.Public | BindingFlags.Instance);
+                    if (rawSpriteField != null)
+                    {
+                        rawSpriteField.SetValue(resourceInfo, sprite);
+                        spriteSet = true;
+                        LogDebug($"Applied custom sprite to {resourceName} via rawSprite field");
+                    }
+
+                    // Try _sprite field
+                    if (!spriteSet)
+                    {
+                        var spriteField = typeof(ResourceInfo).GetField("_sprite", BindingFlags.NonPublic | BindingFlags.Instance);
+                        if (spriteField != null)
+                        {
+                            spriteField.SetValue(resourceInfo, sprite);
+                            spriteSet = true;
+                            LogDebug($"Applied custom sprite to {resourceName} via _sprite field");
+                        }
+                    }
+
+                    // Try backing field
+                    if (!spriteSet)
+                    {
+                        var backingField = typeof(ResourceInfo).GetField("<sprite>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance);
+                        if (backingField != null)
+                        {
+                            backingField.SetValue(resourceInfo, sprite);
+                            spriteSet = true;
+                            LogDebug($"Applied custom sprite to {resourceName} via backing field");
+                        }
+                    }
+
+                    if (!spriteSet)
+                    {
+                        Log.LogWarning($"Could not set sprite on {resourceName} - no writable field found");
+                    }
+                }
+                else
+                {
+                    Log.LogWarning($"Could not find resource '{resourceName}' to apply sprite");
+                }
+            }
+
+            // Also apply to unlocks if they share the same name
+            ApplySpriteToUnlock(RepairToolUnlock, RepairToolName);
+            ApplySpriteToUnlock(FoodUnlock, CookedMeatName); // Use cooked meat icon for food unlock
+
+            Log.LogInfo($"Applied {customSprites.Count} custom sprites");
+        }
+
+        /// <summary>
+        /// Apply a custom sprite to an unlock
+        /// </summary>
+        private void ApplySpriteToUnlock(string unlockName, string spriteKey)
+        {
+            if (!customSprites.TryGetValue(spriteKey, out Sprite sprite))
+                return;
+
+            Unlock unlock = EMU.Unlocks.GetUnlockByName(unlockName);
+            if (unlock != null && sprite != null)
+            {
+                unlock.sprite = sprite;
+                LogDebug($"Applied custom sprite to unlock '{unlockName}'");
             }
         }
 

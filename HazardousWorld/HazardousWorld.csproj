@@ -49,6 +49,10 @@
       <HintPath>$(GameDir)\Techtonica_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>$(GameDir)\Techtonica_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="EquinoxsModUtils">
       <HintPath>$(PluginDir)\Equinox-EquinoxsModUtils\EquinoxsModUtils\EquinoxsModUtils.dll</HintPath>
       <Private>false</Private>
@@ -61,6 +65,10 @@
       <HintPath>..\TechtonicaFramework\bin\Debug\net472\TechtonicaFramework.dll</HintPath>
       <Private>false</Private>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\*.png" />
   </ItemGroup>
 
 </Project>

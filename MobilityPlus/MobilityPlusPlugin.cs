@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -70,6 +72,9 @@ namespace MobilityPlus
         public static ConfigEntry<KeyCode> SummonVehicleKey;
         public static ConfigEntry<KeyCode> DismissVehicleKey;
 
+        // Custom sprites cache
+        private static Dictionary<string, Sprite> customSprites = new Dictionary<string, Sprite>();
+
         private void Awake()
         {
             Instance = this;
@@ -78,6 +83,9 @@ namespace MobilityPlus
 
             InitializeConfig();
             Harmony.PatchAll();
+
+            // Load custom icons before registration
+            LoadCustomIcons();
 
             // Register content with EMUAdditions
             RegisterUnlocks();
@@ -126,10 +134,10 @@ namespace MobilityPlus
                 new ConfigDescription("Base vehicle movement speed", new AcceptableValueRange<float>(5f, 30f)));
             VehicleHoverHeight = Config.Bind("Vehicle", "Hover Height", 1.5f,
                 new ConfigDescription("Height vehicle hovers above ground", new AcceptableValueRange<float>(0.5f, 5f)));
-            SummonVehicleKey = Config.Bind("Vehicle", "Summon Vehicle Key", KeyCode.V,
-                "Key to summon personal vehicle");
-            DismissVehicleKey = Config.Bind("Vehicle", "Dismiss Vehicle Key", KeyCode.B,
-                "Key to dismiss/exit vehicle");
+            SummonVehicleKey = Config.Bind("Vehicle", "Summon Vehicle Key", KeyCode.Home,
+                "Key to summon personal vehicle (Home key - avoids game keybind conflicts)");
+            DismissVehicleKey = Config.Bind("Vehicle", "Dismiss Vehicle Key", KeyCode.End,
+                "Key to dismiss/exit vehicle (End key - avoids game keybind conflicts)");
 
             DebugMode = Config.Bind("General", "Debug Mode", false, "Enable debug logging");
         }
@@ -515,6 +523,9 @@ namespace MobilityPlus
             LinkUnlockToResource("Jump Pad", ExtremeSpeedUnlock);
             LinkUnlockToResource(HoverPodName, VehicleUnlock);
 
+            // Apply custom sprites to resources
+            ApplyCustomSprites();
+
             Log.LogInfo("Linked unlocks to resources");
         }
 
@@ -711,7 +722,7 @@ namespace MobilityPlus
             activeVehicle.speed = VehicleSpeed.Value;
             activeVehicle.hoverHeight = VehicleHoverHeight.Value;
 
-            Log.LogInfo("Hover Pod summoned! Press V near it to mount, B to dismiss.");
+            Log.LogInfo("Hover Pod summoned! Press Home near it to mount, End to dismiss.");
         }
 
         private void DismissVehicle()
@@ -724,63 +735,208 @@ namespace MobilityPlus
             }
         }
 
-        private GameObject CreateHoverPodVisual(Vector3 position)
+        // Asset bundle for hover pod model
+        private static AssetBundle vehicleBundle;
+        private static GameObject vehiclePrefab;
+        private static Material cachedURPMaterial;
+
+        private void LoadVehicleAssets()
         {
-            GameObject pod = new GameObject("HoverPod");
-            pod.transform.position = position;
+            if (vehicleBundle != null) return;
 
-            Color bodyColor = new Color(0.2f, 0.3f, 0.5f); // Blue-gray
-            Color accentColor = new Color(0.4f, 0.7f, 0.9f); // Light blue
-            Color glowColor = new Color(0.3f, 0.8f, 1f); // Cyan glow
+            string bundlePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Info.Location), "Bundles");
+            string[] bundleNames = { "drones_scifi", "drones_voodooplay", "hoverbuggy" };
 
-            // Main body (flattened capsule)
-            GameObject body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            body.transform.SetParent(pod.transform);
-            body.transform.localPosition = Vector3.zero;
-            body.transform.localRotation = Quaternion.Euler(90f, 0, 0);
-            body.transform.localScale = new Vector3(1.5f, 2f, 1f);
-            body.GetComponent<Renderer>().material.color = bodyColor;
-            UnityEngine.Object.Destroy(body.GetComponent<Collider>());
-
-            // Cockpit dome
-            GameObject cockpit = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            cockpit.transform.SetParent(pod.transform);
-            cockpit.transform.localPosition = Vector3.up * 0.4f + Vector3.forward * 0.3f;
-            cockpit.transform.localScale = new Vector3(0.8f, 0.5f, 0.8f);
-            cockpit.GetComponent<Renderer>().material.color = new Color(0.5f, 0.8f, 1f, 0.5f);
-            UnityEngine.Object.Destroy(cockpit.GetComponent<Collider>());
-
-            // Hover engines (4 corners)
-            for (int i = 0; i < 4; i++)
+            foreach (var bundleName in bundleNames)
             {
-                float angle = (i / 4f) * Mathf.PI * 2f + Mathf.PI / 4f;
-                Vector3 enginePos = new Vector3(Mathf.Cos(angle) * 1.2f, -0.3f, Mathf.Sin(angle) * 0.8f);
+                string fullPath = System.IO.Path.Combine(bundlePath, bundleName);
+                if (System.IO.File.Exists(fullPath))
+                {
+                    try
+                    {
+                        vehicleBundle = AssetBundle.LoadFromFile(fullPath);
+                        if (vehicleBundle != null)
+                        {
+                            Log.LogInfo($"Loaded vehicle bundle: {bundleName}");
+                            // Try to find a suitable hover pod prefab
+                            foreach (var assetName in vehicleBundle.GetAllAssetNames())
+                            {
+                                if (assetName.Contains("drone") && assetName.EndsWith(".prefab"))
+                                {
+                                    vehiclePrefab = vehicleBundle.LoadAsset<GameObject>(assetName);
+                                    if (vehiclePrefab != null)
+                                    {
+                                        Log.LogInfo($"Loaded vehicle prefab: {assetName}");
+                                        break;
+                                    }
+                                }
+                            }
+                            if (vehiclePrefab != null) break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.LogWarning($"Failed to load bundle {bundleName}: {ex.Message}");
+                    }
+                }
+            }
+        }
 
-                GameObject engine = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                engine.transform.SetParent(pod.transform);
-                engine.transform.localPosition = enginePos;
-                engine.transform.localScale = new Vector3(0.3f, 0.15f, 0.3f);
-                engine.GetComponent<Renderer>().material.color = accentColor;
-                UnityEngine.Object.Destroy(engine.GetComponent<Collider>());
-
-                // Engine glow
-                GameObject glow = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                glow.transform.SetParent(engine.transform);
-                glow.transform.localPosition = Vector3.down * 0.5f;
-                glow.transform.localScale = new Vector3(0.7f, 0.3f, 0.7f);
-                glow.GetComponent<Renderer>().material.color = glowColor;
-                UnityEngine.Object.Destroy(glow.GetComponent<Collider>());
+        private static void FixMaterialsForURP(GameObject obj)
+        {
+            if (cachedURPMaterial == null)
+            {
+                var gameRenderers = UnityEngine.Object.FindObjectsOfType<Renderer>();
+                foreach (var r in gameRenderers)
+                {
+                    if (r.material != null && r.material.shader != null &&
+                        r.material.shader.name.Contains("Universal"))
+                    {
+                        cachedURPMaterial = r.material;
+                        break;
+                    }
+                }
             }
 
-            // Main collider for the vehicle
+            if (cachedURPMaterial == null) return;
+
+            var renderers = obj.GetComponentsInChildren<Renderer>(true);
+            foreach (var renderer in renderers)
+            {
+                var materials = renderer.materials;
+                for (int i = 0; i < materials.Length; i++)
+                {
+                    var oldMat = materials[i];
+                    if (oldMat != null && oldMat.shader != null &&
+                        !oldMat.shader.name.Contains("Universal") && !oldMat.shader.name.Contains("URP"))
+                    {
+                        // Preserve textures when converting to URP
+                        Color originalColor = oldMat.HasProperty("_Color") ? oldMat.GetColor("_Color") : oldMat.color;
+                        Texture mainTex = oldMat.HasProperty("_MainTex") ? oldMat.GetTexture("_MainTex") : null;
+
+                        var newMat = new Material(cachedURPMaterial);
+                        newMat.color = originalColor;
+                        if (newMat.HasProperty("_BaseColor")) newMat.SetColor("_BaseColor", originalColor);
+                        if (mainTex != null)
+                        {
+                            if (newMat.HasProperty("_MainTex")) newMat.SetTexture("_MainTex", mainTex);
+                            if (newMat.HasProperty("_BaseMap")) newMat.SetTexture("_BaseMap", mainTex);
+                        }
+                        materials[i] = newMat;
+                    }
+                }
+                renderer.materials = materials;
+            }
+        }
+
+        private GameObject CreateHoverPodVisual(Vector3 position)
+        {
+            GameObject pod = null;
+
+            // Try to load real 3D model first
+            LoadVehicleAssets();
+            if (vehiclePrefab != null)
+            {
+                pod = UnityEngine.Object.Instantiate(vehiclePrefab, position, Quaternion.identity);
+                pod.name = "HoverPod";
+                FixMaterialsForURP(pod);
+
+                // Scale up to vehicle size (drones are usually small)
+                pod.transform.localScale = Vector3.one * 2.5f;
+
+                // Remove any existing colliders from prefab
+                foreach (var col in pod.GetComponentsInChildren<Collider>())
+                {
+                    UnityEngine.Object.Destroy(col);
+                }
+
+                Log.LogInfo("Created Hover Pod from 3D asset");
+            }
+            else
+            {
+                // Fallback: create a better-looking sci-fi pod from primitives
+                pod = CreateFallbackHoverPod(position);
+                Log.LogWarning("Using fallback primitive Hover Pod - bundle not found");
+            }
+
+            // Add physics components
             var collider = pod.AddComponent<BoxCollider>();
-            collider.size = new Vector3(3f, 1f, 2f);
+            collider.size = new Vector3(2f, 1f, 3f);
             collider.center = Vector3.zero;
 
             var rb = pod.AddComponent<Rigidbody>();
             rb.useGravity = false;
+            rb.mass = 100f; // Heavier for stability
+            rb.drag = 8f; // Much higher drag to reduce drift
+            rb.angularDrag = 10f; // High angular drag for rotation stability
             rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-            rb.drag = 3f;
+            rb.interpolation = RigidbodyInterpolation.Interpolate; // Smooth movement
+
+            return pod;
+        }
+
+        private GameObject CreateFallbackHoverPod(Vector3 position)
+        {
+            GameObject pod = new GameObject("HoverPod");
+            pod.transform.position = position;
+
+            Color bodyColor = new Color(0.15f, 0.2f, 0.3f);
+            Color accentColor = new Color(0.3f, 0.6f, 0.9f);
+            Color glowColor = new Color(0.2f, 0.7f, 1f);
+
+            // Main body - sleek ellipsoid
+            GameObject body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            body.transform.SetParent(pod.transform);
+            body.transform.localPosition = Vector3.zero;
+            body.transform.localRotation = Quaternion.Euler(90f, 0, 0);
+            body.transform.localScale = new Vector3(1.2f, 1.8f, 0.8f);
+            body.GetComponent<Renderer>().material.color = bodyColor;
+            UnityEngine.Object.Destroy(body.GetComponent<Collider>());
+
+            // Cockpit canopy
+            GameObject cockpit = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            cockpit.transform.SetParent(pod.transform);
+            cockpit.transform.localPosition = new Vector3(0, 0.35f, 0.4f);
+            cockpit.transform.localScale = new Vector3(0.9f, 0.45f, 0.7f);
+            var cockpitMat = cockpit.GetComponent<Renderer>().material;
+            cockpitMat.color = new Color(0.4f, 0.7f, 0.95f, 0.6f);
+            UnityEngine.Object.Destroy(cockpit.GetComponent<Collider>());
+
+            // Thruster housings (4 corners, lower profile)
+            Vector3[] thrusterPositions = {
+                new Vector3(-0.9f, -0.25f, 0.6f),
+                new Vector3(0.9f, -0.25f, 0.6f),
+                new Vector3(-0.9f, -0.25f, -0.6f),
+                new Vector3(0.9f, -0.25f, -0.6f)
+            };
+
+            foreach (var thrusterPos in thrusterPositions)
+            {
+                GameObject thruster = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                thruster.transform.SetParent(pod.transform);
+                thruster.transform.localPosition = thrusterPos;
+                thruster.transform.localScale = new Vector3(0.25f, 0.1f, 0.25f);
+                thruster.GetComponent<Renderer>().material.color = accentColor;
+                UnityEngine.Object.Destroy(thruster.GetComponent<Collider>());
+
+                // Thruster glow
+                GameObject glow = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                glow.transform.SetParent(thruster.transform);
+                glow.transform.localPosition = Vector3.down * 0.3f;
+                glow.transform.localScale = new Vector3(0.8f, 0.4f, 0.8f);
+                glow.GetComponent<Renderer>().material.color = glowColor;
+                UnityEngine.Object.Destroy(glow.GetComponent<Collider>());
+            }
+
+            // Add a point light for glow effect
+            var lightObj = new GameObject("HoverLight");
+            lightObj.transform.SetParent(pod.transform);
+            lightObj.transform.localPosition = Vector3.down * 0.5f;
+            var light = lightObj.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = glowColor;
+            light.intensity = 1.5f;
+            light.range = 4f;
 
             return pod;
         }
@@ -854,6 +1010,89 @@ namespace MobilityPlus
                 Log.LogInfo($"[DEBUG] {message}");
             }
         }
+
+        /// <summary>
+        /// Clone a sprite from an existing game resource to match Techtonica's icon style
+        /// </summary>
+        private static Sprite CloneGameSprite(string sourceResourceName)
+        {
+            try
+            {
+                ResourceInfo sourceResource = EMU.Resources.GetResourceInfoByName(sourceResourceName);
+                if (sourceResource != null && sourceResource.sprite != null)
+                {
+                    Log.LogInfo($"Cloned sprite from {sourceResourceName}");
+                    return sourceResource.sprite;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to clone sprite from {sourceResourceName}: {ex.Message}");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Load all custom icons by cloning from existing game resources
+        /// This ensures icons match Techtonica's visual style
+        /// </summary>
+        private void LoadCustomIcons()
+        {
+            // Clone sprites from existing similar items to match game aesthetic
+            // Stilts MKII/MKIII - use base Stilts sprite
+            Sprite stiltsSprite = CloneGameSprite("Stilts");
+            if (stiltsSprite != null)
+            {
+                customSprites[StiltsMk2Name] = stiltsSprite;
+                customSprites[StiltsMk3Name] = stiltsSprite;
+            }
+
+            // Speed Boots - use Stilts sprite (leg equipment)
+            customSprites[SpeedBootsName] = CloneGameSprite("Stilts");
+
+            // Jump Pack - use M.O.L.E. sprite (mobility equipment)
+            customSprites[JumpPackName] = CloneGameSprite("M.O.L.E.");
+
+            // Hover Pod - use M.O.L.E. sprite (vehicle)
+            customSprites[HoverPodName] = CloneGameSprite("M.O.L.E.");
+
+            // Rail Runner MKII - use Rail Runner sprite
+            customSprites[GrappleMk2Name] = CloneGameSprite("Rail Runner");
+
+            int loaded = customSprites.Values.Count(s => s != null);
+            Log.LogInfo($"Cloned {loaded}/{customSprites.Count} sprites from game assets");
+        }
+
+        /// <summary>
+        /// Apply custom sprites to resources by name
+        /// </summary>
+        private void ApplyCustomSprites()
+        {
+            foreach (var kvp in customSprites)
+            {
+                string resourceName = kvp.Key;
+                Sprite sprite = kvp.Value;
+
+                try
+                {
+                    ResourceInfo info = EMU.Resources.GetResourceInfoByName(resourceName);
+                    if (info != null && sprite != null)
+                    {
+                        // Use reflection to set the rawSprite field
+                        var spriteField = typeof(ResourceInfo).GetField("rawSprite", BindingFlags.Public | BindingFlags.Instance);
+                        if (spriteField != null)
+                        {
+                            spriteField.SetValue(info, sprite);
+                            LogDebug($"Applied custom sprite to {resourceName}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.LogWarning($"Failed to apply sprite to {resourceName}: {ex.Message}");
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -869,22 +1108,30 @@ namespace MobilityPlus
     }
 
     /// <summary>
-    /// Hover Pod vehicle controller - handles mounting, movement, and hover physics
+    /// Hover Pod vehicle controller - handles mounting, movement, and stable hover physics
+    /// Uses PID-style control for smooth, wobble-free hovering
     /// </summary>
     public class HoverPodController : MonoBehaviour
     {
         public float speed = 15f;
         public float hoverHeight = 1.5f;
-        public float hoverForce = 50f;
-        public float rotationSpeed = 100f;
-        public float tiltAmount = 15f;
+        public float rotationSpeed = 120f;
+        public float maxTiltAngle = 8f;
 
         private Rigidbody rb;
         private Player mountedPlayer;
-        private Vector3 originalPlayerPosition;
         private bool playerMounted = false;
-        private float engineHum = 0f;
-        private float bobOffset = 0f;
+
+        // PID controller values for stable hover
+        private float hoverProportional = 80f;  // Spring strength
+        private float hoverDamping = 25f;       // Velocity damping
+        private float hoverIntegral = 5f;       // Accumulated error correction
+        private float integralError = 0f;
+        private float maxIntegralError = 5f;
+
+        // Smoothed values for stability
+        private float smoothedTargetHeight;
+        private Quaternion targetRotation;
 
         public bool IsPlayerMounted => playerMounted;
 
@@ -895,110 +1142,168 @@ namespace MobilityPlus
             {
                 rb = gameObject.AddComponent<Rigidbody>();
                 rb.useGravity = false;
-                rb.drag = 3f;
+                rb.mass = 100f;
+                rb.drag = 8f;
+                rb.angularDrag = 10f;
                 rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+                rb.interpolation = RigidbodyInterpolation.Interpolate;
             }
+
+            smoothedTargetHeight = hoverHeight;
+            targetRotation = transform.rotation;
         }
 
         private void Update()
         {
-            // Idle bobbing animation
-            bobOffset += Time.deltaTime * 2f;
-
             if (playerMounted && mountedPlayer != null)
             {
-                HandleMountedMovement();
-                UpdatePlayerPosition();
-            }
-            else
-            {
-                // Idle hover bob
-                ApplyIdleHover();
+                HandleMountedInput();
             }
         }
 
         private void FixedUpdate()
         {
-            ApplyHoverPhysics();
-        }
+            ApplyStableHover();
 
-        private void ApplyHoverPhysics()
-        {
-            // Raycast down to maintain hover height
-            if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, hoverHeight * 3f))
+            if (playerMounted && mountedPlayer != null)
             {
-                float currentHeight = hit.distance;
-                float heightError = hoverHeight - currentHeight;
-
-                // Apply upward force to maintain hover height
-                Vector3 hoverForceVec = Vector3.up * heightError * hoverForce;
-                rb.AddForce(hoverForceVec, ForceMode.Acceleration);
+                ApplyMovement();
+                UpdatePlayerPosition();
             }
             else
             {
-                // No ground below - gentle descent
-                rb.AddForce(Vector3.down * 5f, ForceMode.Acceleration);
+                // When idle, slowly stabilize rotation
+                transform.rotation = Quaternion.Slerp(transform.rotation,
+                    Quaternion.Euler(0, transform.eulerAngles.y, 0), Time.fixedDeltaTime * 2f);
             }
+        }
 
-            // Dampen vertical oscillation
-            if (Mathf.Abs(rb.velocity.y) > 0.1f)
+        private void ApplyStableHover()
+        {
+            // Smooth height target changes
+            smoothedTargetHeight = Mathf.Lerp(smoothedTargetHeight, hoverHeight, Time.fixedDeltaTime * 3f);
+
+            // Find ground height using multiple raycasts for stability
+            float groundHeight = GetGroundHeight();
+
+            if (groundHeight < float.MaxValue)
             {
-                rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y * 0.95f, rb.velocity.z);
+                float currentHeight = transform.position.y - groundHeight;
+                float heightError = smoothedTargetHeight - currentHeight;
+
+                // Accumulate integral error (with limits to prevent windup)
+                integralError = Mathf.Clamp(integralError + heightError * Time.fixedDeltaTime,
+                    -maxIntegralError, maxIntegralError);
+
+                // PID control: P (proportional) + I (integral) + D (derivative/damping)
+                float verticalForce =
+                    heightError * hoverProportional +           // Spring force
+                    integralError * hoverIntegral -             // Accumulated error correction
+                    rb.velocity.y * hoverDamping;               // Velocity damping
+
+                rb.AddForce(Vector3.up * verticalForce, ForceMode.Acceleration);
+            }
+            else
+            {
+                // No ground detected - gentle descent
+                rb.AddForce(Vector3.down * 10f, ForceMode.Acceleration);
+                integralError = 0f;
             }
         }
 
-        private void ApplyIdleHover()
+        private float GetGroundHeight()
         {
-            // Gentle bobbing when idle
-            float bob = Mathf.Sin(bobOffset) * 0.05f;
-            transform.position = new Vector3(
-                transform.position.x,
-                transform.position.y + bob * Time.deltaTime,
-                transform.position.z
-            );
+            // Use multiple raycasts for stability on uneven terrain
+            Vector3[] offsets = {
+                Vector3.zero,
+                Vector3.forward * 0.5f,
+                Vector3.back * 0.5f,
+                Vector3.left * 0.5f,
+                Vector3.right * 0.5f
+            };
+
+            float minHeight = float.MaxValue;
+            int hits = 0;
+            float totalHeight = 0f;
+
+            foreach (var offset in offsets)
+            {
+                Vector3 rayStart = transform.position + transform.TransformDirection(offset);
+                if (Physics.Raycast(rayStart, Vector3.down, out RaycastHit hit, hoverHeight * 4f))
+                {
+                    totalHeight += hit.point.y;
+                    hits++;
+                    if (hit.point.y < minHeight) minHeight = hit.point.y;
+                }
+            }
+
+            // Return average ground height for stability
+            return hits > 0 ? totalHeight / hits : float.MaxValue;
         }
 
-        private void HandleMountedMovement()
+        private void HandleMountedInput()
         {
-            // Get input
+            // Height adjustment with PageUp/PageDown (avoids Space/Ctrl conflicts with game jump/crouch)
+            if (Input.GetKey(KeyCode.PageUp))
+            {
+                hoverHeight = Mathf.Min(hoverHeight + Time.deltaTime * 4f, 12f);
+            }
+            else if (Input.GetKey(KeyCode.PageDown))
+            {
+                hoverHeight = Mathf.Max(hoverHeight - Time.deltaTime * 4f, 0.5f);
+            }
+        }
+
+        private void ApplyMovement()
+        {
             float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");
 
-            // Calculate movement direction based on camera/player facing
+            // Get camera-relative direction
             Vector3 moveDirection = Vector3.zero;
-
             if (Camera.main != null)
             {
                 Vector3 camForward = Camera.main.transform.forward;
                 Vector3 camRight = Camera.main.transform.right;
-
-                // Flatten to horizontal plane
                 camForward.y = 0;
                 camRight.y = 0;
                 camForward.Normalize();
                 camRight.Normalize();
-
-                moveDirection = (camForward * vertical + camRight * horizontal).normalized;
+                moveDirection = (camForward * vertical + camRight * horizontal);
             }
             else
             {
-                moveDirection = (transform.forward * vertical + transform.right * horizontal).normalized;
+                moveDirection = (transform.forward * vertical + transform.right * horizontal);
             }
 
-            // Apply movement
-            if (moveDirection.magnitude > 0.1f)
+            // Apply horizontal movement force
+            if (moveDirection.sqrMagnitude > 0.01f)
             {
-                rb.AddForce(moveDirection * speed, ForceMode.Acceleration);
+                moveDirection = moveDirection.normalized;
 
-                // Rotate to face movement direction
-                Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                // Smooth acceleration
+                Vector3 targetVel = moveDirection * speed;
+                Vector3 currentHorizontalVel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+                Vector3 velDiff = targetVel - currentHorizontalVel;
 
-                // Apply forward tilt when moving
-                float currentSpeed = rb.velocity.magnitude;
-                float tilt = Mathf.Clamp(currentSpeed / speed, 0, 1) * tiltAmount;
-                transform.localRotation *= Quaternion.Euler(tilt, 0, 0);
+                rb.AddForce(velDiff * 5f, ForceMode.Acceleration);
+
+                // Smooth rotation towards movement direction
+                targetRotation = Quaternion.LookRotation(moveDirection);
             }
+
+            // Apply smooth rotation (Y axis only)
+            float currentY = transform.eulerAngles.y;
+            float targetY = targetRotation.eulerAngles.y;
+            float newY = Mathf.LerpAngle(currentY, targetY, Time.fixedDeltaTime * 5f);
+
+            // Calculate tilt based on velocity (purely visual, non-cumulative)
+            Vector3 localVel = transform.InverseTransformDirection(rb.velocity);
+            float forwardTilt = Mathf.Clamp(-localVel.z / speed * maxTiltAngle, -maxTiltAngle, maxTiltAngle);
+            float sideTilt = Mathf.Clamp(localVel.x / speed * maxTiltAngle * 0.5f, -maxTiltAngle * 0.5f, maxTiltAngle * 0.5f);
+
+            // Apply rotation directly (not additively) to prevent accumulation
+            transform.rotation = Quaternion.Euler(forwardTilt, newY, -sideTilt);
 
             // Speed cap
             Vector3 horizontalVelocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
@@ -1007,41 +1312,22 @@ namespace MobilityPlus
                 horizontalVelocity = horizontalVelocity.normalized * speed;
                 rb.velocity = new Vector3(horizontalVelocity.x, rb.velocity.y, horizontalVelocity.z);
             }
-
-            // Ascend/Descend with Space/Ctrl
-            if (Input.GetKey(KeyCode.Space))
-            {
-                hoverHeight = Mathf.Min(hoverHeight + Time.deltaTime * 3f, 10f);
-            }
-            else if (Input.GetKey(KeyCode.LeftControl))
-            {
-                hoverHeight = Mathf.Max(hoverHeight - Time.deltaTime * 3f, 0.5f);
-            }
-
-            // Engine sound simulation (visual only - particles)
-            engineHum = Mathf.Lerp(engineHum, moveDirection.magnitude > 0.1f ? 1f : 0.3f, Time.deltaTime * 3f);
         }
 
         private void UpdatePlayerPosition()
         {
             if (mountedPlayer != null)
             {
-                // Keep player attached to vehicle
-                Vector3 seatPosition = transform.position + Vector3.up * 0.5f;
-                mountedPlayer.transform.position = seatPosition;
+                // Player stays attached via parenting, no need for manual position updates
             }
         }
 
-        /// <summary>
-        /// Mount a player onto the vehicle
-        /// </summary>
         public void Mount(Player player)
         {
             if (playerMounted) return;
 
             mountedPlayer = player;
             playerMounted = true;
-            originalPlayerPosition = player.transform.position;
 
             // Disable player's normal movement
             var controller = player.GetComponent<CharacterController>();
@@ -1050,16 +1336,17 @@ namespace MobilityPlus
                 controller.enabled = false;
             }
 
-            // Parent player to vehicle for smooth following
+            // Parent player to vehicle
             player.transform.SetParent(transform);
-            player.transform.localPosition = Vector3.up * 0.5f;
+            player.transform.localPosition = Vector3.up * 0.6f;
+            player.transform.localRotation = Quaternion.identity;
 
-            MobilityPlusPlugin.Log.LogInfo("Mounted Hover Pod! Use WASD to move, Space/Ctrl for altitude, B to dismount.");
+            // Reset integral error for fresh hover
+            integralError = 0f;
+
+            MobilityPlusPlugin.Log.LogInfo("Mounted Hover Pod! WASD to move, PageUp/PageDown for altitude, End to dismount.");
         }
 
-        /// <summary>
-        /// Dismount the player from the vehicle
-        /// </summary>
         public void Dismount()
         {
             if (!playerMounted || mountedPlayer == null) return;
@@ -1068,14 +1355,11 @@ namespace MobilityPlus
             mountedPlayer.transform.SetParent(null);
 
             // Position player beside vehicle
-            Vector3 dismountPos = transform.position + transform.right * 2f;
-
-            // Ensure ground contact
+            Vector3 dismountPos = transform.position + transform.right * 2.5f;
             if (Physics.Raycast(dismountPos + Vector3.up * 5f, Vector3.down, out RaycastHit hit, 20f))
             {
                 dismountPos = hit.point + Vector3.up * 0.1f;
             }
-
             mountedPlayer.transform.position = dismountPos;
 
             // Re-enable player movement
@@ -1091,9 +1375,6 @@ namespace MobilityPlus
             MobilityPlusPlugin.Log.LogInfo("Dismounted from Hover Pod.");
         }
 
-        /// <summary>
-        /// Recall the vehicle to the player's position
-        /// </summary>
         public void RecallToPlayer(Player player)
         {
             if (playerMounted) return;
@@ -1101,16 +1382,15 @@ namespace MobilityPlus
             Vector3 targetPos = player.transform.position + player.transform.forward * 3f;
             targetPos.y = player.transform.position.y + hoverHeight;
 
-            // Teleport vehicle to player
             transform.position = targetPos;
             rb.velocity = Vector3.zero;
+            integralError = 0f;
 
-            MobilityPlusPlugin.Log.LogInfo("Hover Pod recalled! Press V to mount.");
+            MobilityPlusPlugin.Log.LogInfo("Hover Pod recalled! Press Home to mount.");
         }
 
         private void OnDestroy()
         {
-            // Ensure player is dismounted if vehicle is destroyed
             if (playerMounted && mountedPlayer != null)
             {
                 Dismount();

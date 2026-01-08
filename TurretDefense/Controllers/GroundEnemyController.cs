@@ -6,16 +6,18 @@ using UnityEngine;
 namespace TurretDefense
 {
     /// <summary>
-    /// Ground-based enemy types (Chomper, Spitter, Mimic, Arachnid)
+    /// Ground-based enemy types (Chomper, Spitter, Mimic, Arachnid, Robots)
     /// </summary>
     public enum GroundEnemyType
     {
-        Chomper,    // Melee, charges at player, high damage
-        Spitter,    // Ranged acid attack, keeps distance
-        Mimic,      // Ambush predator, disguises as objects
-        Arachnid,   // Fast spider, swarms in groups
-        Grenadier,  // Throws explosive projectiles
-        Gunner      // Sustained ranged fire
+        Chomper,        // Melee, charges at player, high damage
+        Spitter,        // Ranged acid attack, keeps distance
+        Mimic,          // Ambush predator, disguises as objects
+        Arachnid,       // Fast spider, swarms in groups
+        Grenadier,      // Throws explosive projectiles
+        Gunner,         // Sustained ranged fire
+        MachineGunRobot,// Heavy robot with rapid fire machine gun
+        CannonMachine   // Heavy artillery robot with powerful cannon
     }
 
     /// <summary>
@@ -55,6 +57,23 @@ namespace TurretDefense
         private Animator animator;
         private float animSpeedMultiplier = 1f;
 
+        // Animation parameter hashes for performance
+        private static readonly int AnimIsMoving = Animator.StringToHash("IsMoving");
+        private static readonly int AnimMoveSpeed = Animator.StringToHash("MoveSpeed");
+        private static readonly int AnimIsAttacking = Animator.StringToHash("IsAttacking");
+        private static readonly int AnimIsHurt = Animator.StringToHash("IsHurt");
+        private static readonly int AnimIsDying = Animator.StringToHash("IsDying");
+        private static readonly int AnimAttackType = Animator.StringToHash("AttackType");
+        private static readonly int AnimTriggerAttack = Animator.StringToHash("Attack");
+        private static readonly int AnimTriggerHurt = Animator.StringToHash("Hurt");
+        private static readonly int AnimTriggerDeath = Animator.StringToHash("Death");
+        private static readonly int AnimTriggerSpawn = Animator.StringToHash("Spawn");
+        private static readonly int AnimTriggerReveal = Animator.StringToHash("Reveal");
+        private static readonly int AnimTriggerRoar = Animator.StringToHash("Roar");
+
+        private float lastMoveSpeed = 0f;
+        private bool wasMoving = false;
+
         // ========== REFERENCES ==========
         private Transform playerTransform;
         private Renderer[] renderers;
@@ -87,6 +106,14 @@ namespace TurretDefense
             { GroundEnemyType.Gunner, new[] {
                 new LootDrop(TurretDefensePlugin.AlienAlloyName, 3, 7, 0.65f),
                 new LootDrop(TurretDefensePlugin.AlienCoreName, 1, 2, 0.3f)
+            }},
+            { GroundEnemyType.MachineGunRobot, new[] {
+                new LootDrop(TurretDefensePlugin.AlienAlloyName, 8, 15, 0.9f),
+                new LootDrop(TurretDefensePlugin.AlienCoreName, 2, 4, 0.5f)
+            }},
+            { GroundEnemyType.CannonMachine, new[] {
+                new LootDrop(TurretDefensePlugin.AlienAlloyName, 12, 25, 1.0f),
+                new LootDrop(TurretDefensePlugin.AlienCoreName, 3, 6, 0.7f)
             }}
         };
 
@@ -180,6 +207,26 @@ namespace TurretDefense
                     AttackCooldown = 0.3f; // Rapid fire
                     ScoreValue = 175;
                     break;
+
+                case GroundEnemyType.MachineGunRobot:
+                    MaxHealth = 500f * waveMultiplier;
+                    Armor = 25f;
+                    MoveSpeed = 3f;
+                    AttackDamage = 12f * waveMultiplier;
+                    AttackRange = 25f;
+                    AttackCooldown = 0.15f; // Very rapid fire
+                    ScoreValue = 350;
+                    break;
+
+                case GroundEnemyType.CannonMachine:
+                    MaxHealth = 800f * waveMultiplier;
+                    Armor = 40f;
+                    MoveSpeed = 2f;
+                    AttackDamage = 60f * waveMultiplier;
+                    AttackRange = 35f;
+                    AttackCooldown = 4f; // Slow but devastating
+                    ScoreValue = 500;
+                    break;
             }
 
             Health = MaxHealth;
@@ -195,6 +242,97 @@ namespace TurretDefense
             {
                 originalColor = renderers[0].material.color;
             }
+
+            // Initialize animator parameters if animator exists
+            if (animator != null)
+            {
+                InitializeAnimatorParameters();
+                // Trigger spawn animation
+                TriggerAnimation(AnimTriggerSpawn);
+            }
+        }
+
+        private void InitializeAnimatorParameters()
+        {
+            if (animator == null) return;
+
+            // Safely try to set initial parameter values
+            TrySetAnimatorBool(AnimIsMoving, false);
+            TrySetAnimatorFloat(AnimMoveSpeed, 0f);
+            TrySetAnimatorBool(AnimIsAttacking, false);
+            TrySetAnimatorBool(AnimIsHurt, false);
+            TrySetAnimatorBool(AnimIsDying, false);
+
+            // Set attack type based on enemy type
+            int attackType = EnemyType switch
+            {
+                GroundEnemyType.Chomper => 0,    // Bite/claw
+                GroundEnemyType.Spitter => 1,    // Ranged spit
+                GroundEnemyType.Mimic => 2,      // Ambush strike
+                GroundEnemyType.Arachnid => 3,   // Quick bite
+                GroundEnemyType.Grenadier => 4,  // Throw
+                GroundEnemyType.Gunner => 5,     // Shoot
+                GroundEnemyType.MachineGunRobot => 6, // Machine gun
+                GroundEnemyType.CannonMachine => 7,   // Cannon
+                _ => 0
+            };
+            TrySetAnimatorInt(AnimAttackType, attackType);
+        }
+
+        private void TrySetAnimatorBool(int paramHash, bool value)
+        {
+            try { animator.SetBool(paramHash, value); }
+            catch { /* Parameter doesn't exist in this animator */ }
+        }
+
+        private void TrySetAnimatorFloat(int paramHash, float value)
+        {
+            try { animator.SetFloat(paramHash, value); }
+            catch { /* Parameter doesn't exist in this animator */ }
+        }
+
+        private void TrySetAnimatorInt(int paramHash, int value)
+        {
+            try { animator.SetInteger(paramHash, value); }
+            catch { /* Parameter doesn't exist in this animator */ }
+        }
+
+        private void TriggerAnimation(int triggerHash)
+        {
+            if (animator == null) return;
+            try { animator.SetTrigger(triggerHash); }
+            catch { /* Trigger doesn't exist in this animator */ }
+        }
+
+        private void UpdateAnimationState()
+        {
+            if (animator == null) return;
+
+            // Calculate current movement state
+            float currentSpeed = Velocity.magnitude;
+            bool isMoving = currentSpeed > 0.1f;
+
+            // Update movement parameters with smoothing
+            if (isMoving != wasMoving)
+            {
+                TrySetAnimatorBool(AnimIsMoving, isMoving);
+                wasMoving = isMoving;
+            }
+
+            // Smooth speed transitions
+            float targetSpeed = currentSpeed / MoveSpeed;
+            lastMoveSpeed = Mathf.Lerp(lastMoveSpeed, targetSpeed, Time.deltaTime * 5f);
+            TrySetAnimatorFloat(AnimMoveSpeed, lastMoveSpeed);
+
+            // Update attacking state
+            bool isAttacking = currentState == AIState.Attacking && Time.time - lastAttackTime < AttackCooldown * 0.5f;
+            TrySetAnimatorBool(AnimIsAttacking, isAttacking);
+
+            // Update dying state
+            TrySetAnimatorBool(AnimIsDying, currentState == AIState.Dying);
+
+            // Speed multiplier for animator
+            animator.speed = animSpeedMultiplier;
         }
 
         private void Update()
@@ -205,6 +343,7 @@ namespace TurretDefense
                 playerTransform = Player.instance?.transform;
 
             UpdateState();
+            UpdateAnimationState();
         }
 
         private void UpdateState()
@@ -375,6 +514,8 @@ namespace TurretDefense
                 SetAmbushAppearance(false);
 
                 // Play reveal animation/effect
+                TriggerAnimation(AnimTriggerReveal);
+                TriggerAnimation(AnimTriggerRoar);  // Roar after reveal
                 StartCoroutine(AmbushRevealEffect());
 
                 // Immediately attack
@@ -471,11 +612,8 @@ namespace TurretDefense
         {
             lastAttackTime = Time.time;
 
-            // Trigger attack animation
-            if (animator != null)
-            {
-                animator.SetTrigger("Attack");
-            }
+            // Trigger attack animation with proper hash
+            TriggerAnimation(AnimTriggerAttack);
 
             switch (EnemyType)
             {
@@ -496,6 +634,12 @@ namespace TurretDefense
                     break;
                 case GroundEnemyType.Gunner:
                     StartCoroutine(GunnerAttackEffect());
+                    break;
+                case GroundEnemyType.MachineGunRobot:
+                    StartCoroutine(MachineGunRobotAttackEffect());
+                    break;
+                case GroundEnemyType.CannonMachine:
+                    StartCoroutine(CannonMachineAttackEffect());
                     break;
             }
 
@@ -641,6 +785,126 @@ namespace TurretDefense
             UnityEngine.Object.Destroy(tracer);
         }
 
+        private IEnumerator MachineGunRobotAttackEffect()
+        {
+            if (playerTransform == null) yield break;
+
+            // Rapid burst fire with multiple tracers
+            for (int i = 0; i < 5; i++)
+            {
+                var tracer = new GameObject("MachineGunTracer");
+                var line = tracer.AddComponent<LineRenderer>();
+                line.startWidth = 0.08f;
+                line.endWidth = 0.03f;
+                line.material = TurretDefensePlugin.GetColoredMaterial(new Color(1f, 0.6f, 0.1f));
+                line.positionCount = 2;
+
+                // Slight spread on shots
+                Vector3 spread = UnityEngine.Random.insideUnitSphere * 0.5f;
+                line.SetPosition(0, transform.position + transform.forward * 1.5f + Vector3.up * 2f);
+                line.SetPosition(1, playerTransform.position + Vector3.up * 1f + spread);
+
+                // Muzzle flash
+                var flash = new GameObject("MuzzleFlash");
+                flash.transform.position = transform.position + transform.forward * 1.5f + Vector3.up * 2f;
+                var flashLight = flash.AddComponent<Light>();
+                flashLight.type = LightType.Point;
+                flashLight.range = 5f;
+                flashLight.intensity = 3f;
+                flashLight.color = new Color(1f, 0.7f, 0.3f);
+
+                yield return new WaitForSeconds(0.03f);
+                UnityEngine.Object.Destroy(tracer);
+                UnityEngine.Object.Destroy(flash);
+            }
+        }
+
+        private IEnumerator CannonMachineAttackEffect()
+        {
+            if (playerTransform == null) yield break;
+
+            // Charge up effect
+            var chargeObj = new GameObject("CannonCharge");
+            chargeObj.transform.position = transform.position + transform.forward * 2f + Vector3.up * 1.5f;
+
+            var chargeLight = chargeObj.AddComponent<Light>();
+            chargeLight.type = LightType.Point;
+            chargeLight.range = 8f;
+            chargeLight.color = new Color(1f, 0.2f, 0.2f);
+
+            // Charging animation
+            float chargeTime = 0.5f;
+            float elapsed = 0f;
+            while (elapsed < chargeTime)
+            {
+                elapsed += Time.deltaTime;
+                chargeLight.intensity = Mathf.Lerp(1f, 10f, elapsed / chargeTime);
+                yield return null;
+            }
+
+            UnityEngine.Object.Destroy(chargeObj);
+
+            // Fire the cannon shot
+            var projectile = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            projectile.name = "CannonShot";
+            projectile.transform.position = transform.position + transform.forward * 2f + Vector3.up * 1.5f;
+            projectile.transform.localScale = Vector3.one * 0.6f;
+            projectile.GetComponent<Renderer>().material = TurretDefensePlugin.GetColoredMaterial(new Color(1f, 0.3f, 0.1f));
+            UnityEngine.Object.Destroy(projectile.GetComponent<Collider>());
+
+            // Trail effect
+            var trail = projectile.AddComponent<TrailRenderer>();
+            trail.startWidth = 0.4f;
+            trail.endWidth = 0.1f;
+            trail.time = 0.3f;
+            trail.material = TurretDefensePlugin.GetColoredMaterial(new Color(1f, 0.5f, 0.2f));
+
+            // Projectile travel
+            Vector3 start = projectile.transform.position;
+            Vector3 end = playerTransform.position + Vector3.up * 1f;
+            elapsed = 0f;
+            float travelTime = 0.4f;
+
+            while (elapsed < travelTime)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / travelTime;
+                projectile.transform.position = Vector3.Lerp(start, end, t);
+                yield return null;
+            }
+
+            // Impact explosion
+            var explosionObj = new GameObject("CannonExplosion");
+            explosionObj.transform.position = projectile.transform.position;
+
+            var particles = explosionObj.AddComponent<ParticleSystem>();
+            var main = particles.main;
+            main.startLifetime = 1f;
+            main.startSpeed = 15f;
+            main.startSize = 0.8f;
+            main.startColor = new Color(1f, 0.4f, 0.1f);
+
+            var emission = particles.emission;
+            emission.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0f, 50) });
+            emission.rateOverTime = 0;
+
+            var shape = particles.shape;
+            shape.shapeType = ParticleSystemShapeType.Sphere;
+            shape.radius = 1f;
+
+            var renderer = explosionObj.GetComponent<ParticleSystemRenderer>();
+            renderer.material = TurretDefensePlugin.GetEffectMaterial(Color.white);
+
+            var explosionLight = explosionObj.AddComponent<Light>();
+            explosionLight.type = LightType.Point;
+            explosionLight.range = 20f;
+            explosionLight.intensity = 10f;
+            explosionLight.color = new Color(1f, 0.5f, 0.2f);
+
+            UnityEngine.Object.Destroy(explosionObj, 2f);
+            UnityEngine.Object.Destroy(projectile);
+        }
+
         public void TakeDamage(float damage, bool isCritical)
         {
             float effectiveDamage = Mathf.Max(1, damage - Armor);
@@ -648,6 +912,10 @@ namespace TurretDefense
 
             TurretDefensePlugin.LogDebug($"{EnemyName} took {effectiveDamage:F0} damage, HP: {Health:F0}/{MaxHealth}");
 
+            // Trigger hurt animation and visual feedback
+            TriggerAnimation(AnimTriggerHurt);
+            TrySetAnimatorBool(AnimIsHurt, true);
+            StartCoroutine(ResetHurtState());
             StartCoroutine(DamageFlash());
 
             // Mimic reveals on damage
@@ -673,6 +941,12 @@ namespace TurretDefense
             {
                 Die();
             }
+        }
+
+        private IEnumerator ResetHurtState()
+        {
+            yield return new WaitForSeconds(0.3f);
+            TrySetAnimatorBool(AnimIsHurt, false);
         }
 
         private IEnumerator DamageFlash()
@@ -726,10 +1000,9 @@ namespace TurretDefense
         {
             Velocity = Vector3.zero;
 
-            if (animator != null)
-            {
-                animator.SetTrigger("Death");
-            }
+            // Trigger death animation with new system
+            TrySetAnimatorBool(AnimIsDying, true);
+            TriggerAnimation(AnimTriggerDeath);
 
             // Death particles
             var deathObj = new GameObject("GroundEnemyDeath");

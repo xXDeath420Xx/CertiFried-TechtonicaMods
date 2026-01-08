@@ -1,0 +1,11 @@
+{
+  "name": "BaseBuilding",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/CertiFried-Mods/TTMod-BaseBuilding",
+  "description": "Adds base building structures including walls, floors, and foundations",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100",
+    "Equinox-EquinoxsModUtils-6.1.1",
+    "Equinox-EMUAdditions-2.1.1"
+  ]
+}

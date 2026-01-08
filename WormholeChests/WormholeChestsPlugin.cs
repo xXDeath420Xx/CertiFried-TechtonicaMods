@@ -42,6 +42,9 @@ namespace WormholeChests
 
         public static Texture2D wormholeTexture;
 
+        // Custom sprites dictionary to cache loaded sprites
+        public static Dictionary<string, Sprite> customSprites = new Dictionary<string, Sprite>();
+
         public static ConfigEntry<bool> freeWormholeChests;
         public static ConfigEntry<bool> useRelativePositioning;
         public static ConfigEntry<float> relativeXPercent;
@@ -68,9 +71,15 @@ namespace WormholeChests
             ApplyPatches();
             ChestGUI.LoadImages();
 
-            Sprite sprite = Sprite.Create(wormholeTexture,
-                new Rect(0f, 0f, wormholeTexture.width, wormholeTexture.height),
-                new Vector2(0f, 0f), 512f);
+            // Load custom icons before registering unlocks
+            LoadCustomIcons();
+
+            // Use loaded custom sprite if available, otherwise fall back to generated texture
+            Sprite sprite = customSprites.ContainsKey("wormhole")
+                ? customSprites["wormhole"]
+                : Sprite.Create(wormholeTexture,
+                    new Rect(0f, 0f, wormholeTexture.width, wormholeTexture.height),
+                    new Vector2(0f, 0f), 512f);
 
             // Add new unlock using EMUAdditions (EMU 6.1.3 compatible - no numScansNeeded)
             EMUAdditions.AddNewUnlock(new NewUnlockDetails
@@ -110,6 +119,9 @@ namespace WormholeChests
             Unlock mining = EMU.Unlocks.GetUnlockByName("Core Boost (Mining)");
             EMU.Unlocks.UpdateUnlockTier("Wormhole Chests", threshing.requiredTier);
             EMU.Unlocks.UpdateUnlockTreePosition("Wormhole Chests", mining.treePosition);
+
+            // Apply custom sprites to unlocks and resources after game defines are loaded
+            ApplyCustomSprites();
         }
 
         private void OnTechTreeStateLoaded()
@@ -209,6 +221,122 @@ namespace WormholeChests
             Harmony.CreateAndPatchAll(typeof(ChestInstancePatch));
             Harmony.CreateAndPatchAll(typeof(InventoryNavigatorPatch));
             Harmony.CreateAndPatchAll(typeof(SaveStatePatch));
+        }
+
+        /// <summary>
+        /// Load custom icons from embedded resources with appropriate tinting
+        /// </summary>
+        private void LoadCustomIcons()
+        {
+            // Load wormhole icon with purple/magenta tint
+            Sprite wormholeSprite = LoadEmbeddedSprite("wormhole.png", new Color(0.8f, 0.2f, 1f)); // Purple/magenta tint
+            if (wormholeSprite != null)
+            {
+                customSprites["wormhole"] = wormholeSprite;
+                Log.LogInfo("Loaded custom wormhole icon with purple tint");
+            }
+            else
+            {
+                Log.LogWarning("Failed to load wormhole.png embedded resource, using fallback icon");
+            }
+        }
+
+        /// <summary>
+        /// Apply custom sprites to unlocks and resources after game defines are loaded
+        /// </summary>
+        private void ApplyCustomSprites()
+        {
+            // Apply wormhole sprite to unlock
+            if (customSprites.TryGetValue("wormhole", out Sprite wormholeSprite))
+            {
+                Unlock wormholeUnlock = EMU.Unlocks.GetUnlockByName("Wormhole Chests");
+                if (wormholeUnlock != null)
+                {
+                    wormholeUnlock.sprite = wormholeSprite;
+                    Log.LogInfo("Applied custom wormhole sprite to Wormhole Chests unlock");
+                }
+
+                // Also try to apply to any associated resource if it exists
+                ResourceInfo wormholeResource = EMU.Resources.GetResourceInfoByName("Wormhole Chests");
+                if (wormholeResource != null)
+                {
+                    // Use reflection to set the rawSprite field
+                    var spriteField = typeof(ResourceInfo).GetField("rawSprite", BindingFlags.Public | BindingFlags.Instance);
+                    if (spriteField != null)
+                    {
+                        spriteField.SetValue(wormholeResource, wormholeSprite);
+                        Log.LogInfo("Applied custom wormhole sprite to Wormhole Chests resource");
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Load sprite from embedded resource PNG file with optional tinting
+        /// </summary>
+        public static Sprite LoadEmbeddedSprite(string resourceName, Color? tintColor = null, int width = 256, int height = 256)
+        {
+            try
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                string fullName = assembly.GetManifestResourceNames()
+                    .FirstOrDefault(n => n.EndsWith(resourceName));
+
+                if (string.IsNullOrEmpty(fullName))
+                {
+                    Log.LogWarning($"Embedded resource not found: {resourceName}");
+                    return null;
+                }
+
+                using (var stream = assembly.GetManifestResourceStream(fullName))
+                {
+                    if (stream == null) return null;
+
+                    byte[] data = new byte[stream.Length];
+                    stream.Read(data, 0, data.Length);
+
+                    Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+                    tex.filterMode = FilterMode.Bilinear;
+
+                    if (tex.LoadImage(data))
+                    {
+                        // Apply tint if specified
+                        if (tintColor.HasValue)
+                        {
+                            TintTexture(tex, tintColor.Value);
+                        }
+                        tex.Apply();
+                        Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+                        Log.LogInfo($"Loaded embedded sprite: {resourceName} ({tex.width}x{tex.height})" + (tintColor.HasValue ? " - tinted" : ""));
+                        return sprite;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to load embedded sprite {resourceName}: {ex.Message}");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Tint a texture by multiplying each pixel's color with a tint color
+        /// </summary>
+        private static void TintTexture(Texture2D tex, Color tint)
+        {
+            Color[] pixels = tex.GetPixels();
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                // Preserve alpha, tint RGB based on original brightness
+                float brightness = (pixels[i].r + pixels[i].g + pixels[i].b) / 3f;
+                pixels[i] = new Color(
+                    tint.r * brightness,
+                    tint.g * brightness,
+                    tint.b * brightness,
+                    pixels[i].a
+                );
+            }
+            tex.SetPixels(pixels);
         }
     }
 

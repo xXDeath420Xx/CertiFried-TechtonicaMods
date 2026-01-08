@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -76,6 +78,9 @@ namespace HazardousWorld
 
             InitializeConfig();
             Harmony.PatchAll();
+
+            // Load custom icons
+            LoadCustomIcons();
 
             // Register protective equipment
             RegisterProtectiveEquipment();
@@ -375,6 +380,9 @@ namespace HazardousWorld
             LinkUnlockToResource(HazmatSuitName, HazmatUnlock);
             LinkUnlockToResource(RadShieldName, HazmatUnlock);
             LinkUnlockToResource("Antidote", HazmatUnlock);
+
+            // Apply custom sprites to resources
+            ApplyCustomSprites();
 
             Log.LogInfo("Linked HazardousWorld unlocks to resources");
         }
@@ -884,6 +892,122 @@ namespace HazardousWorld
             if (DebugMode != null && DebugMode.Value)
             {
                 Log.LogInfo($"[DEBUG] {message}");
+            }
+        }
+
+        // Cached sprites cloned from game assets
+        private static Dictionary<string, Sprite> customSprites = new Dictionary<string, Sprite>();
+
+        /// <summary>
+        /// Clone a sprite from an existing game resource to match Techtonica's icon style
+        /// </summary>
+        private static Sprite CloneGameSprite(string sourceResourceName)
+        {
+            try
+            {
+                ResourceInfo sourceResource = EMU.Resources.GetResourceInfoByName(sourceResourceName);
+                if (sourceResource != null && sourceResource.sprite != null)
+                {
+                    Log.LogInfo($"Cloned sprite from {sourceResourceName}");
+                    return sourceResource.sprite;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to clone sprite from {sourceResourceName}: {ex.Message}");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Load all custom icons by cloning from existing game resources
+        /// This ensures icons match Techtonica's visual style
+        /// </summary>
+        private void LoadCustomIcons()
+        {
+            // Clone sprites from existing similar items to match game aesthetic
+            // Hazmat Suit - use M.O.L.E. suit icon (protective gear)
+            customSprites["hazmat_suit"] = CloneGameSprite("M.O.L.E.");
+            // Radiation Shield - use Exosuit icon (protective equipment)
+            customSprites["radiation_shield"] = CloneGameSprite("Exosuit");
+            // Antidote - use Plantmatter Fibre icon (organic consumable)
+            customSprites["antidote"] = CloneGameSprite("Plantmatter Fibre");
+
+            int loaded = customSprites.Values.Count(s => s != null);
+            Log.LogInfo($"Cloned {loaded}/{customSprites.Count} sprites from game assets");
+        }
+
+        /// <summary>
+        /// Set sprite on ResourceInfo using reflection (sprite property is read-only)
+        /// </summary>
+        private static void SetResourceSprite(ResourceInfo resource, Sprite sprite)
+        {
+            if (resource == null || sprite == null) return;
+            try
+            {
+                var spriteField = typeof(ResourceInfo).GetField("_sprite", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (spriteField != null)
+                {
+                    spriteField.SetValue(resource, sprite);
+                }
+                else
+                {
+                    // Try property backing field
+                    var backingField = typeof(ResourceInfo).GetField("<sprite>k__BackingField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    if (backingField != null)
+                    {
+                        backingField.SetValue(resource, sprite);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to set sprite via reflection: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Apply custom sprites to resources after they're registered
+        /// </summary>
+        private void ApplyCustomSprites()
+        {
+            try
+            {
+                // Apply to Hazmat Suit
+                var hazmat = EMU.Resources.GetResourceInfoByName(HazmatSuitName);
+                if (hazmat != null && customSprites.TryGetValue("hazmat_suit", out Sprite hazmatSprite) && hazmatSprite != null)
+                {
+                    SetResourceSprite(hazmat, hazmatSprite);
+                    LogDebug($"Applied custom sprite to {HazmatSuitName}");
+                }
+
+                // Apply to Radiation Shield
+                var radShield = EMU.Resources.GetResourceInfoByName(RadShieldName);
+                if (radShield != null && customSprites.TryGetValue("radiation_shield", out Sprite radSprite) && radSprite != null)
+                {
+                    SetResourceSprite(radShield, radSprite);
+                    LogDebug($"Applied custom sprite to {RadShieldName}");
+                }
+
+                // Apply to Antidote
+                var antidote = EMU.Resources.GetResourceInfoByName("Antidote");
+                if (antidote != null && customSprites.TryGetValue("antidote", out Sprite antidoteSprite) && antidoteSprite != null)
+                {
+                    SetResourceSprite(antidote, antidoteSprite);
+                    LogDebug($"Applied custom sprite to Antidote");
+                }
+
+                // Apply to unlock
+                var unlock = EMU.Unlocks.GetUnlockByName(HazmatUnlock);
+                if (unlock != null && customSprites.TryGetValue("hazmat_suit", out Sprite unlockSprite) && unlockSprite != null)
+                {
+                    unlock.sprite = unlockSprite;
+                    LogDebug($"Applied custom sprite to unlock {HazmatUnlock}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"Failed to apply custom sprites: {ex.Message}");
             }
         }
     }

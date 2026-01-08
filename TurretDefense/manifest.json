@@ -1,0 +1,12 @@
+{
+  "name": "TurretDefense",
+  "version_number": "4.5.4",
+  "website_url": "https://github.com/CertiFried-Mods/TTMod-TurretDefense",
+  "description": "Adds defensive turrets and alien wave defense mechanics to protect your base",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100",
+    "Equinox-EquinoxsModUtils-6.1.1",
+    "Equinox-EMUAdditions-2.1.1",
+    "CertiFried-TechtonicaFramework-1.4.0"
+  ]
+}
