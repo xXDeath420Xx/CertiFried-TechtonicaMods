@@ -1,0 +1,10 @@
+{
+  "name": "SoundSampler_Patched",
+  "version_number": "1.1.0",
+  "website_url": "https://github.com/xXDeath420Xx/CertiFried-TechtonicaMods",
+  "description": "Patched version of SoundSampler by Equinox. Dev utility for testing sounds (F12). Updated for current EMU API.",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100",
+    "Equinox-EquinoxsModUtils-6.1.3"
+  ]
+}

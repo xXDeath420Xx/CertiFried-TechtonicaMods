@@ -1,0 +1,11 @@
+{
+  "name": "MassProdCores_Patched",
+  "version_number": "1.1.0",
+  "website_url": "https://github.com/xXDeath420Xx/CertiFried-TechtonicaMods",
+  "description": "Patched version of MassProdCores by Jarl. Mass production recipes for cores. Updated for EMU 6.x API.",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100",
+    "Equinox-EquinoxsModUtils-6.1.3",
+    "Equinox-EMUAdditions-2.0.1"
+  ]
+}

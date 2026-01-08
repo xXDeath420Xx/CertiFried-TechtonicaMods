@@ -1,0 +1,10 @@
+{
+  "name": "BetterEndGame_Patched",
+  "version_number": "1.2.0",
+  "website_url": "https://github.com/xXDeath420Xx/CertiFried-TechtonicaMods",
+  "description": "Patched version of BetterEndGame by Equinox. Infinite progression unlocks. Updated for EMU 6.x API. Original: https://github.com/CubeSuite/TTMod-BetterEndGame (GPL-3.0)",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100",
+    "Equinox-EquinoxsModUtils-6.1.3"
+  ]
+}

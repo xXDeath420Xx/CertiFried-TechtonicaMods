@@ -285,8 +285,11 @@ The Atlantum Reactor is built on Techtonica's `PowerGeneratorDefinition` system,
 
 ## Credits
 
-### Development
-- **CertiFried** - Original mod author and maintainer
+### Original Author
+- **Equinox** - [Original AtlantumReactor](https://thunderstore.io/c/techtonica/p/Equinox/AtlantumReactor/) - Original mod concept and implementation
+
+### Updated By
+- **CertiFried** - Updated for EMU 6.x API compatibility and maintained
 
 ### Development Assistance
 - **Claude Code** (Anthropic) - AI-assisted development, code architecture, and documentation
