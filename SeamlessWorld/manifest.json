@@ -1,9 +1,0 @@
-{
-  "name": "SeamlessWorld",
-  "version_number": "0.1.0",
-  "website_url": "https://github.com/CertiFried-Mods/TTMod-SeamlessWorld",
-  "description": "Seamless world chunk loading for smoother exploration without loading screens",
-  "dependencies": [
-    "BepInEx-BepInExPack-5.4.2100"
-  ]
-}
