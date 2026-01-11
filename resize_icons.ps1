@@ -1,7 +1,7 @@
 # Resize mod icons to 256x256 for Thunderstore
 Add-Type -AssemblyName System.Drawing
 
-$mods = @('BaseBuilding', 'MechSuit', 'SeamlessWorld', 'MultiplayerFixes')
+$mods = @('BaseBuilding', 'MechSuit', 'MultiplayerFixes')
 
 foreach ($mod in $mods) {
     $path = "C:\Users\crawf\TechtonicaMods\NewMods\$mod\icon.png"

@@ -46,7 +46,6 @@ CERTIFRIED_MODS = {
     "PlanterCoreClusters": "CertiFried-PlanterCoreClusters_Updated",
     "Recycler": "CertiFried-Recycler",
     "Restock": "CertiFried-Restock_Updated",
-    "SeamlessWorld": "CertiFried-SeamlessWorld",
     "SurvivalElements": "CertiFried-SurvivalElements",
     "TechtonicaFramework": "CertiFried-TechtonicaFramework",
     "TurretDefense": "CertiFried-TurretDefense",

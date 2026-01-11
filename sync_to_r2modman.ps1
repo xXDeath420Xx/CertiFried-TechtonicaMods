@@ -29,7 +29,6 @@ $ModMappings = @{
     "PlanterCoreClusters" = @{ Folder = "CertiFried-PlanterCoreClusters_Updated"; Version = "3.0.7" }
     "Recycler" = @{ Folder = "CertiFried-Recycler"; Version = "1.0.0" }
     "Restock" = @{ Folder = "CertiFried-Restock_Updated"; Version = "3.0.8" }
-    "SeamlessWorld" = @{ Folder = "CertiFried-SeamlessWorld"; Version = "0.1.0" }
     "SurvivalElements" = @{ Folder = "CertiFried-SurvivalElements"; Version = "2.6.3" }
     "TechtonicaFramework" = @{ Folder = "CertiFried-TechtonicaFramework"; Version = "1.4.0" }
     "TurretDefense" = @{ Folder = "CertiFried-TurretDefense"; Version = "4.5.4" }
